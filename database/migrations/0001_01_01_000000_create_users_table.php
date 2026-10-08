@@ -13,12 +13,24 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->string('name', 150);
+            $table->string('nim', 30)->nullable();
+            $table->string('email', 150)->unique();
+            $table->string('email_type', 20)->default('campus'); // 'campus' | 'public'
+            $table->string('ktm_image_path')->nullable();
+            $table->string('verification_status', 30)->default('active'); // 'active' | 'pending' | 'rejected'
+            $table->text('rejection_reason')->nullable();
+            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('verified_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role', 30)->default('buyer'); // 'seller' | 'buyer' | 'admin'
+            $table->string('campus', 150)->nullable();
+            $table->string('phone', 25)->nullable();
+            $table->string('status', 30)->default('active'); // 'active' | 'suspended' | 'banned'
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
