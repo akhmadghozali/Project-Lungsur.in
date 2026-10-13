@@ -24,11 +24,15 @@ return new class extends Migration {
             $table->softDeletes();
         });
 
-        DB::statement('ALTER TABLE listings ADD CONSTRAINT check_listing_price_modulo CHECK (price >= 1000 AND (price % 1000 = 0));');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE listings ADD CONSTRAINT check_listing_price_modulo CHECK (price >= 1000 AND (price % 1000 = 0));');
+        }
     }
 
     public function down(): void {
-        DB::statement('ALTER TABLE listings DROP CONSTRAINT IF EXISTS check_listing_price_modulo;');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE listings DROP CONSTRAINT IF EXISTS check_listing_price_modulo;');
+        }
         Schema::dropIfExists('listings');
     }
 };

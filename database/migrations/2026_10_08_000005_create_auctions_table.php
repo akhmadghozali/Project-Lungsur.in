@@ -20,13 +20,17 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        DB::statement('ALTER TABLE auctions ADD CONSTRAINT check_auction_starting_price_modulo CHECK (starting_price >= 1000 AND (starting_price % 1000 = 0));');
-        DB::statement('ALTER TABLE auctions ADD CONSTRAINT check_auction_bid_increment_modulo CHECK (bid_increment >= 1000 AND (bid_increment % 1000 = 0));');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE auctions ADD CONSTRAINT check_auction_starting_price_modulo CHECK (starting_price >= 1000 AND (starting_price % 1000 = 0));');
+            DB::statement('ALTER TABLE auctions ADD CONSTRAINT check_auction_bid_increment_modulo CHECK (bid_increment >= 1000 AND (bid_increment % 1000 = 0));');
+        }
     }
 
     public function down(): void {
-        DB::statement('ALTER TABLE auctions DROP CONSTRAINT IF EXISTS check_auction_starting_price_modulo;');
-        DB::statement('ALTER TABLE auctions DROP CONSTRAINT IF EXISTS check_auction_bid_increment_modulo;');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE auctions DROP CONSTRAINT IF EXISTS check_auction_starting_price_modulo;');
+            DB::statement('ALTER TABLE auctions DROP CONSTRAINT IF EXISTS check_auction_bid_increment_modulo;');
+        }
         Schema::dropIfExists('auctions');
     }
 };

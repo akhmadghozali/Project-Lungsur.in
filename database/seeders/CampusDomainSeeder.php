@@ -26,6 +26,14 @@ class CampusDomainSeeder extends Seeder
                 'domain_name' => 'uin-malang.ac.id',
                 'campus_name' => 'UIN Maulana Malik Ibrahim Malang',
             ],
+            [
+                'domain_name' => 'umm.ac.id',
+                'campus_name' => 'Universitas Muhammadiyah Malang',
+            ],
+            [
+                'domain_name' => 'itn.ac.id',
+                'campus_name' => 'Institut Teknologi Nasional Malang',
+            ],
         ];
 
         foreach ($domains as $domain) {
