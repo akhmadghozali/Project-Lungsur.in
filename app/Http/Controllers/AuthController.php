@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\CampusDomain;
+use App\Mail\OtpVerificationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
@@ -253,8 +256,12 @@ class AuthController extends Controller
             $ktmPath = $request->file('ktm_file')->store('ktm', 'public');
         }
 
-        // Simpan data user baru
-        $user = User::create([
+        // 1. Generate 6 digit numeric OTP
+        $otp = (string) random_int(100000, 999999);
+        $cacheKey = 'reg_otp_' . md5(strtolower($validated['email']));
+
+        // 2. Simpan draft pendaftaran & OTP di Cache selama 10 menit
+        Cache::put($cacheKey, [
             'name' => $validated['name'],
             'email' => strtolower($validated['email']),
             'email_type' => $emailType,
@@ -265,34 +272,193 @@ class AuthController extends Controller
             'campus' => $validated['campus'],
             'phone' => $validated['phone'],
             'status' => 'active',
+            'otp' => $otp,
+            'attempts' => 0,
+            'resend_available_at' => now()->addSeconds(60)->timestamp,
+        ], now()->addMinutes(10));
+
+        // 3. Kirim email berisi kode OTP ke alamat pengguna
+        try {
+            Mail::to($validated['email'])->send(new OtpVerificationMail($validated['name'], $otp));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'status' => 'otp_required',
+                'message' => 'Kode OTP verifikasi telah dikirimkan ke email Anda (' . $validated['email'] . ').',
+                'email' => strtolower($validated['email']),
+                'email_type' => $emailType,
+                'resend_cooldown' => 60,
+            ], 200);
+        }
+
+        return redirect()->route('register')->with([
+            'otp_required' => true,
+            'otp_email' => strtolower($validated['email']),
+            'info' => 'Kode OTP verifikasi telah dikirimkan ke email ' . $validated['email'] . '. Silakan periksa kotak masuk atau spam email Anda.',
+        ]);
+    }
+
+    /**
+     * Verifikasi kode 6-digit OTP dan selesaikan pembuatan akun pengguna.
+     */
+    public function verifyOtp(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'string', 'email:filter'],
+            'otp' => ['required', 'string', 'digits:6'],
+        ], [
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'otp.required' => 'Kode OTP 6 digit wajib dimasukkan.',
+            'otp.digits' => 'Kode OTP harus berupa 6 digit angka.',
         ]);
 
-        if ($isCampusDomain) {
+        $cacheKey = 'reg_otp_' . md5(strtolower($validated['email']));
+        $cached = Cache::get($cacheKey);
+
+        if (!$cached) {
+            $errorMsg = 'Sesi verifikasi OTP telah kedaluwarsa atau tidak ditemukan. Silakan kirim ulang OTP atau lakukan pendaftaran kembali.';
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => $errorMsg], 422);
+            }
+            return back()->with('error', $errorMsg);
+        }
+
+        // Cek jika batas percobaan terlampaui (maksimal 5 kali)
+        if (($cached['attempts'] ?? 0) >= 5) {
+            Cache::forget($cacheKey);
+            $errorMsg = 'Anda telah melebihi batas 5 kali percobaan OTP. Sesi pendaftaran dibatalkan demi keamanan, silakan daftar ulang.';
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => $errorMsg], 422);
+            }
+            return back()->with('error', $errorMsg);
+        }
+
+        // Cek kecocokan kode OTP
+        if ($cached['otp'] !== $validated['otp']) {
+            $cached['attempts'] = ($cached['attempts'] ?? 0) + 1;
+            Cache::put($cacheKey, $cached, now()->addMinutes(10));
+            $remaining = 5 - $cached['attempts'];
+            $errorMsg = "Kode OTP yang Anda masukkan salah. Sisa kesempatan mencoba: {$remaining} kali.";
+
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => $errorMsg, 'remaining_attempts' => $remaining], 422);
+            }
+            return back()->with('error', $errorMsg);
+        }
+
+        // OTP Valid! Simpan user resmi ke tabel database users
+        $user = User::create([
+            'name' => $cached['name'],
+            'email' => $cached['email'],
+            'email_type' => $cached['email_type'],
+            'ktm_image_path' => $cached['ktm_image_path'],
+            'verification_status' => $cached['verification_status'],
+            'password' => $cached['password'],
+            'role' => $cached['role'],
+            'campus' => $cached['campus'],
+            'phone' => $cached['phone'],
+            'status' => $cached['status'],
+            'email_verified_at' => now(),
+        ]);
+
+        // Hapus cache OTP setelah berhasil
+        Cache::forget($cacheKey);
+
+        if ($cached['email_type'] === 'campus') {
             // Email kampus langsung login otomatis
             Auth::login($user);
 
             if ($request->wantsJson()) {
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Pendaftaran berhasil. Akun kampus Anda langsung aktif.',
+                    'message' => 'Verifikasi email berhasil! Selamat datang di Lungsur.in, ' . $user->name . '.',
+                    'redirect' => route('dashboard'),
                     'user' => $user,
-                ], 201);
+                ], 200);
             }
 
             return redirect()->intended(route('dashboard'))
-                ->with('success', 'Pendaftaran berhasil! Akun kampus Anda telah aktif.');
+                ->with('success', 'Verifikasi email berhasil! Akun kampus Anda telah aktif.');
         } else {
-            // Email umum menunggu verifikasi
+            // Email umum menunggu verifikasi berkas KTM oleh admin
             if ($request->wantsJson()) {
                 return response()->json([
                     'status' => 'pending_verification',
-                    'message' => 'Pendaftaran berhasil. Akun Anda sedang menunggu verifikasi berkas KTM oleh administrator.',
+                    'message' => 'Verifikasi email berhasil! Berkas KTM Anda sedang dalam antrean verifikasi administrator.',
+                    'redirect' => route('login'),
                     'user' => $user,
-                ], 201);
+                ], 200);
             }
 
-            return redirect()->route('login')->with('info', 'Pendaftaran berhasil! Akun Anda sedang dalam antrean verifikasi berkas KTM oleh administrator (maksimal 1x24 jam).');
+            return redirect()->route('login')->with('info', 'Verifikasi email berhasil! Akun Anda sedang dalam antrean verifikasi berkas KTM oleh administrator (maksimal 1x24 jam).');
         }
+    }
+
+    /**
+     * Kirim ulang kode OTP verifikasi (dengan batas cooldown 60 detik).
+     */
+    public function resendOtp(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'string', 'email:filter'],
+        ], [
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+        ]);
+
+        $cacheKey = 'reg_otp_' . md5(strtolower($validated['email']));
+        $cached = Cache::get($cacheKey);
+
+        if (!$cached) {
+            $errorMsg = 'Sesi pendaftaran tidak ditemukan atau telah kedaluwarsa. Silakan lakukan pendaftaran ulang.';
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => $errorMsg], 422);
+            }
+            return back()->with('error', $errorMsg);
+        }
+
+        // Cek batasan cooldown 60 detik
+        if (now()->timestamp < ($cached['resend_available_at'] ?? 0)) {
+            $secondsLeft = $cached['resend_available_at'] - now()->timestamp;
+            $errorMsg = "Mohon tunggu {$secondsLeft} detik sebelum meminta kode OTP baru.";
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $errorMsg,
+                    'seconds_left' => $secondsLeft,
+                ], 429);
+            }
+            return back()->with('warning', $errorMsg);
+        }
+
+        // Generate kode OTP baru
+        $newOtp = (string) random_int(100000, 999999);
+        $cached['otp'] = $newOtp;
+        $cached['attempts'] = 0;
+        $cached['resend_available_at'] = now()->addSeconds(60)->timestamp;
+
+        Cache::put($cacheKey, $cached, now()->addMinutes(10));
+
+        try {
+            Mail::to($cached['email'])->send(new OtpVerificationMail($cached['name'], $newOtp));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Kode OTP baru telah berhasil dikirimkan ke email Anda (' . $cached['email'] . ').',
+                'resend_cooldown' => 60,
+            ], 200);
+        }
+
+        return back()->with('success', 'Kode OTP baru telah berhasil dikirimkan ke email Anda.');
     }
 
     /**
