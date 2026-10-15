@@ -390,11 +390,19 @@
                         </p>
                     </div>
 
+                    <!-- Alert Error Registrasi (AJAX / Real-Time) -->
+                    <div x-show="registerError" x-cloak class="mb-4 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-medium flex items-start gap-2 shadow-2xs">
+                        <svg class="w-4 h-4 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div x-text="registerError"></div>
+                    </div>
+
                     <form action="{{ route('register') }}" 
                           method="POST" 
                           enctype="multipart/form-data" 
                           class="space-y-3.5"
-                          @submit="return validateBeforeSubmit($event)">
+                          @submit.prevent="submitRegister($event)">
                         @csrf
                         <input type="hidden" name="mode" value="register">
 
@@ -703,10 +711,16 @@
                         <!-- Tombol Aksi Utama -->
                         <div class="pt-2 space-y-3">
                             <button type="submit" 
-                                    :disabled="isCampusMismatch"
-                                    :class="{ 'opacity-50 cursor-not-allowed hover:bg-blue-600 active:bg-blue-600': isCampusMismatch }"
-                                    class="w-full py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm tracking-wide shadow-md shadow-blue-500/20 focus:outline-none focus:ring-4 focus:ring-blue-100 transition cursor-pointer">
-                                <span x-text="isCampusMismatch ? 'Perbaiki Kampus / Email Terlebih Dahulu' : (isCampus ? 'Daftar Akun Mahasiswa' : (isPublic ? 'Daftar & Ajukan Verifikasi KTM' : 'Buat akun'))"></span>
+                                    :disabled="isCampusMismatch || registerLoading"
+                                    :class="{ 'opacity-50 cursor-not-allowed hover:bg-blue-600 active:bg-blue-600': isCampusMismatch || registerLoading }"
+                                    class="w-full py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm tracking-wide shadow-md shadow-blue-500/20 focus:outline-none focus:ring-4 focus:ring-blue-100 transition cursor-pointer flex items-center justify-center gap-2">
+                                <template x-if="registerLoading">
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </template>
+                                <span x-text="registerLoading ? 'Mengirim Kode OTP...' : (isCampusMismatch ? 'Perbaiki Kampus / Email Terlebih Dahulu' : (isCampus ? 'Daftar Akun Mahasiswa' : (isPublic ? 'Daftar & Ajukan Verifikasi KTM' : 'Buat akun')))"></span>
                             </button>
 
                             <div class="relative flex items-center justify-center">
@@ -747,6 +761,126 @@
     </div>
 
     <!-- ======================================================== -->
+    <!-- MODAL POPUP VERIFIKASI OTP EMAIL 6-DIGIT                 -->
+    <!-- ======================================================== -->
+    <div x-show="showOtpModal" 
+         x-cloak 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+
+        <div class="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200 text-center relative overflow-hidden"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 scale-95">
+
+            <!-- Soft ambient accent in modal -->
+            <div class="absolute -right-12 -top-12 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl pointer-events-none"></div>
+
+            <!-- Header Icon -->
+            <div class="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 mx-auto flex items-center justify-center mb-4 shadow-xs">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+            </div>
+
+            <!-- Title & Info -->
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Verifikasi Email Mahasiswa
+            </h3>
+            <p class="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Kami telah mengirimkan 6 digit kode OTP ke:
+            </p>
+            <div class="mt-1 font-bold text-sm text-blue-600 bg-blue-50 py-1 px-3 rounded-lg inline-block border border-blue-100">
+                <span x-text="otpEmail"></span>
+            </div>
+
+            <!-- Alert Error OTP -->
+            <div x-show="otpError" x-cloak class="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 font-semibold text-left flex items-start gap-2">
+                <svg class="w-4 h-4 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span x-text="otpError"></span>
+            </div>
+
+            <!-- Alert Sukses Kirim Ulang OTP -->
+            <div x-show="otpSuccessMessage" x-cloak class="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold text-left flex items-start gap-2">
+                <svg class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span x-text="otpSuccessMessage"></span>
+            </div>
+
+            <!-- 6 Input OTP Boxes -->
+            <div class="my-6">
+                <div class="flex justify-center items-center gap-2 sm:gap-2.5" @paste="handleOtpPaste($event)">
+                    <template x-for="(digit, index) in otpDigits" :key="index">
+                        <input type="text"
+                               inputmode="numeric"
+                               maxlength="1"
+                               :x-ref="'otpInput' + index"
+                               x-model="otpDigits[index]"
+                               @input="handleOtpInput($event, index)"
+                               @keydown="handleOtpKeydown($event, index)"
+                               class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition shadow-2xs">
+                    </template>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-2 font-medium">
+                    Masukkan 6 digit angka dari email (bisa di-paste langsung)
+                </p>
+            </div>
+
+            <!-- Action Button -->
+            <div class="space-y-3">
+                <button type="button"
+                        @click="submitVerifyOtp()"
+                        :disabled="otpLoading || otpDigits.some(d => d === '')"
+                        :class="{ 'opacity-50 cursor-not-allowed': otpLoading || otpDigits.some(d => d === '') }"
+                        class="w-full py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm shadow-lg shadow-blue-500/25 transition flex items-center justify-center gap-2 cursor-pointer">
+                    <template x-if="otpLoading">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </template>
+                    <span x-text="otpLoading ? 'Memverifikasi...' : 'Verifikasi & Selesaikan Pendaftaran'"></span>
+                </button>
+
+                <!-- Resend Timer -->
+                <div class="text-xs text-slate-500 pt-1">
+                    <template x-if="otpCountdown > 0">
+                        <span>Kirim ulang kode dalam <strong class="text-blue-600 font-bold" x-text="otpCountdown + ' detik'"></strong></span>
+                    </template>
+                    <template x-if="otpCountdown <= 0">
+                        <button type="button"
+                                @click="resendOtp()"
+                                :disabled="otpLoading"
+                                class="font-bold text-blue-600 hover:text-blue-800 underline transition cursor-pointer">
+                            Kirim Ulang Kode OTP
+                        </button>
+                    </template>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100">
+                    <button type="button"
+                            @click="closeOtpModal()"
+                            class="text-xs text-slate-400 hover:text-slate-600 font-semibold transition cursor-pointer">
+                        &larr; Salah ketik email? Ubah data pendaftaran
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
     <!-- ALPINE.JS SPA ORCHESTRATOR & DUAL FLOW LOGIC             -->
     <!-- ======================================================== -->
     <script>
@@ -764,6 +898,20 @@
                 isCampusMismatch: false,
                 campusMismatchMessage: '',
                 matchedCampusForEmail: '',
+
+                // State OTP Verification Modal
+                showOtpModal: {{ session('otp_required') ? 'true' : 'false' }},
+                otpEmail: '{{ session('otp_email', '') }}',
+                otpDigits: ['', '', '', '', '', ''],
+                otpLoading: false,
+                otpError: '',
+                otpSuccessMessage: '',
+                otpCountdown: 0,
+                otpTimer: null,
+
+                // State submit loading & error
+                registerLoading: false,
+                registerError: '',
 
                 // Password strength
                 password: '',
@@ -813,6 +961,13 @@
 
                     if (this.email) {
                         this.detectEmail();
+                    }
+
+                    if (this.showOtpModal) {
+                        this.startOtpCountdown(60);
+                        this.$nextTick(() => {
+                            if (this.$refs.otpInput0) this.$refs.otpInput0.focus();
+                        });
                     }
                 },
 
@@ -1002,6 +1157,180 @@
                         return false;
                     }
                     return true;
+                },
+
+                startOtpCountdown(seconds = 60) {
+                    this.otpCountdown = seconds;
+                    if (this.otpTimer) clearInterval(this.otpTimer);
+                    this.otpTimer = setInterval(() => {
+                        if (this.otpCountdown > 0) {
+                            this.otpCountdown--;
+                        } else {
+                            clearInterval(this.otpTimer);
+                        }
+                    }, 1000);
+                },
+
+                handleOtpInput(event, index) {
+                    const val = event.target.value.replace(/[^0-9]/g, '');
+                    this.otpDigits[index] = val ? val[val.length - 1] : '';
+                    if (val && index < 5) {
+                        this.$refs['otpInput' + (index + 1)].focus();
+                    }
+                    if (this.otpDigits.every(d => d !== '')) {
+                        this.submitVerifyOtp();
+                    }
+                },
+
+                handleOtpKeydown(event, index) {
+                    if (event.key === 'Backspace' && !this.otpDigits[index] && index > 0) {
+                        this.$refs['otpInput' + (index - 1)].focus();
+                    }
+                },
+
+                handleOtpPaste(event) {
+                    event.preventDefault();
+                    const pasted = (event.clipboardData || window.clipboardData).getData('text').trim().replace(/[^0-9]/g, '');
+                    if (pasted.length >= 6) {
+                        for (let i = 0; i < 6; i++) {
+                            this.otpDigits[i] = pasted[i];
+                        }
+                        if (this.$refs.otpInput5) this.$refs.otpInput5.focus();
+                        this.submitVerifyOtp();
+                    }
+                },
+
+                async submitRegister(event) {
+                    if (!this.validateBeforeSubmit(event)) return;
+
+                    this.registerLoading = true;
+                    this.registerError = '';
+
+                    const form = event.target;
+                    const formData = new FormData(form);
+
+                    try {
+                        const response = await fetch('{{ route('register') }}', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.status === 'otp_required') {
+                            this.otpEmail = data.email;
+                            this.otpDigits = ['', '', '', '', '', ''];
+                            this.otpError = '';
+                            this.otpSuccessMessage = '';
+                            this.showOtpModal = true;
+                            this.startOtpCountdown(data.resend_cooldown || 60);
+                            this.$nextTick(() => {
+                                if (this.$refs.otpInput0) this.$refs.otpInput0.focus();
+                            });
+                        } else if (!response.ok) {
+                            if (data.errors) {
+                                const firstErrKey = Object.keys(data.errors)[0];
+                                this.registerError = data.errors[firstErrKey][0];
+                            } else {
+                                this.registerError = data.message || 'Terjadi kesalahan saat pendaftaran. Silakan periksa kembali formulir.';
+                            }
+                        }
+                    } catch (err) {
+                        this.registerError = 'Gagal menghubungi server. Periksa koneksi internet Anda.';
+                    } finally {
+                        this.registerLoading = false;
+                    }
+                },
+
+                async submitVerifyOtp() {
+                    const otpCode = this.otpDigits.join('');
+                    if (otpCode.length < 6) {
+                        this.otpError = 'Harap lengkapi 6 digit kode OTP.';
+                        return;
+                    }
+
+                    this.otpLoading = true;
+                    this.otpError = '';
+                    this.otpSuccessMessage = '';
+
+                    try {
+                        const response = await fetch('{{ route('register.verify_otp') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                email: this.otpEmail,
+                                otp: otpCode
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.redirect) {
+                            window.location.href = data.redirect;
+                        } else {
+                            this.otpError = data.message || 'Kode OTP yang Anda masukkan tidak sesuai.';
+                        }
+                    } catch (err) {
+                        this.otpError = 'Gagal memverifikasi OTP. Coba beberapa saat lagi.';
+                    } finally {
+                        this.otpLoading = false;
+                    }
+                },
+
+                async resendOtp() {
+                    if (this.otpCountdown > 0) return;
+
+                    this.otpLoading = true;
+                    this.otpError = '';
+                    this.otpSuccessMessage = '';
+
+                    try {
+                        const response = await fetch('{{ route('register.resend_otp') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                email: this.otpEmail
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            this.otpSuccessMessage = data.message || 'Kode OTP baru telah berhasil dikirimkan.';
+                            this.otpDigits = ['', '', '', '', '', ''];
+                            this.startOtpCountdown(data.resend_cooldown || 60);
+                            this.$nextTick(() => {
+                                if (this.$refs.otpInput0) this.$refs.otpInput0.focus();
+                            });
+                        } else {
+                            this.otpError = data.message || 'Gagal mengirim ulang kode OTP.';
+                        }
+                    } catch (err) {
+                        this.otpError = 'Terjadi kesalahan jaringan saat meminta kode baru.';
+                    } finally {
+                        this.otpLoading = false;
+                    }
+                },
+
+                closeOtpModal() {
+                    this.showOtpModal = false;
+                    this.otpError = '';
+                    this.otpSuccessMessage = '';
+                    if (this.otpTimer) clearInterval(this.otpTimer);
                 }
             }));
         });

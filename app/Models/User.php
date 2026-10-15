@@ -46,4 +46,34 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function listings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Listing::class);
+    }
+
+    public function bids(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(AuctionBid::class);
+    }
+
+    public function wonAuctions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Auction::class, 'winner_id');
+    }
+
+    public function buyerConversations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Conversation::class, 'buyer_id');
+    }
+
+    public function sellerConversations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Conversation::class, 'seller_id');
+    }
+
+    public function messages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
 }
