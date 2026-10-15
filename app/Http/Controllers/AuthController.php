@@ -18,7 +18,7 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->intended('/dashboard');
+            return $this->redirectAfterAuth(Auth::user());
         }
 
         $initialMode = old('mode', 'login');
@@ -33,7 +33,7 @@ class AuthController extends Controller
     public function showRegister()
     {
         if (Auth::check()) {
-            return redirect()->intended('/dashboard');
+            return $this->redirectAfterAuth(Auth::user());
         }
 
         $initialMode = old('mode', 'register');
@@ -80,7 +80,7 @@ class AuthController extends Controller
             $request->session()->regenerateToken();
 
             $errorMsg = 'Akun Anda ditangguhkan karena pelanggaran ketentuan platform. Silakan hubungi admin.';
-            
+
             if ($request->wantsJson()) {
                 return response()->json(['status' => 'error', 'message' => $errorMsg], 403);
             }
@@ -134,10 +134,14 @@ class AuthController extends Controller
                 'status' => 'success',
                 'message' => 'Login berhasil.',
                 'user' => $user,
+                'redirect' => $user->role === 'admin'
+                    ? route('admin.verifications.index')
+                    : route('dashboard'),
             ]);
         }
 
-        return redirect()->intended('/dashboard')->with('success', 'Selamat datang kembali, ' . $user->name . '!');
+        return $this->redirectAfterAuth($user)
+            ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
     }
 
     /**
@@ -275,7 +279,8 @@ class AuthController extends Controller
                 ], 201);
             }
 
-            return redirect()->intended('/dashboard')->with('success', 'Pendaftaran berhasil! Akun kampus Anda telah aktif.');
+            return redirect()->intended(route('dashboard'))
+                ->with('success', 'Pendaftaran berhasil! Akun kampus Anda telah aktif.');
         } else {
             // Email umum menunggu verifikasi
             if ($request->wantsJson()) {
@@ -307,5 +312,18 @@ class AuthController extends Controller
         }
 
         return redirect('/')->with('info', 'Anda telah keluar dari akun.');
+    }
+
+    /**
+     * Arahkan user ke halaman yang sesuai dengan role-nya setelah login.
+     */
+    protected function redirectAfterAuth(User $user)
+    {
+        // Admin selalu ke panel admin (tanpa intended, supaya tidak terseret ke URL user)
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.verifications.index');
+        }
+
+        return redirect()->intended(route('dashboard'));
     }
 }

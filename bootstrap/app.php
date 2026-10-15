@@ -14,7 +14,15 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'verified_student' => \App\Http\Middleware\EnsureAccountIsVerified::class,
+            'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         ]);
+
+        // Tujuan redirect kalau user yang sudah login membuka /login atau /register
+        $middleware->redirectUsersTo(fn (Request $request) =>
+            $request->user()?->role === 'admin'
+                ? route('admin.verifications.index')
+                : route('dashboard')
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
