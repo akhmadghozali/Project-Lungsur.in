@@ -38,11 +38,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 | Iklan (Listing) Routes
 |--------------------------------------------------------------------------
 */
+Route::middleware(['auth', 'verified_student'])->group(function () {
+    // Halaman form pasang iklan — hanya user terverifikasi
+    Route::get('/katalog/pasang', [IklanController::class, 'create'])->name('katalog.pasang');
 
-// Halaman form pasang iklan
-Route::get('/katalog/pasang', function () {
-    return view('iklan.create');
-})->name('katalog.pasang');
+    // POST handler — simpan iklan via IklanController
+    Route::post('/katalog/pasang', [IklanController::class, 'store'])->name('iklan.store');
+});
 
-// POST handler — simpan iklan via IklanController
-Route::post('/katalog/pasang', [IklanController::class, 'store'])->name('iklan.store');
+// Stub halaman detail barang (agar tombol "Lihat Detail" di beranda tidak 404)
+Route::get('/katalog/{id}', function ($id) {
+    return redirect('/')->with('info', 'Halaman detail barang akan segera hadir.');
+})->name('listings.show');

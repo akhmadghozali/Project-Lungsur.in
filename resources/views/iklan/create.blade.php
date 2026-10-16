@@ -34,6 +34,14 @@
         {{-- ===================================== --}}
         <div
             x-data="{
+                /* ── Reactive form state (digunakan di modal preview) ── */
+                title: '{{ old('title', '') }}',
+                price: '{{ old('price', '') }}',
+                condition: '{{ old('condition', '') }}',
+                category_id: '{{ old('category_id', '') }}',
+                addresses: '{{ old('addresses', auth()->user()->addresses ?? '') }}',
+                description: '{{ old('description', '') }}',
+
                 /* ── Image Preview State ── */
                 previewUrl: null,
                 previewName: '',
@@ -54,7 +62,6 @@
                 },
 
                 /* ── Price Validation State ── */
-                price: '',
                 priceError: '',
 
                 get priceNum() {
@@ -96,7 +103,12 @@
                 showModal: false,
 
                 openPreview() {
-                    if (!this.canSubmit) return;
+                    /* Jika harga belum valid, fokuskan ke input harga dan beri feedback */
+                    if (!this.isPriceValid) {
+                        this.validatePrice();
+                        this.$nextTick(() => this.$refs.hargaInput?.focus());
+                        return;
+                    }
                     this.showModal = true;
                     document.body.style.overflow = 'hidden';
                 },
@@ -121,6 +133,14 @@
                         bekas_perlu_perbaikan: 'Bekas – Perlu Perbaikan',
                     };
                     return map[val] || val;
+                },
+
+                /* ── Helper: nama kategori dari select ── */
+                get categoryLabel() {
+                    const sel = this.$refs.categorySelect;
+                    if (!sel || !this.category_id) return 'Belum dipilih';
+                    const opt = sel.options[sel.selectedIndex];
+                    return opt ? opt.text : 'Belum dipilih';
                 }
             }"
             class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden"
@@ -153,14 +173,13 @@
                             id="judul_barang"
                             type="text"
                             name="title"
-                            x-ref="titleInput"
-                            maxlength="255"
+                            maxlength="200"
                             required
                             placeholder="Contoh: Rice Cooker Philips 2L Bekas Mulus"
-                            value="{{ old('title') }}"
+                            x-model="title"
                             class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/60 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
                         >
-                        @error('judul')
+                        @error('title')
                             <p class="text-xs text-rose-600 font-medium flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 {{ $message }}
@@ -168,7 +187,7 @@
                         @enderror
                     </div>
 
-                    {{-- Harga + Kondisi in one row on sm+ --}}
+                    {{-- Harga + Kondisi --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                         {{-- Harga Barang --}}
@@ -183,6 +202,7 @@
                                     id="harga_barang"
                                     type="number"
                                     name="price"
+                                    x-ref="hargaInput"
                                     min="1000"
                                     step="1000"
                                     required
@@ -204,7 +224,7 @@
                                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span x-text="formattedPrice"></span>
                             </div>
-                            @error('harga')
+                            @error('price')
                                 <p class="text-xs text-rose-600 font-medium flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     {{ $message }}
@@ -222,22 +242,82 @@
                                 <select
                                     id="kondisi_barang"
                                     name="condition"
-                                    x-ref="conditionSelect"
                                     required
+                                    x-model="condition"
                                     class="w-full appearance-none px-4 py-2.5 pr-9 text-sm rounded-xl border border-slate-200 bg-slate-50/60 text-slate-800 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition cursor-pointer"
                                 >
-                                    <option value="" disabled {{ old('condition') ? '' : 'selected' }}>Pilih kondisi...</option>
-                                    <option value="baru" {{ old('condition') === 'baru' ? 'selected' : '' }}>Baru</option>
-                                    <option value="bekas_mulus" {{ old('condition') === 'bekas_mulus' ? 'selected' : '' }}>Bekas – Mulus (95–99%)</option>
-                                    <option value="bekas_baik" {{ old('condition') === 'bekas_baik' ? 'selected' : '' }}>Bekas – Baik (80–94%)</option>
-                                    <option value="bekas_normal" {{ old('condition') === 'bekas_normal' ? 'selected' : '' }}>Bekas – Normal (60–79%)</option>
-                                    <option value="bekas_perlu_perbaikan" {{ old('condition') === 'bekas_perlu_perbaikan' ? 'selected' : '' }}>Bekas – Perlu Perbaikan</option>
+                                    <option value="" disabled>Pilih kondisi...</option>
+                                    <option value="baru">Baru</option>
+                                    <option value="bekas_mulus">Bekas – Mulus (95–99%)</option>
+                                    <option value="bekas_baik">Bekas – Baik (80–94%)</option>
+                                    <option value="bekas_normal">Bekas – Normal (60–79%)</option>
+                                    <option value="bekas_perlu_perbaikan">Bekas – Perlu Perbaikan</option>
                                 </select>
                                 <svg class="w-4 h-4 text-slate-400 absolute right-3 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                 </svg>
                             </div>
-                            @error('kondisi')
+                            @error('condition')
+                                <p class="text-xs text-rose-600 font-medium flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    {{-- Kategori + Lokasi --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                        {{-- Kategori Barang --}}
+                        <div class="space-y-1.5">
+                            <label for="kategori_barang" class="block text-sm font-bold text-slate-700">
+                                Kategori
+                                <span class="text-rose-500 ml-0.5">*</span>
+                            </label>
+                            <div class="relative">
+                                <select
+                                    id="kategori_barang"
+                                    name="category_id"
+                                    x-ref="categorySelect"
+                                    required
+                                    x-model="category_id"
+                                    class="w-full appearance-none px-4 py-2.5 pr-9 text-sm rounded-xl border border-slate-200 bg-slate-50/60 text-slate-800 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition cursor-pointer"
+                                >
+                                    <option value="" disabled>Pilih kategori...</option>
+                                    @foreach ($categories as $cat)
+                                        <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                    @endforeach
+                                </select>
+                                <svg class="w-4 h-4 text-slate-400 absolute right-3 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                            @error('category_id')
+                                <p class="text-xs text-rose-600 font-medium flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
+                        {{-- Lokasi / Area Kampus --}}
+                        <div class="space-y-1.5">
+                            <label for="lokasi_barang" class="block text-sm font-bold text-slate-700">
+                                Lokasi / Area Kampus
+                                <span class="text-rose-500 ml-0.5">*</span>
+                            </label>
+                            <input
+                                id="lokasi_barang"
+                                type="text"
+                                name="addresses"
+                                maxlength="255"
+                                required
+                                placeholder="Contoh: Polinema, Sumbersari, Malang"
+                                x-model="addresses"
+                                class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/60 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+                            >
+                            @error('addresses')
                                 <p class="text-xs text-rose-600 font-medium flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     {{ $message }}
@@ -299,7 +379,7 @@
                                 <p class="text-sm font-bold text-slate-700 group-hover:text-blue-700 transition">
                                     Klik untuk unggah foto
                                 </p>
-                                <p class="text-xs text-slate-400 mt-0.5">PNG, JPG, WEBP – Maks. 5 MB</p>
+                                <p class="text-xs text-slate-400 mt-0.5">PNG, JPG, WEBP – Maks. 2 MB</p>
                             </div>
                         </label>
 
@@ -315,7 +395,7 @@
                         >
                     </div>
 
-                    @error('foto')
+                    @error('image')
                         <p class="text-xs text-rose-600 font-medium flex items-center gap-1">
                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             {{ $message }}
@@ -348,14 +428,14 @@
                         <textarea
                             id="deskripsi_barang"
                             name="description"
-                            x-ref="descInput"
                             rows="5"
                             required
                             maxlength="2000"
                             placeholder="Jelaskan kondisi barang secara detail: merek, tahun beli, alasan jual, kelengkapan, dll. Semakin lengkap semakin cepat laku!"
+                            x-model="description"
                             class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50/60 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition resize-none leading-relaxed"
-                        >{{ old('description') }}</textarea>
-                        @error('deskripsi')
+                        ></textarea>
+                        @error('description')
                             <p class="text-xs text-rose-600 font-medium flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 {{ $message }}
@@ -376,17 +456,13 @@
                         Batal
                     </a>
 
-                    {{-- Tombol Preview Iklan (hanya aktif ketika harga valid) --}}
+                    {{-- Tombol Preview Iklan --}}
                     <button
                         id="btn-preview-iklan"
                         type="button"
                         @click="openPreview()"
-                        :disabled="!canSubmit"
-                        :title="canSubmit ? 'Lihat pratinjau iklan sebelum dipasang' : 'Periksa kembali harga yang kamu masukkan'"
-                        :class="canSubmit
-                            ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/25 cursor-pointer'
-                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
-                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-2.5 text-sm font-black rounded-xl transition"
+                        :title="canSubmit ? 'Lihat pratinjau iklan sebelum dipasang' : 'Isi harga yang valid (minimal Rp1.000, kelipatan Rp1.000)'"
+                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-2.5 text-sm font-black rounded-xl transition bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/25 cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -458,13 +534,13 @@
                         </button>
                     </div>
 
-                    {{-- Konten preview: tampilan kartu barang --}}
+                    {{-- Konten preview --}}
                     <div class="p-5 space-y-4">
 
                         {{-- Foto barang --}}
                         <div class="rounded-xl overflow-hidden bg-slate-100 aspect-video flex items-center justify-center border border-slate-200">
                             <template x-if="previewUrl">
-                                <img :src="previewUrl" :alt="$refs.titleInput?.value" class="w-full h-full object-cover">
+                                <img :src="previewUrl" :alt="title" class="w-full h-full object-cover">
                             </template>
                             <template x-if="!previewUrl">
                                 <div class="flex flex-col items-center gap-2 text-slate-400">
@@ -478,24 +554,45 @@
 
                         {{-- Detail barang --}}
                         <div class="space-y-3">
+
                             {{-- Judul & Harga --}}
                             <div class="flex items-start justify-between gap-3">
                                 <h3
                                     class="text-base font-black text-slate-900 leading-snug flex-1"
-                                    x-text="$refs.titleInput?.value || '(Judul belum diisi)'"
+                                    x-text="title || '(Judul belum diisi)'"
                                 ></h3>
                                 <span class="text-lg font-black text-blue-600 shrink-0" x-text="formattedPrice || '—'"></span>
                             </div>
 
-                            {{-- Badge Kondisi --}}
+                            {{-- Badge Kondisi + Kategori --}}
                             <div class="flex flex-wrap gap-2">
                                 <span
+                                    x-show="condition"
                                     class="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full"
-                                    :class="$refs.conditionSelect?.value === 'baru'
+                                    :class="condition === 'baru'
                                         ? 'bg-emerald-100 text-emerald-700'
                                         : 'bg-amber-100 text-amber-700'"
-                                    x-text="kondisiLabel($refs.conditionSelect?.value) || 'Belum dipilih'"
+                                    x-text="kondisiLabel(condition)"
                                 ></span>
+                                <span
+                                    x-show="!condition"
+                                    class="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500"
+                                >Kondisi belum dipilih</span>
+
+                                <span
+                                    x-show="category_id"
+                                    class="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-600"
+                                    x-text="categoryLabel"
+                                ></span>
+                            </div>
+
+                            {{-- Lokasi --}}
+                            <div x-show="addresses" class="flex items-center gap-1.5 text-xs text-slate-500">
+                                <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <span x-text="addresses"></span>
                             </div>
 
                             {{-- Divider --}}
@@ -506,7 +603,7 @@
                                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Deskripsi</p>
                                 <p
                                     class="text-sm text-slate-700 leading-relaxed whitespace-pre-line line-clamp-6"
-                                    x-text="$refs.descInput?.value || '(Deskripsi belum diisi)'"
+                                    x-text="description || '(Deskripsi belum diisi)'"
                                 ></p>
                             </div>
 
@@ -517,7 +614,7 @@
                                 </div>
                                 <div>
                                     <p class="text-xs font-bold text-slate-800">{{ auth()->user()?->name ?? 'Pengguna Lungsur.in' }}</p>
-                                    <p class="text-[11px] text-slate-400">Baru saja • Malang, Jawa Timur</p>
+                                    <p class="text-[11px] text-slate-400">Baru saja</p>
                                 </div>
                             </div>
                         </div>
