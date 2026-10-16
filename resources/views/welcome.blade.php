@@ -223,16 +223,75 @@
                 </div>
 
                 <!-- Kontrol Filter Dropdown & Grid Toggle Sesuai Figma -->
-                <div class="flex items-center gap-3">
-                    <div class="relative">
-                        <select class="appearance-none bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl pl-3.5 pr-8 py-2 focus:outline-none focus:border-blue-600 cursor-pointer shadow-2xs">
-                            <option>Terbaru</option>
-                            <option>Harga Terendah</option>
-                            <option>Harga Tertinggi</option>
-                        </select>
-                        <svg class="w-3.5 h-3.5 text-slate-400 absolute right-3 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
+                <div class="flex items-center gap-1.5">
+                    <!-- Custom Sort Dropdown -->
+                    <div class="relative" id="sort-dropdown">
+
+                        <!-- Tombol utama -->
+                        <button
+                            type="button"
+                            id="sort-button"
+                            class="appearance-none bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl pl-3.5 pr-8 py-2 focus:outline-none focus:border-blue-600 cursor-pointer shadow-sm relative"
+                        >
+                            <span id="sort-label">
+                                {{ $sort === 'lowest' ? 'Harga Terendah' : ($sort === 'highest' ? 'Harga Tertinggi' : 'Terbaru') }}
+                            </span>
+
+                            <svg
+                                class="w-3.5 h-3.5 text-slate-400 absolute right-3 top-2.5 pointer-events-none"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </button>
+
+                        <!-- Menu dropdown -->
+                        <div
+                            id="sort-menu"
+                            class="hidden absolute right-0 top-full mt-2 w-48 bg-white border border-slate-100 rounded-xl shadow-xl p-1.5 z-50"
+                        >
+                            @foreach ([
+                                'latest' => 'Terbaru',
+                                'lowest' => 'Harga Terendah',
+                                'highest' => 'Harga Tertinggi'
+                            ] as $value => $label)
+
+                                <button
+                                    type="button"
+                                    data-sort="{{ $value }}"
+                                    class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition
+                                    {{ $sort === $value
+                                        ? 'bg-blue-50 text-blue-600'
+                                        : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600' }}"
+                                >
+                                    {{ $label }}
+
+                                    @if ($sort === $value)
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M5 13l4 4L19 7"
+                                            />
+                                        </svg>
+                                    @endif
+                                </button>
+
+                            @endforeach
+                        </div>
                     </div>
 
                     <!-- Layout Icon Button -->
@@ -244,97 +303,23 @@
                 </div>
             </div>
 
-            <!-- Notice Khusus Guest (Sesuai Aturan Proposal BR-06) -->
-            @guest
-                <div class="bg-blue-50/80 border border-blue-200 rounded-2xl p-4 flex items-center justify-between gap-4 text-xs">
-                    <div class="flex items-center gap-2.5 text-blue-900 font-medium">
-                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span>Mode Pratinjau Pengunjung: Menampilkan 8 barang acak. Masuk dengan email kampus untuk melihat kontak penjual & menawar barang.</span>
-                    </div>
-                    <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="font-bold text-blue-700 underline shrink-0 hover:text-blue-900">
-                        Masuk Sekarang &rarr;
-                    </a>
-                </div>
-            @endguest
-
-            <!-- 8 Kartu Produk (Listing Cards) Sesuai Figma 4 -->
-            @php
-                $sampleListings = [
-                    [
-                        'title' => 'Rice Cooker Philips 2L HD3119',
-                        'category' => 'Elektronik',
-                        'time' => '2 jam lalu',
-                        'price' => 'Rp 115.000',
-                        'old_price' => null,
-                        'image' => 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=400&auto=format&fit=crop',
-                    ],
-                    [
-                        'title' => 'Kursi Kerja Putar Ergonomis',
-                        'category' => 'Meja & Kursi',
-                        'time' => '3 jam lalu',
-                        'price' => 'Rp 160.000',
-                        'old_price' => null,
-                        'image' => 'https://images.unsplash.com/photo-1580481077195-c328a37db7e9?q=80&w=400&auto=format&fit=crop',
-                    ],
-                    [
-                        'title' => 'Kompor Gas Rinnai 1 Tungku',
-                        'category' => 'Peralatan Dapur',
-                        'time' => '5 jam lalu',
-                        'price' => 'Rp 95.000',
-                        'old_price' => null,
-                        'image' => 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=400&auto=format&fit=crop',
-                    ],
-                    [
-                        'title' => 'Rak Buku Kayu 3 Susun Portabel',
-                        'category' => 'Buku & Alat Tulis',
-                        'time' => '6 jam lalu',
-                        'price' => 'Rp 50.000',
-                        'old_price' => 'Rp 60.000',
-                        'image' => 'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?q=80&w=400&auto=format&fit=crop',
-                    ],
-                    [
-                        'title' => 'Dispenser Miyako Galon Atas Hot & Normal',
-                        'category' => 'Elektronik',
-                        'time' => '8 jam lalu',
-                        'price' => 'Rp 70.000',
-                        'old_price' => null,
-                        'image' => 'https://images.unsplash.com/photo-1585338107529-13afc5f02586?q=80&w=400&auto=format&fit=crop',
-                    ],
-                    [
-                        'title' => 'Setrika Maspion Anti Lengket EX-1000',
-                        'category' => 'Kesehatan & Elektronik',
-                        'time' => '10 jam lalu',
-                        'price' => 'Rp 55.000',
-                        'old_price' => null,
-                        'image' => 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?q=80&w=400&auto=format&fit=crop',
-                    ],
-                    [
-                        'title' => 'Sepatu Sneakers Putih (Size 42)',
-                        'category' => 'Fashion',
-                        'time' => '12 jam lalu',
-                        'price' => 'Rp 180.000',
-                        'old_price' => null,
-                        'image' => 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop',
-                    ],
-                    [
-                        'title' => 'Tanaman Hias Monstera Pot Keramik',
-                        'category' => 'Lainnya',
-                        'time' => '14 jam lalu',
-                        'price' => 'Rp 35.000',
-                        'old_price' => null,
-                        'image' => 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?q=80&w=400&auto=format&fit=crop',
-                    ],
-                ];
-            @endphp
-
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                @foreach ($sampleListings as $item)
+        <div id="listing-content">
+            <!-- Kartu Produk (Listing Cards) dari database -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-6">
+                @forelse ($listings as $listing)
                     <div class="bg-white rounded-2xl border border-slate-100 shadow-2xs hover:shadow-md transition overflow-hidden flex flex-col group">
                         <!-- Foto Barang -->
                         <div class="aspect-[4/3] bg-slate-100 overflow-hidden relative">
-                            <img src="{{ $item['image'] }}" 
-                                 alt="{{ $item['title'] }}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            @if ($listing->photo_url)
+                                <img src="{{ $listing->photo_url }}"
+                                     alt="{{ $listing->title }}"
+                                     loading="lazy"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-[11px] font-medium text-slate-400">
+                                    Belum ada foto
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Card Body -->
@@ -343,43 +328,135 @@
                                 <!-- Tag Kategori & Waktu Unggah -->
                                 <div class="flex items-center justify-between text-[11px] mb-2">
                                     <span class="font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md truncate max-w-[110px]">
-                                        {{ $item['category'] }}
+                                        {{ $listing->category->name ?? 'Lainnya' }}
                                     </span>
                                     <span class="text-slate-400 shrink-0">
-                                        {{ $item['time'] }}
+                                        {{ $listing->created_at->diffForHumans() }}
                                     </span>
                                 </div>
 
                                 <!-- Judul Barang -->
                                 <h3 class="font-bold text-xs sm:text-sm text-slate-800 line-clamp-2 leading-snug group-hover:text-blue-600 transition">
-                                    {{ $item['title'] }}
+                                    {{ $listing->title }}
                                 </h3>
 
                                 <!-- Harga Biru Tebal -->
                                 <div class="mt-2 flex items-baseline gap-2">
                                     <span class="text-base sm:text-lg font-black text-blue-600 tracking-tight">
-                                        {{ $item['price'] }}
+                                        Rp {{ number_format($listing->price, 0, ',', '.') }}
                                     </span>
-                                    @if ($item['old_price'])
-                                        <span class="text-[11px] text-slate-400 line-through">
-                                            {{ $item['old_price'] }}
-                                        </span>
-                                    @endif
                                 </div>
                             </div>
 
                             <!-- Tombol Full-Width "Lihat Detail ->" Sesuai Figma -->
-                            <a href="{{ Route::has('listings.show') ? route('listings.show', 1) : url('/katalog/1') }}" 
+                            <a href="{{ Route::has('listings.show') ? route('listings.show', $listing->id) : url('/katalog/'.$listing->id) }}"
                                class="w-full text-center py-2.5 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs">
                                 <span>Lihat Detail</span>
                                 <span>&rarr;</span>
                             </a>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <div class="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+                        <p class="text-sm font-bold text-slate-800">Belum ada barang</p>
+                        <p class="mt-1 text-xs text-slate-500">Jadilah yang pertama memasang iklan di Lungsur.in.</p>
+                    </div>
+                @endforelse
             </div>
-        </section>
 
+            <div id="listing-results">
+                @if ($listings instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    @if ($listings->total() > 0)
+
+                        <div class="mt-10 flex flex-col items-center gap-3">
+
+                            {{-- Tombol Pagination --}}
+                            <div class="flex items-center justify-center gap-2">
+
+                                {{-- Tombol Sebelumnya --}}
+                                @if ($listings->onFirstPage())
+                                    <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-300">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                    </span>
+                                @else
+                                    <a href="{{ $listings->previousPageUrl() }}"
+                                    class="js-pagination w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-blue-100 hover:text-blue-600 transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                    </a>
+                                @endif
+
+                                {{-- Nomor Halaman --}}
+                                @foreach ($listings->getUrlRange(1, $listings->lastPage()) as $page => $url)
+                                    <a href="{{ $url }}"
+                                    class="js-pagination w-10 h-10 flex items-center justify-center rounded-xl text-sm font-semibold transition
+                                    {{ $listings->currentPage() == $page
+                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100' }}">
+                                        {{ $page }}
+                                    </a>
+                                @endforeach
+
+                                {{-- Tombol Selanjutnya --}}
+                                @if ($listings->hasMorePages())
+                                    <a href="{{ $listings->nextPageUrl() }}"
+                                    class="js-pagination w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-blue-100 hover:text-blue-600 transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </a>
+                                @else
+                                    <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-300">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </span>
+                                @endif
+
+                            </div>
+
+                            {{-- Informasi Jumlah Iklan --}}
+                            <p class="text-xs sm:text-sm text-slate-400">
+                                Menampilkan
+                                <span class="font-semibold text-slate-700">
+                                    {{ $listings->firstItem() }}–{{ $listings->lastItem() }}
+                                </span>
+                                dari
+                                <span class="font-semibold text-slate-700">
+                                    {{ $listings->total() }}
+                                </span>
+                                iklan
+                            </p>
+
+                        </div>
+
+                    @endif
+                @endif
+            </div>
+        </div>
+                    <!-- Notice Khusus Guest -->
+            @guest
+                <div class="mt-6 bg-blue-50/80 border border-blue-200 rounded-2xl p-4 flex items-center justify-between gap-4 text-xs">
+                    <div class="flex items-center gap-2.5 text-blue-900 font-medium">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                        <span>Masuk dengan email kampus untuk melihat kontak penjual & menawar barang.</span>
+                    </div>
+
+                    <a href="{{ Route::has('login') ? route('login') : url('/login') }}"
+                    class="font-bold text-blue-700 underline shrink-0 hover:text-blue-900">
+                        Masuk Sekarang &rarr;
+                    </a>
+                </div>
+            @endguest
+
+        </section>
 
         <!-- ========================================== -->
         <!-- 5. BANNER PENUTUP CTA (Sesuai Figma 6)     -->
@@ -416,4 +493,113 @@
         </section>
 
     </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const listingContent = document.getElementById('listing-content');
+        const sortDropdown = document.getElementById('sort-dropdown');
+        const sortButton = document.getElementById('sort-button');
+        let sortMenu = document.getElementById('sort-menu');
+        let sortLabel = document.getElementById('sort-label');
+
+        // AJAX untuk mengambil daftar iklan
+        function loadListings(url, updateHistory = true) {
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Gagal memuat daftar iklan');
+                }
+                return response.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const newPage = parser.parseFromString(html, 'text/html');
+
+                // Ambil daftar iklan dan pagination terbaru
+                const newListingContent = newPage.getElementById('listing-content');
+
+                if (newListingContent && listingContent) {
+                    listingContent.innerHTML = newListingContent.innerHTML;
+                }
+
+                // Perbarui isi dropdown berdasarkan pilihan terbaru
+                const newSortMenu = newPage.getElementById('sort-menu');
+                const newSortLabel = newPage.getElementById('sort-label');
+
+                if (newSortMenu && sortMenu) {
+                    sortMenu.innerHTML = newSortMenu.innerHTML;
+                }
+
+                if (newSortLabel && sortLabel) {
+                    sortLabel.textContent = newSortLabel.textContent.trim();
+                }
+
+                // Simpan URL ke riwayat browser
+                if (updateHistory) {
+                    window.history.pushState({}, '', url);
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        }
+
+        // Klik tombol dropdown
+        if (sortButton && sortMenu) {
+            sortButton.addEventListener('click', function () {
+                sortMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Klik pilihan pengurutan
+        if (sortMenu) {
+            sortMenu.addEventListener('click', function (event) {
+                const option = event.target.closest('[data-sort]');
+
+                if (!option) return;
+
+                const selectedSort = option.dataset.sort;
+
+                const url = new URL(window.location.href);
+
+                url.searchParams.set('sort', selectedSort);
+                url.searchParams.delete('page');
+
+                sortMenu.classList.add('hidden');
+
+                loadListings(url.toString());
+            });
+        }
+
+        // Tutup dropdown jika klik di luar dropdown
+        document.addEventListener('click', function (event) {
+            if (
+                sortDropdown &&
+                !sortDropdown.contains(event.target) &&
+                sortMenu
+            ) {
+                sortMenu.classList.add('hidden');
+            }
+        });
+
+        // Pagination AJAX
+        document.addEventListener('click', function (event) {
+            const paginationLink = event.target.closest('.js-pagination');
+
+            if (!paginationLink) return;
+
+            event.preventDefault();
+
+            loadListings(paginationLink.href);
+        });
+
+        // Tombol Back dan Forward browser
+        window.addEventListener('popstate', function () {
+            loadListings(window.location.href, false);
+        });
+    });
+    </script>
 </x-layouts.app>

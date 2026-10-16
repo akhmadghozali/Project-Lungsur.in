@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Listing extends Model
 {
@@ -38,6 +39,11 @@ class Listing extends Model
         ];
     }
 
+    public function scopeAvailable($query)
+    {
+        return $query->where('status', 'available');
+    }
+
     // ── Relationships ──────────────────────────────────────────
 
     public function user(): BelongsTo
@@ -58,6 +64,21 @@ class Listing extends Model
     public function primaryImage(): HasMany
     {
         return $this->hasMany(ListingImage::class)->where('is_primary', true);
+    }
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        $image = $this->images->firstWhere('is_primary', true) ?? $this->images->first();
+
+        if (! $image) {
+            return null;
+        }
+
+        $url = $image->image_url;
+
+        return Str::startsWith($url, ['http://', 'https://'])
+            ? $url
+            : asset('storage/' . ltrim($url, '/'));
     }
 
     public function auction(): HasOne
