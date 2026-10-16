@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\IklanController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminVerificationController;
@@ -31,3 +32,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/verifications/{user}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
     Route::post('/verifications/{user}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Iklan (Listing) Routes
+|--------------------------------------------------------------------------
+*/
+
+// Halaman form pasang iklan
+Route::get('/katalog/pasang', function () {
+    return view('iklan.create');
+})->name('katalog.pasang');
+
+// POST handler — simpan iklan via IklanController
+Route::post('/katalog/pasang', [IklanController::class, 'store'])->name('iklan.store');
