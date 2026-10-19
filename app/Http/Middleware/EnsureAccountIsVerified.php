@@ -22,6 +22,19 @@ class EnsureAccountIsVerified
             return redirect()->route('login');
         }
 
+        // Cegah administrator mengakses rute khusus mahasiswa (dashboard, pasang iklan, dll)
+        if ($user->role === 'admin') {
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'status' => 'forbidden',
+                    'message' => 'Akun administrator tidak diizinkan mengakses fitur transaksi mahasiswa.',
+                ], 403);
+            }
+
+            return redirect()->route('admin.verifications.index')
+                ->with('warning', 'Akun administrator hanya memiliki akses ke portal operasional admin.');
+        }
+
         // Cek jika akun disuspend / dibanned
         if ($user->status === 'suspended' || $user->status === 'banned') {
             Auth::logout();

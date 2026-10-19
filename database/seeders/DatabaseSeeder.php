@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CampusDomainSeeder::class,
             CategorySeeder::class,
+            PendingUserSeeder::class,
         ]);
 
         User::factory()->create([

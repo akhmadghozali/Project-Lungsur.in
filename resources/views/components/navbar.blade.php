@@ -125,7 +125,7 @@
                             <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium">Iklan & Lelang Saya</a>
                             <a href="{{ Route::has('profile.edit') ? route('profile.edit') : url('/profil') }}" class="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium">Pengaturan Profil</a>
                             @if((auth()->user()->role ?? '') === 'admin')
-                                <a href="{{ Route::has('admin.dashboard') ? route('admin.dashboard') : url('/admin/dashboard') }}" class="block px-4 py-2 text-blue-600 font-bold hover:bg-blue-50">Panel Admin</a>
+                                <a href="{{ route('admin.verifications.index') }}" class="block px-4 py-2 text-blue-600 font-bold hover:bg-blue-50">Panel Admin</a>
                             @endif
                             <form method="POST" action="{{ Route::has('logout') ? route('logout') : url('/logout') }}">
                                 @csrf

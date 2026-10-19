@@ -48,5 +48,8 @@ Route::middleware(['auth', 'verified_student'])->group(function () {
 
 // Stub halaman detail barang (agar tombol "Lihat Detail" di beranda tidak 404)
 Route::get('/katalog/{id}', function ($id) {
+    if (auth()->check() && auth()->user()->role === 'admin') {
+        return redirect()->route('admin.verifications.index');
+    }
     return redirect('/')->with('info', 'Halaman detail barang akan segera hadir.');
 })->name('listings.show');

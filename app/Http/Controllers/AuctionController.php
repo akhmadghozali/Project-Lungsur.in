@@ -162,6 +162,13 @@ class AuctionController extends Controller
             ], 403);
         }
 
+        if ($user->role === 'admin') {
+            return response()->json([
+                'status' => 'forbidden',
+                'message' => 'Akun administrator tidak diperbolehkan mengajukan penawaran lelang.',
+            ], 403);
+        }
+
         // 2. Validasi input nominal penawaran
         $validator = Validator::make($request->all(), [
             'bid_amount' => ['required', 'numeric', 'min:1000'],
