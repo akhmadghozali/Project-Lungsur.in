@@ -8,6 +8,10 @@ class HomeController extends Controller
 {
     public function index()
     {
+        if (auth()->check() && auth()->user()->role === 'admin') {
+            return redirect()->route('admin.verifications.index');
+        }
+
         $query = Listing::available()->with(['category', 'images']);
 
         // Filter pengurutan

@@ -6,10 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ADMIN - User Verifikasi | Lungsur.in</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
     <style>[x-cloak]{display:none !important;}</style>
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased">
+    <x-flash-message />
 @php
     $admin = auth()->user();
     $adminRoleLabel = match ($admin->role) {
@@ -31,7 +31,7 @@
 
         <div class="px-6 pb-2 pt-4 text-[10px] font-bold tracking-widest text-slate-500">PORTAL MODERASI</div>
         <nav class="space-y-1 px-3 text-sm">
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5">
+            <a href="{{ route('admin.verifications.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5">
                 <span>▦</span> Dashboard
             </a>
             <a href="{{ route('admin.verifications.index') }}"

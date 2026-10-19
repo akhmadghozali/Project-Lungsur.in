@@ -51,6 +51,20 @@ class AdminVerificationController extends Controller
 
     public function approve(Request $request, User $user)
     {
+        // Cegah memproses akun admin atau diri sendiri
+        if ($user->role === 'admin' || (int) $user->id === (int) $request->user()->id) {
+            return redirect()
+                ->route('admin.verifications.index')
+                ->with('error', 'Tidak dapat memproses verifikasi pada akun administrator.');
+        }
+
+        // Cegah memproses akun yang sudah bukan status pending
+        if ($user->verification_status !== 'pending') {
+            return redirect()
+                ->route('admin.verifications.index')
+                ->with('warning', "Akun {$user->name} sudah diproses sebelumnya (Status: {$user->verification_status}).");
+        }
+
         $user->update([
             'verification_status' => 'active',
             'rejection_reason' => null,
@@ -65,6 +79,20 @@ class AdminVerificationController extends Controller
 
     public function reject(Request $request, User $user)
     {
+        // Cegah memproses akun admin atau diri sendiri
+        if ($user->role === 'admin' || (int) $user->id === (int) $request->user()->id) {
+            return redirect()
+                ->route('admin.verifications.index')
+                ->with('error', 'Tidak dapat menolak verifikasi pada akun administrator.');
+        }
+
+        // Cegah memproses akun yang sudah bukan status pending
+        if ($user->verification_status !== 'pending') {
+            return redirect()
+                ->route('admin.verifications.index')
+                ->with('warning', "Akun {$user->name} sudah diproses sebelumnya (Status: {$user->verification_status}).");
+        }
+
         $validated = $request->validate([
             'rejection_reason' => ['required', 'string', 'max:255'],
         ]);

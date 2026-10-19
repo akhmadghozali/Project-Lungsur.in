@@ -112,6 +112,13 @@ class ChatController extends Controller
             ], 403);
         }
 
+        if ($user->role === 'admin') {
+            return response()->json([
+                'status' => 'forbidden',
+                'message' => 'Akun administrator tidak diperbolehkan menggunakan fitur obrolan transaksi.',
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'listing_id' => ['required', 'integer', 'exists:listings,id'],
             'message' => ['nullable', 'string', 'max:2000'],
@@ -291,6 +298,13 @@ class ChatController extends Controller
             return response()->json([
                 'status' => 'forbidden',
                 'message' => 'Akun Anda harus terverifikasi aktif untuk dapat mengirim pesan.',
+            ], 403);
+        }
+
+        if ($user->role === 'admin') {
+            return response()->json([
+                'status' => 'forbidden',
+                'message' => 'Akun administrator tidak diperbolehkan menggunakan fitur obrolan transaksi.',
             ], 403);
         }
 
