@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\CampusDomain;
 use App\Mail\OtpVerificationMail;
+use App\Mail\PasswordResetOtpMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -478,6 +481,247 @@ class AuthController extends Controller
         }
 
         return redirect('/')->with('info', 'Anda telah keluar dari akun.');
+    }
+
+    /**
+     * Redirect pengguna ke halaman autentikasi Google OAuth.
+     */
+    public function redirectToGoogle()
+    {
+        if (empty(config('services.google.client_id')) || empty(config('services.google.client_secret'))) {
+            return redirect()->route('login')->with('warning', 'Integrasi Google OAuth belum dikonfigurasi di file .env (GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET).');
+        }
+
+        try {
+            return Socialite::driver('google')->redirect();
+        } catch (\Throwable $e) {
+            report($e);
+            return redirect()->route('login')->with('error', 'Gagal menghubungkan ke layanan Google: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Menangani callback autentikasi dari Google OAuth.
+     */
+    public function handleGoogleCallback()
+    {
+        if (empty(config('services.google.client_id')) || empty(config('services.google.client_secret'))) {
+            return redirect()->route('login')->with('warning', 'Integrasi Google OAuth belum dikonfigurasi di file .env.');
+        }
+
+        try {
+            $googleUser = Socialite::driver('google')->user();
+        } catch (\Throwable $e) {
+            report($e);
+            return redirect()->route('login')->with('error', 'Gagal mengautentikasi akun Google. Silakan coba kembali.');
+        }
+
+        $email = strtolower(trim($googleUser->getEmail()));
+        if (empty($email)) {
+            return redirect()->route('login')->with('error', 'Akun Google Anda tidak memiliki alamat email yang valid.');
+        }
+
+        $user = User::where('google_id', $googleUser->getId())
+            ->orWhere('email', $email)
+            ->first();
+
+        if ($user) {
+            $dirty = false;
+            if (!$user->google_id) {
+                $user->google_id = $googleUser->getId();
+                $dirty = true;
+            }
+            if (!$user->avatar && $googleUser->getAvatar()) {
+                $user->avatar = $googleUser->getAvatar();
+                $dirty = true;
+            }
+            if ($dirty) {
+                $user->save();
+            }
+        } else {
+            $domain = explode('@', $email)[1] ?? '';
+            $campusDomain = CampusDomain::where('is_active', true)->get()->first(function ($cd) use ($domain) {
+                return $domain === $cd->domain_name || str_ends_with($domain, '.' . $cd->domain_name);
+            });
+
+            $isCampusDomain = (bool) $campusDomain || str_ends_with($domain, '.ac.id');
+            $campusName = $campusDomain ? $campusDomain->campus_name : ($isCampusDomain ? 'Kampus Mahasiswa' : null);
+            $emailType = $isCampusDomain ? 'campus' : 'public';
+            $verificationStatus = $isCampusDomain ? 'active' : 'pending';
+
+            $user = User::create([
+                'name' => $googleUser->getName() ?? explode('@', $email)[0],
+                'email' => $email,
+                'email_type' => $emailType,
+                'verification_status' => $verificationStatus,
+                'campus' => $campusName,
+                'google_id' => $googleUser->getId(),
+                'avatar' => $googleUser->getAvatar(),
+                'password' => Hash::make(Str::random(32)),
+                'role' => 'buyer',
+                'status' => 'active',
+                'email_verified_at' => now(),
+            ]);
+        }
+
+        if ($user->status === 'suspended' || $user->status === 'banned') {
+            return redirect()->route('login')->with('error', 'Akun Anda ditangguhkan karena pelanggaran ketentuan platform.');
+        }
+
+        if ($user->verification_status === 'pending') {
+            return redirect()->route('login')->with('warning', 'Akun Google Anda berhasil terdaftar. Karena menggunakan email umum (@' . (explode('@', $email)[1] ?? 'gmail.com') . '), akun Anda memerlukan verifikasi berkas KTM oleh administrator sebelum dapat digunakan.');
+        }
+
+        if ($user->verification_status === 'rejected') {
+            return redirect()->route('login')->with('error', 'Verifikasi akun Anda ditolak: ' . ($user->rejection_reason ?? 'Data tidak sesuai'));
+        }
+
+        Auth::login($user, true);
+        request()->session()->regenerate();
+
+        return $this->redirectAfterAuth($user)->with('success', 'Berhasil masuk dengan akun Google! Selamat datang, ' . $user->name . '.');
+    }
+
+    /**
+     * Tampilkan formulir permintaan lupa password.
+     */
+    public function showForgotPassword()
+    {
+        if (Auth::check()) {
+            return $this->redirectAfterAuth(Auth::user());
+        }
+
+        $initialMode = 'forgot_password';
+        $campusDomains = CampusDomain::where('is_active', true)->get();
+
+        return view('auth.auth', compact('initialMode', 'campusDomains'));
+    }
+
+    /**
+     * Kirimkan kode OTP reset password ke email terdaftar.
+     */
+    public function sendResetOtp(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'string', 'email:filter'],
+        ], [
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+        ]);
+
+        $email = strtolower(trim($validated['email']));
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return back()->with('error', 'Alamat email tidak terdaftar di sistem Lungsur.in.')
+                ->withInput();
+        }
+
+        $cacheKey = 'pwd_reset_otp_' . md5($email);
+        $cached = Cache::get($cacheKey);
+
+        if ($cached && isset($cached['cooldown']) && now()->timestamp < $cached['cooldown']) {
+            $remaining = $cached['cooldown'] - now()->timestamp;
+            return redirect()->route('password.reset', ['email' => $email])
+                ->with('warning', "Mohon tunggu {$remaining} detik sebelum meminta kode OTP reset password baru.")
+                ->with('reset_email', $email);
+        }
+
+        $otp = (string) random_int(100000, 999999);
+
+        Cache::put($cacheKey, [
+            'email' => $email,
+            'otp' => $otp,
+            'attempts' => 0,
+            'cooldown' => now()->addSeconds(60)->timestamp,
+        ], now()->addMinutes(15));
+
+        try {
+            Mail::to($email)->send(new PasswordResetOtpMail($user->name, $otp));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return redirect()->route('password.reset', ['email' => $email])
+            ->with('success', "Kode OTP 6-digit telah dikirimkan ke {$email}. Silakan periksa kotak masuk atau spam email Anda.")
+            ->with('reset_email', $email);
+    }
+
+    /**
+     * Tampilkan formulir verifikasi OTP dan ganti kata sandi.
+     */
+    public function showResetPassword(Request $request)
+    {
+        if (Auth::check()) {
+            return $this->redirectAfterAuth(Auth::user());
+        }
+
+        $initialMode = 'reset_password';
+        $campusDomains = CampusDomain::where('is_active', true)->get();
+        $presetEmail = session('reset_email', $request->query('email', old('email', '')));
+
+        return view('auth.auth', compact('initialMode', 'campusDomains', 'presetEmail'));
+    }
+
+    /**
+     * Verifikasi kode OTP dan simpan kata sandi baru.
+     */
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'string', 'email:filter'],
+            'otp' => ['required', 'string', 'size:6'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'otp.required' => 'Kode OTP 6-digit wajib diisi.',
+            'otp.size' => 'Kode OTP harus tepat 6 digit.',
+            'password.required' => 'Kata sandi baru wajib diisi.',
+            'password.min' => 'Kata sandi minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
+        ]);
+
+        $email = strtolower(trim($validated['email']));
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return back()->with('error', 'Akun dengan email ini tidak ditemukan.')
+                ->withInput();
+        }
+
+        $cacheKey = 'pwd_reset_otp_' . md5($email);
+        $cached = Cache::get($cacheKey);
+
+        if (!$cached) {
+            return redirect()->route('password.request')
+                ->with('error', 'Sesi kode OTP telah kedaluwarsa. Silakan ajukan permohonan reset kata sandi baru.');
+        }
+
+        if (($cached['attempts'] ?? 0) >= 5) {
+            Cache::forget($cacheKey);
+            return redirect()->route('password.request')
+                ->with('error', 'Terlalu banyak percobaan kode OTP yang salah. Demi keamanan, silakan minta kode OTP baru.');
+        }
+
+        if ($cached['otp'] !== trim($validated['otp'])) {
+            $cached['attempts'] = ($cached['attempts'] ?? 0) + 1;
+            Cache::put($cacheKey, $cached, now()->addMinutes(15));
+            $sisa = 5 - $cached['attempts'];
+            return back()->with('error', "Kode OTP yang Anda masukkan salah. Sisa kesempatan mencoba: {$sisa} kali.")
+                ->with('reset_email', $email)
+                ->withInput();
+        }
+
+        // OTP Valid! Perbarui password dan remember token
+        $user->password = Hash::make($validated['password']);
+        $user->setRememberToken(Str::random(60));
+        $user->save();
+
+        Cache::forget($cacheKey);
+
+        return redirect()->route('login')
+            ->with('success', 'Kata sandi akun Anda berhasil diperbarui! Silakan masuk dengan kata sandi baru.');
     }
 
     /**

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title x-text="mode === 'register' ? 'Buat Akun - Lungsur.in' : 'Login - Lungsur.in'">
-        {{ ($initialMode ?? (request()->is('register') ? 'register' : 'login')) === 'register' ? 'Buat Akun - Lungsur.in' : 'Login - Lungsur.in' }}
+    <title x-text="mode === 'register' ? 'Buat Akun - Lungsur.in' : (mode === 'forgot_password' ? 'Lupa Password - Lungsur.in' : (mode === 'reset_password' ? 'Reset Password - Lungsur.in' : 'Login - Lungsur.in'))">
+        {{ ($initialMode ?? (request()->is('register') ? 'register' : (request()->is('forgot-password') ? 'forgot_password' : (request()->is('reset-password') ? 'reset_password' : 'login')))) === 'register' ? 'Buat Akun - Lungsur.in' : 'Login - Lungsur.in' }}
     </title>
 
     <!-- Vite Assets -->
@@ -22,7 +22,7 @@
         <!-- SISI KIRI (BRANDING PANEL BERGANTI HALUS TANPA RELOAD)         -->
         <!-- ============================================================== -->
         <div class="lg:col-span-5 relative flex flex-col justify-between overflow-hidden transition-colors duration-500"
-             :class="mode === 'register' ? 'bg-slate-900' : 'bg-blue-600'">
+             :class="mode === 'register' ? 'bg-slate-900' : (mode === 'forgot_password' || mode === 'reset_password' ? 'bg-indigo-950' : 'bg-blue-600')">
             
             <!-- PANEL KIRI VERSI LOGIN (GAMBAR 5: BLUE STRIPED CARD) -->
             <div x-show="mode === 'login'" 
@@ -183,6 +183,84 @@
                 </div>
             </div>
 
+            <!-- PANEL KIRI VERSI LUPA / RESET PASSWORD -->
+            <div x-show="mode === 'forgot_password' || mode === 'reset_password'" 
+                 x-cloak
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-x-4"
+                 x-transition:enter-end="opacity-100 translate-x-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-x-0"
+                 x-transition:leave-end="opacity-0 -translate-x-4"
+                 class="h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative">
+                
+                <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none"></div>
+
+                <!-- Top: Logo Lungsur.in -->
+                <div class="relative z-10">
+                    <a href="{{ url('/') }}" class="inline-flex items-center gap-2 bg-white px-3.5 py-2 rounded-2xl shadow-md group transition hover:scale-[1.02]">
+                        <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                <path d="M3 3v5h5"/>
+                                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                                <path d="M21 21v-5h-5"/>
+                                <path d="M12 9l5 2.5-5 2.5-5-2.5 5-2.5z" fill="#FBBF24" stroke="#FBBF24" stroke-width="1.5"/>
+                                <path d="M9.5 13v2.2c0 .8 1.1 1.5 2.5 1.5s2.5-.7 2.5-1.5V13" stroke="#FBBF24" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <span class="text-base font-black text-slate-900 tracking-tight">
+                            Lungsur<span class="text-blue-600">.in</span>
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Middle: Headline & Points -->
+                <div class="relative z-10 my-8 sm:my-12">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold mb-4">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        Pemulihan Akun
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-[1.2]">
+                        Akses Akun Terlindungi.
+                    </h2>
+                    <p class="mt-3 text-sm text-indigo-100 font-medium leading-relaxed">
+                        Lupa kata sandi? Kami akan mengirimkan kode verifikasi 6 digit ke alamat email kampus atau umum terdaftar Anda untuk mengatur ulang kata sandi dengan aman.
+                    </p>
+
+                    <div class="mt-6 space-y-3 pt-2 border-t border-white/10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 text-xs">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-xs font-semibold text-slate-200">
+                                Kode OTP berlaku 15 menit
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 text-xs">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-xs font-semibold text-slate-200">
+                                Enkripsi bcrypt standar industri
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Footer Info -->
+                <div class="relative z-10 pt-4 border-t border-white/10 text-[11px] text-indigo-300">
+                    &copy; {{ date('Y') }} Lungsur.in &bull; Keamanan Akun Mahasiswa
+                </div>
+            </div>
+
         </div>
 
         <!-- ============================================================== -->
@@ -321,12 +399,16 @@
                                 <input id="remember" 
                                        name="remember" 
                                        type="checkbox" 
+                                       value="1"
+                                       {{ old('remember') ? 'checked' : '' }}
                                        class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300">
                                 <span class="ml-2 text-xs font-semibold text-slate-600">
                                     Ingat saya
                                 </span>
                             </label>
-                            <a href="#" class="text-xs font-semibold text-blue-600 hover:text-blue-700 transition hover:underline">
+                            <a href="{{ route('password.request') }}" 
+                               @click.prevent="switchMode('forgot_password')"
+                               class="text-xs font-semibold text-blue-600 hover:text-blue-700 transition hover:underline">
                                 Lupa password?
                             </a>
                         </div>
@@ -350,9 +432,8 @@
                         </div>
 
                         <!-- Tombol Login dengan Google -->
-                        <button type="button" 
-                                onclick="alert('Fitur SSO Google Mahasiswa sedang dipersiapkan untuk integrasi OAuth.')"
-                                class="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-sm flex items-center justify-center gap-3 transition shadow-2xs cursor-pointer">
+                        <a href="{{ route('auth.google') }}" 
+                           class="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-sm flex items-center justify-center gap-3 transition shadow-2xs cursor-pointer">
                             <svg class="w-4 h-4" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -360,7 +441,7 @@
                                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                             </svg>
                             <span>Login dengan Google</span>
-                        </button>
+                        </a>
                     </form>
                 </div>
 
@@ -732,9 +813,8 @@
                                 </span>
                             </div>
 
-                            <button type="button" 
-                                    onclick="alert('Fitur SSO Google Mahasiswa sedang dipersiapkan untuk integrasi OAuth.')"
-                                    class="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-sm flex items-center justify-center gap-3 transition shadow-2xs cursor-pointer">
+                            <a href="{{ route('auth.google') }}" 
+                               class="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-sm flex items-center justify-center gap-3 transition shadow-2xs cursor-pointer">
                                 <svg class="w-4 h-4" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -742,7 +822,7 @@
                                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                                 </svg>
                                 <span>Daftar dengan Google</span>
-                            </button>
+                            </a>
                         </div>
 
                         <div class="pt-2 text-center">
@@ -750,6 +830,176 @@
                                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                                 Langkah 1 dari 2 &mdash; berikutnya: lengkapi profil kos
                             </span>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ============================================================== -->
+                <!-- FORMULIR 3: LUPA PASSWORD (KIRIM KODE OTP)                     -->
+                <!-- ============================================================== -->
+                <div x-show="mode === 'forgot_password'" 
+                     x-cloak
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-3"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 -translate-y-3">
+                    
+                    <div class="mb-6">
+                        <button type="button" 
+                                @click="switchMode('login')"
+                                class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-blue-600 transition mb-3 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Kembali ke Login
+                        </button>
+                        <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                            Lupa Kata Sandi?
+                        </h1>
+                        <p class="text-xs sm:text-sm font-medium text-slate-500 mt-1">
+                            Masukkan email akun Anda. Kami akan mengirimkan kode OTP 6-digit untuk verifikasi akun Anda.
+                        </p>
+                    </div>
+
+                    <form action="{{ route('password.email') }}" method="POST" class="space-y-4">
+                        @csrf
+                        
+                        <div>
+                            <label for="forgot_email" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Alamat Email Terdaftar
+                            </label>
+                            <input id="forgot_email" 
+                                   name="email" 
+                                   type="email" 
+                                   value="{{ old('email', $presetEmail ?? '') }}"
+                                   placeholder="nama@student.ub.ac.id atau nama@gmail.com" 
+                                   required 
+                                   class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" 
+                                    class="w-full py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm tracking-wide shadow-md shadow-blue-500/20 focus:outline-none focus:ring-4 focus:ring-blue-100 transition cursor-pointer">
+                                Kirim Kode OTP Reset
+                            </button>
+                        </div>
+
+                        <div class="pt-2 text-center">
+                            <p class="text-xs font-medium text-slate-500">
+                                Sudah memiliki kode OTP? 
+                                <button type="button" 
+                                        @click="switchMode('reset_password')" 
+                                        class="font-bold text-blue-600 hover:underline cursor-pointer">
+                                    Masukkan kode di sini
+                                </button>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ============================================================== -->
+                <!-- FORMULIR 4: RESET PASSWORD (VERIFIKASI OTP & KATA SANDI BARU) -->
+                <!-- ============================================================== -->
+                <div x-show="mode === 'reset_password'" 
+                     x-cloak
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-3"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 -translate-y-3">
+                    
+                    <div class="mb-6">
+                        <button type="button" 
+                                @click="switchMode('forgot_password')"
+                                class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-blue-600 transition mb-3 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Ganti Email / Kirim Ulang OTP
+                        </button>
+                        <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                            Atur Kata Sandi Baru
+                        </h1>
+                        <p class="text-xs sm:text-sm font-medium text-slate-500 mt-1">
+                            Masukkan kode OTP yang dikirimkan ke email Anda dan buat kata sandi baru.
+                        </p>
+                    </div>
+
+                    <form action="{{ route('password.update') }}" method="POST" class="space-y-4">
+                        @csrf
+                        
+                        <div>
+                            <label for="reset_email" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Alamat Email
+                            </label>
+                            <input id="reset_email" 
+                                   name="email" 
+                                   type="email" 
+                                   value="{{ old('email', $presetEmail ?? '') }}"
+                                   placeholder="nama@email.com" 
+                                   required 
+                                   class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                        </div>
+
+                        <div>
+                            <label for="reset_otp" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Kode OTP (6 Digit)
+                            </label>
+                            <input id="reset_otp" 
+                                   name="otp" 
+                                   type="text" 
+                                   maxlength="6"
+                                   placeholder="123456" 
+                                   required 
+                                   class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 font-mono text-center tracking-[0.4em] text-lg font-bold focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                        </div>
+
+                        <div x-data="{ show: false }">
+                            <label for="reset_password_field" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Kata Sandi Baru
+                            </label>
+                            <div class="relative">
+                                <input id="reset_password_field" 
+                                       name="password" 
+                                       :type="show ? 'text' : 'password'" 
+                                       placeholder="Minimal 8 karakter" 
+                                       required 
+                                       class="w-full px-4 py-3 pr-11 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                                <button type="button" 
+                                        @click="show = !show" 
+                                        class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                                        tabindex="-1">
+                                    <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <svg x-show="show" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="reset_password_confirmation" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Konfirmasi Kata Sandi Baru
+                            </label>
+                            <input id="reset_password_confirmation" 
+                                   name="password_confirmation" 
+                                   type="password" 
+                                   placeholder="Ulangi kata sandi baru" 
+                                   required 
+                                   class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" 
+                                    class="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm tracking-wide shadow-md shadow-emerald-500/20 focus:outline-none focus:ring-4 focus:ring-emerald-100 transition cursor-pointer">
+                                Simpan Kata Sandi Baru
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -954,7 +1204,15 @@
                         if (e.state && e.state.mode) {
                             this.mode = e.state.mode;
                         } else {
-                            this.mode = window.location.pathname.includes('register') ? 'register' : 'login';
+                            if (window.location.pathname.includes('register')) {
+                                this.mode = 'register';
+                            } else if (window.location.pathname.includes('forgot-password')) {
+                                this.mode = 'forgot_password';
+                            } else if (window.location.pathname.includes('reset-password')) {
+                                this.mode = 'reset_password';
+                            } else {
+                                this.mode = 'login';
+                            }
                         }
                         this.updatePageTitle();
                     });
@@ -971,18 +1229,32 @@
                     }
                 },
 
-                // Ganti mode Login <-> Register tanpa reload halaman (SPA)
+                // Ganti mode Login <-> Register <-> Lupa Password tanpa reload halaman (SPA)
                 switchMode(target) {
                     if (this.mode === target) return;
                     this.mode = target;
 
-                    const newUrl = target === 'register' ? '{{ route('register') }}' : '{{ route('login') }}';
+                    const urlMap = {
+                        'register': '{{ route('register') }}',
+                        'login': '{{ route('login') }}',
+                        'forgot_password': '{{ route('password.request') }}',
+                        'reset_password': '{{ route('password.reset') }}'
+                    };
+                    const newUrl = urlMap[target] || '{{ route('login') }}';
                     window.history.pushState({ mode: target }, '', newUrl);
                     this.updatePageTitle();
                 },
 
                 updatePageTitle() {
-                    document.title = this.mode === 'register' ? 'Buat Akun - Lungsur.in' : 'Login - Lungsur.in';
+                    if (this.mode === 'register') {
+                        document.title = 'Buat Akun - Lungsur.in';
+                    } else if (this.mode === 'forgot_password') {
+                        document.title = 'Lupa Password - Lungsur.in';
+                    } else if (this.mode === 'reset_password') {
+                        document.title = 'Reset Password - Lungsur.in';
+                    } else {
+                        document.title = 'Login - Lungsur.in';
+                    }
                 },
 
                 detectEmail() {
