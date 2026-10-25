@@ -44,6 +44,20 @@ class Listing extends Model
         return $query->where('status', 'available');
     }
 
+    public function scopeBoosted($query)
+    {
+        return $query->where('is_boosted', true)
+            ->where(function ($q) {
+                $q->whereNull('boosted_until')
+                  ->orWhere('boosted_until', '>', now());
+            });
+    }
+
+    public function isCurrentlyBoosted(): bool
+    {
+        return (bool) ($this->is_boosted && ($this->boosted_until === null || $this->boosted_until->isFuture()));
+    }
+
     // ── Relationships ──────────────────────────────────────────
 
     public function user(): BelongsTo

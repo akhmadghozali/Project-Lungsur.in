@@ -214,12 +214,28 @@
                 <!-- Judul & Subtitle -->
                 <div>
                     <div class="flex items-center gap-2">
-                        <div class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
-                            i
+                        <div class="w-5 h-5 rounded-full {{ !empty($search) ? 'bg-blue-100 text-blue-600' : (($isBoostedOnly ?? false) ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600') }} flex items-center justify-center text-xs font-bold">
+                            {{ ($isBoostedOnly ?? false) ? '⚡' : 'i' }}
                         </div>
-                        <h2 class="text-xl font-black text-slate-900 tracking-tight">Daftar Iklan Terbaru</h2>
+                        <h2 class="text-xl font-black text-slate-900 tracking-tight">
+                            @if (!empty($search))
+                                Hasil Pencarian
+                            @elseif ($isBoostedOnly ?? false)
+                                Iklan Unggulan (Boost)
+                            @else
+                                Daftar Iklan Terbaru
+                            @endif
+                        </h2>
                     </div>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Temukan barang dan kebutuhan menarik dari sesama mahasiswa.</p>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                        @if (!empty($search))
+                            Menampilkan barang yang cocok dengan kata kunci "{{ $search }}".
+                        @elseif ($isBoostedOnly ?? false)
+                            Menampilkan iklan prioritas pilihan mahasiswa yang sedang aktif di-boost.
+                        @else
+                            Temukan barang dan kebutuhan menarik dari sesama mahasiswa.
+                        @endif
+                    </p>
                 </div>
 
                 <!-- Kontrol Filter Dropdown & Grid Toggle Sesuai Figma -->
@@ -304,12 +320,41 @@
             </div>
 
         <div id="listing-content">
+            @if (!empty($search))
+                <div class="mt-4 flex items-center justify-between bg-blue-50/70 border border-blue-100 rounded-2xl px-4 py-3 text-xs text-blue-900">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <span>Hasil pencarian untuk: <strong class="font-bold text-blue-700">"{{ $search }}"</strong> ({{ $listings instanceof \Illuminate\Pagination\LengthAwarePaginator ? $listings->total() : $listings->count() }} barang ditemukan)</span>
+                    </div>
+                    <a href="{{ url('/') }}" class="font-bold text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1 shrink-0">
+                        <span>Reset Pencarian</span>
+                        <span>&times;</span>
+                    </a>
+                </div>
+            @elseif ($isBoostedOnly ?? false)
+                <div class="mt-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold px-3.5 py-1.5 rounded-xl shadow-2xs">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span>Menampilkan iklan unggulan yang sedang aktif di-boost ⚡</span>
+                </div>
+            @endif
+
             <!-- Kartu Produk (Listing Cards) dari database -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-6">
                 @forelse ($listings as $listing)
-                    <div class="bg-white rounded-2xl border border-slate-100 shadow-2xs hover:shadow-md transition overflow-hidden flex flex-col group">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-2xs hover:shadow-md transition overflow-hidden flex flex-col group relative">
                         <!-- Foto Barang -->
                         <div class="aspect-[4/3] bg-slate-100 overflow-hidden relative">
+                            @if ($listing->is_boosted && ($listing->boosted_until === null || $listing->boosted_until->isFuture()))
+                                <div class="absolute top-2.5 left-2.5 bg-amber-500/95 backdrop-blur-xs text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg shadow-sm flex items-center gap-1 z-10">
+                                    <svg class="w-3 h-3 text-white fill-current" viewBox="0 0 20 20">
+                                        <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/>
+                                    </svg>
+                                    <span>Unggulan</span>
+                                </div>
+                            @endif
+
                             @if ($listing->photo_url)
                                 <img src="{{ $listing->photo_url }}"
                                      alt="{{ $listing->title }}"
@@ -335,6 +380,14 @@
                                     </span>
                                 </div>
 
+                                @if (!empty($listing->condition_checklist['kondisi']))
+                                    <div class="mb-1.5">
+                                        <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md {{ $listing->condition_checklist['kondisi'] === 'baru' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                                            {{ ucfirst(str_replace('_', ' ', $listing->condition_checklist['kondisi'])) }}
+                                        </span>
+                                    </div>
+                                @endif
+
                                 <!-- Judul Barang -->
                                 <h3 class="font-bold text-xs sm:text-sm text-slate-800 line-clamp-2 leading-snug group-hover:text-blue-600 transition">
                                     {{ $listing->title }}
@@ -358,8 +411,22 @@
                     </div>
                 @empty
                     <div class="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-                        <p class="text-sm font-bold text-slate-800">Belum ada barang</p>
-                        <p class="mt-1 text-xs text-slate-500">Jadilah yang pertama memasang iklan di Lungsur.in.</p>
+                        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-bold text-slate-800">
+                            {{ !empty($search) ? 'Barang tidak ditemukan' : 'Belum ada barang' }}
+                        </p>
+                        <p class="mt-1 text-xs text-slate-500">
+                            {{ !empty($search) ? 'Coba cari dengan kata kunci lain atau periksa ejaanmu.' : 'Jadilah yang pertama memasang iklan di Lungsur.in.' }}
+                        </p>
+                        @if (!empty($search))
+                            <a href="{{ url('/') }}" class="inline-block mt-4 text-xs font-bold text-blue-600 hover:underline">
+                                &larr; Lihat Semua Barang
+                            </a>
+                        @endif
                     </div>
                 @endforelse
             </div>
