@@ -231,7 +231,29 @@
         {{-- ===================================== --}}
         @if ($mode === 'seller')
             {{-- Mode Penjual: Tabel / Grid Barang Dagangan Saya --}}
-            <div class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-6">
+            <div
+                id="kelola-barang"
+                class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-6 scroll-mt-24"
+                x-data="{
+                    showDeleteModal: false,
+                    deleteTitle: '',
+                    deleteAction: '',
+                    openDeleteModal(title, action) {
+                        this.deleteTitle = title;
+                        this.deleteAction = action;
+                        this.showDeleteModal = true;
+                        document.body.style.overflow = 'hidden';
+                    },
+                    closeDeleteModal() {
+                        this.showDeleteModal = false;
+                        document.body.style.overflow = '';
+                    },
+                    confirmDelete() {
+                        document.getElementById('hidden-delete-form').action = this.deleteAction;
+                        document.getElementById('hidden-delete-form').submit();
+                    }
+                }"
+            >
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div>
                         <h2 class="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
@@ -253,7 +275,7 @@
                 @if ($myListings->count() > 0)
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         @foreach ($myListings as $listing)
-                            <div class="border border-slate-200 rounded-2xl overflow-hidden flex flex-col justify-between bg-white hover:border-slate-300 transition group">
+                            <div id="listing-{{ $listing->id }}" class="border border-slate-200 rounded-2xl overflow-hidden flex flex-col justify-between bg-white hover:border-slate-300 transition group scroll-mt-24">
                                 <div>
                                     {{-- Foto Barang --}}
                                     <div class="aspect-[4/3] bg-slate-100 relative overflow-hidden">
@@ -295,7 +317,7 @@
                                 {{-- Aksi Penjual --}}
                                 <div class="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between gap-2">
                                     {{-- Toggle Status Terjual / Tersedia --}}
-                                    <form method="POST" action="{{ route('dashboard.listings.status', $listing->id) }}" class="flex-1">
+                                    <form method="POST" action="{{ route('dashboard.listings.status', $listing->id) }}#listing-{{ $listing->id }}" class="flex-1">
                                         @csrf
                                         @method('PATCH')
                                         <input type="hidden" name="status" value="{{ $listing->status === 'available' ? 'sold' : 'available' }}">
@@ -305,18 +327,25 @@
                                         </button>
                                     </form>
 
+                                    {{-- Tombol Edit --}}
+                                    <a href="{{ route('iklan.edit', $listing->id) }}"
+                                       class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 border border-blue-200 transition"
+                                       title="Edit Iklan">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </a>
+
                                     {{-- Tombol Hapus --}}
-                                    <form method="POST" action="{{ route('dashboard.listings.destroy', $listing->id) }}" onsubmit="return confirm('Yakin ingin menghapus iklan barang ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 border border-rose-200 transition" 
-                                                title="Hapus Iklan">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button
+                                        type="button"
+                                        @click="openDeleteModal('{{ addslashes($listing->title) }}', '{{ route('dashboard.listings.destroy', $listing->id) }}')"
+                                        class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 border border-rose-200 transition"
+                                        title="Hapus Iklan">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         @endforeach
@@ -342,6 +371,102 @@
                         </a>
                     </div>
                 @endif
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        if (window.location.hash) {
+                            const target = document.querySelector(window.location.hash);
+                            if (target) {
+                                target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }
+                        }
+                    });
+                </script>
+
+                {{-- Hidden delete form (shared, populated by Alpine modal) --}}
+                <form id="hidden-delete-form" method="POST" action="" class="hidden">
+                    @csrf
+                    @method('DELETE')
+                </form>
+
+                {{-- ===================================== --}}
+                {{-- Modal Konfirmasi Hapus Iklan          --}}
+                {{-- ===================================== --}}
+                <div
+                    x-show="showDeleteModal"
+                    x-cloak
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    aria-modal="true"
+                    role="dialog"
+                >
+                    {{-- Backdrop --}}
+                    <div
+                        class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+                        @click="closeDeleteModal()"
+                    ></div>
+
+                    {{-- Modal Panel --}}
+                    <div
+                        x-show="showDeleteModal"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="relative bg-white rounded-2xl shadow-2xl shadow-rose-500/10 border border-slate-100 w-full max-w-sm"
+                    >
+                        {{-- Modal Header --}}
+                        <div class="p-6 text-center space-y-4">
+                            {{-- Icon --}}
+                            <div class="mx-auto w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center">
+                                <svg class="w-7 h-7 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </div>
+
+                            {{-- Title --}}
+                            <div class="space-y-1.5">
+                                <h3 class="text-lg font-black text-slate-900">Hapus Iklan Ini?</h3>
+                                <p class="text-sm text-slate-500 leading-relaxed">
+                                    Kamu akan menghapus iklan
+                                    <span class="font-bold text-slate-800" x-text="'\"' + deleteTitle + '\"'"></span>.
+                                    Tindakan ini tidak bisa dibatalkan.
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Divider --}}
+                        <div class="border-t border-slate-100"></div>
+
+                        {{-- Buttons --}}
+                        <div class="p-4 flex items-center gap-3">
+                            <button
+                                type="button"
+                                @click="closeDeleteModal()"
+                                class="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm transition"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                @click="confirmDelete()"
+                                class="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm transition flex items-center justify-center gap-2 shadow-md shadow-rose-500/20"
+                            >
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                                Ya, Hapus Iklan
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         @else
