@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminVerificationController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AuctionController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -53,3 +54,22 @@ Route::get('/katalog/{id}', function ($id) {
     }
     return redirect('/')->with('info', 'Halaman detail barang akan segera hadir.');
 })->name('listings.show');
+
+// Halaman daftar dan detail lelang
+Route::get('/lelang', [AuctionController::class, 'webIndex'])
+    ->name('auctions.index');
+
+Route::get('/lelang/{id}', [AuctionController::class, 'webShow'])
+    ->whereNumber('id')
+    ->name('auctions.show');
+
+// Menutup lelang ketika countdown habis
+Route::post('/lelang/{id}/expire', [AuctionController::class, 'expire'])
+    ->whereNumber('id')
+    ->name('auctions.expire');
+
+// Mengajukan penawaran lelang
+Route::post('/lelang/{id}/tawar', [AuctionController::class, 'placeBid'])
+    ->middleware(['auth', 'verified_student'])
+    ->whereNumber('id')
+    ->name('auctions.bids.store');
