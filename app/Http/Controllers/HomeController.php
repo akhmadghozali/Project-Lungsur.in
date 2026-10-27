@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Auction;
+use App\Models\AuctionBid;
 use App\Models\Listing;
 use Illuminate\Http\Request;
 
@@ -15,6 +17,30 @@ class HomeController extends Controller
 
         $search = trim((string) $request->query('q', ''));
         $sort = $request->query('sort', 'latest');
+
+        $uniqueBiddersQuery = AuctionBid::query()
+            ->selectRaw('COUNT(DISTINCT user_id)')
+            ->whereColumn('auction_id', 'auctions.id');
+
+        $spotlight = Auction::with([
+            'listing.category',
+            'listing.images',
+            'highestBid.user',
+        ])
+            ->where('auctions.status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('auctions.start_time')
+                    ->orWhere('auctions.start_time', '<=', now());
+            })
+            ->whereNotNull('auctions.end_time')
+            ->where('auctions.end_time', '>', now())
+            ->whereHas('bids')
+            ->whereHas('listing')
+            ->select('auctions.*')
+            ->selectSub($uniqueBiddersQuery, 'unique_bidders_count')
+            ->orderByDesc('unique_bidders_count')
+            ->orderByDesc('auctions.created_at')
+            ->first();
 
         $query = Listing::available()->with(['category', 'images']);
 
@@ -69,6 +95,12 @@ class HomeController extends Controller
             $listings = $query->limit(10)->get();
         }
 
-        return view('welcome', compact('listings', 'sort', 'search', 'isBoostedOnly'));
+        return view('welcome', compact(
+            'listings',
+            'sort',
+            'search',
+            'isBoostedOnly',
+            'spotlight'
+        ));
     }
 }

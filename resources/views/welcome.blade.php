@@ -120,6 +120,139 @@
         </section>
 
 
+        {{-- Spotlight Lelang Unggulan --}}
+        @if ($spotlight)
+            @php
+                $spotlightListing = $spotlight->listing;
+                $spotlightRemaining = $spotlight->timeRemainingSeconds();
+            @endphp
+
+            <section class="space-y-5">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-100 text-lg text-blue-600">
+                            ✦
+                        </div>
+
+                        <div>
+                            <h2 class="text-xl font-black tracking-tight text-slate-900">
+                                Spotlight Lelang Unggulan
+                            </h2>
+                            <p class="mt-1 text-xs text-slate-500">
+                                Barang yang sedang ramai diminati mahasiswa.
+                            </p>
+                        </div>
+                    </div>
+
+                    <a
+                        href="{{ route('auctions.index') }}"
+                        class="shrink-0 text-xs font-bold text-blue-600 transition hover:text-blue-700 sm:text-sm"
+                    >
+                        Lihat Semua →
+                    </a>
+                </div>
+
+                <article class="grid overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm lg:grid-cols-[0.9fr_1.1fr]">
+
+                    {{-- Foto barang --}}
+                    <a
+                        href="{{ route('auctions.show', $spotlight->id) }}"
+                        class="group relative block aspect-[4/3] overflow-hidden bg-slate-100 lg:aspect-auto lg:min-h-[320px]"
+                    >
+                        @if ($spotlightListing?->photo_url)
+                            <img
+                                src="{{ $spotlightListing->photo_url }}"
+                                alt="{{ $spotlightListing->title }}"
+                                loading="lazy"
+                                class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                            >
+                        @else
+                            <div class="flex h-full min-h-56 items-center justify-center text-sm text-slate-400">
+                                Belum ada foto
+                            </div>
+                        @endif
+
+                        <span class="absolute left-3 top-3 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow">
+                            ✦ SPOTLIGHT
+                        </span>
+
+                        <span class="absolute bottom-3 left-3 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-bold text-slate-700">
+                            {{ (int) ($spotlight->unique_bidders_count ?? 0) }} penawar berbeda
+                        </span>
+                    </a>
+
+                    {{-- Informasi lelang --}}
+                    <div class="flex flex-col justify-center p-5 sm:p-7">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <span class="rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">
+                                {{ $spotlightListing?->category?->name ?? 'Perlengkapan Kos' }}
+                            </span>
+
+                            <span
+                                data-home-auction-status
+                                class="rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700"
+                            >
+                                ● Sedang Berlangsung
+                            </span>
+                        </div>
+
+                        <h3 class="text-xl font-black leading-snug text-slate-900 sm:text-2xl">
+                            {{ $spotlightListing?->title ?? 'Barang lelang' }}
+                        </h3>
+
+                        <p class="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-500">
+                            {{ $spotlightListing?->description ?? 'Lihat detail barang dan ajukan penawaran selama lelang berlangsung.' }}
+                        </p>
+
+                        <div class="my-5 grid grid-cols-2 gap-3 border-y border-slate-100 py-4">
+                            <div>
+                                <p class="text-xs font-medium text-slate-500">
+                                    Harga tertinggi
+                                </p>
+
+                                <p class="mt-1 text-xl font-black text-blue-700">
+                                    Rp {{ number_format($spotlight->currentPrice(), 0, ',', '.') }}
+                                </p>
+
+                                <p class="mt-1 text-xs text-slate-400">
+                                    {{ $spotlight->bids()->count() }} penawaran
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs font-bold text-rose-600">
+                                    ◷ Sisa waktu
+                                </p>
+
+                                <div
+                                    data-home-auction-countdown
+                                    data-remaining-seconds="{{ $spotlightRemaining }}"
+                                    class="mt-1 text-lg font-black tabular-nums text-slate-900"
+                                >
+                                    <span data-home-countdown-text>
+                                        Memuat waktu...
+                                    </span>
+                                </div>
+
+                                <p class="mt-1 text-xs text-slate-400">
+                                    Sebelum lelang berakhir
+                                </p>
+                            </div>
+                        </div>
+
+                        <a
+                            href="{{ route('auctions.show', $spotlight->id) }}"
+                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
+                        >
+                            Lihat & Ikut Lelang
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </div>
+                </article>
+            </section>
+        @endif
+
+
         <!-- ========================================== -->
         <!-- 2. KATEGORI BARANG (Sesuai Desain Figma)   -->
         <!-- ========================================== -->
@@ -567,6 +700,65 @@
         const sortButton = document.getElementById('sort-button');
         let sortMenu = document.getElementById('sort-menu');
         let sortLabel = document.getElementById('sort-label');
+ 
+        // Countdown Spotlight Lelang Unggulan
+        document.querySelectorAll('[data-home-auction-countdown]').forEach((timer) => {
+            const initial = Math.max(
+                0,
+                Number(timer.dataset.remainingSeconds || 0)
+            );
+
+            const startedAt = performance.now();
+            const output = timer.querySelector('[data-home-countdown-text]');
+            const status = document.querySelector('[data-home-auction-status]');
+
+            const renderCountdown = () => {
+                const elapsed = Math.floor(
+                    (performance.now() - startedAt) / 1000
+                );
+
+                const remaining = Math.max(0, initial - elapsed);
+
+                const days = Math.floor(remaining / 86400);
+                const hours = Math.floor((remaining % 86400) / 3600);
+                const minutes = Math.floor((remaining % 3600) / 60);
+                const seconds = remaining % 60;
+
+                const pad = (value) => String(value).padStart(2, '0');
+
+                if (remaining <= 0) {
+                    output.textContent = 'Lelang Ditutup';
+
+                    if (status) {
+                        status.textContent = '● Lelang Ditutup';
+                        status.classList.remove(
+                            'bg-emerald-50',
+                            'text-emerald-700'
+                        );
+                        status.classList.add(
+                            'bg-slate-100',
+                            'text-slate-600'
+                        );
+                    }
+
+                    return false;
+                }
+
+                output.textContent = days > 0
+                    ? `${days}h ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+                    : `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
+                return true;
+            };
+
+            if (renderCountdown()) {
+                const interval = window.setInterval(() => {
+                    if (!renderCountdown()) {
+                        window.clearInterval(interval);
+                    }
+                }, 1000);
+            }
+        });
 
         // AJAX untuk mengambil daftar iklan
         function loadListings(url, updateHistory = true) {
