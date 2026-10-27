@@ -35,13 +35,13 @@
                         <span>Beranda</span>
                     </a>
 
-                    <!-- Kategori -->
+                    <!-- Katalog -->
                     <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" 
                        class="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-blue-600 hover:bg-slate-50 transition">
                         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                         </svg>
-                        <span>Kategori</span>
+                        <span>Katalog</span>
                     </a>
 
                     @auth
@@ -78,16 +78,56 @@
             <!-- Bagian Kanan: Search Bar Mini + Notifikasi + Profil/Auth -->
             <div class="flex items-center gap-4">
                 <!-- Search Box di Navbar -->
-                <div class="hidden md:flex relative w-64 lg:w-72">
+                <form action="{{ url('/') }}" method="GET" class="hidden md:flex relative w-64 lg:w-72">
                     <input type="text" 
-                           placeholder="Cari barang, jasa, atau kebutuhan..." 
-                           class="w-full pl-9 pr-4 py-2 text-xs rounded-full border border-slate-200 bg-slate-50/70 text-slate-700 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition">
-                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </div>
+                           name="q"
+                           value="{{ request('q') }}"
+                           placeholder="Cari barang atau kebutuhan..." 
+                           class="w-full pl-9 pr-4 py-2 text-xs rounded-full border border-slate-200 bg-slate-50/70 text-slate-700 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition shadow-2xs">
+                    <button type="submit" class="absolute left-3 top-2.5 text-slate-400 hover:text-blue-600 cursor-pointer" aria-label="Cari">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </button>
+                </form>
 
                 @auth
+                    <!-- Mode Switcher Pill (Pembeli ⇄ Penjual) -->
+                    <form method="POST" action="{{ route('user.switch_mode') }}" class="hidden sm:inline-flex items-center">
+                        @csrf
+                        @if(auth()->user()->isSeller())
+                            <input type="hidden" name="mode" value="buyer">
+                            <button type="submit" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition shadow-2xs cursor-pointer group"
+                                    title="Klik untuk beralih ke Mode Pembeli">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>Penjual</span>
+                                <svg class="w-3.5 h-3.5 text-emerald-500 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                </svg>
+                            </button>
+                        @else
+                            <input type="hidden" name="mode" value="seller">
+                            <button type="submit" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition shadow-2xs cursor-pointer group"
+                                    title="Klik untuk beralih ke Mode Penjual">
+                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                <span>Pembeli</span>
+                                <svg class="w-3.5 h-3.5 text-blue-500 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                </svg>
+                            </button>
+                        @endif
+                    </form>
+
+                    <!-- Tombol Cepat Pasang Iklan Khusus Mode Penjual -->
+                    @if(auth()->user()->isSeller())
+                        <a href="{{ route('katalog.pasang') }}" 
+                           class="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/20 transition">
+                            <span>+ Iklan Baru</span>
+                        </a>
+                    @endif
+
                     <!-- Bell Notifikasi -->
                     <button type="button" class="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-full transition" aria-label="Notifikasi">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,9 +161,29 @@
                             <div class="px-4 py-2.5 border-b border-slate-100">
                                 <p class="font-bold text-slate-900 truncate">{{ auth()->user()->name }}</p>
                                 <p class="text-xs text-slate-500 truncate">{{ auth()->user()->email }}</p>
+                                <div class="mt-1">
+                                    <span class="inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md {{ auth()->user()->isSeller() ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800' }}">
+                                        {{ auth()->user()->isSeller() ? 'Mode Penjual' : 'Mode Pembeli' }}
+                                    </span>
+                                </div>
                             </div>
-                            <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium">Iklan & Lelang Saya</a>
-                            <a href="{{ Route::has('profile.edit') ? route('profile.edit') : url('/profil') }}" class="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium">Pengaturan Profil</a>
+
+                            <!-- Switch Mode Link di Dropdown -->
+                            <div class="px-4 py-2 border-b border-slate-100">
+                                <form method="POST" action="{{ route('user.switch_mode') }}">
+                                    @csrf
+                                    <input type="hidden" name="mode" value="{{ auth()->user()->isSeller() ? 'buyer' : 'seller' }}">
+                                    <button type="submit" class="w-full flex items-center justify-between text-xs font-bold text-slate-700 hover:text-blue-600 cursor-pointer">
+                                        <span>Ganti ke {{ auth()->user()->isSeller() ? 'Mode Pembeli' : 'Mode Penjual' }}</span>
+                                        <span class="text-xs text-blue-600">&rarr;</span>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium">Dashboard Saya</a>
+                            @if(auth()->user()->isSeller())
+                                <a href="{{ route('katalog.pasang') }}" class="block px-4 py-2 text-blue-600 hover:bg-blue-50 font-bold">+ Pasang Iklan Baru</a>
+                            @endif
                             @if((auth()->user()->role ?? '') === 'admin')
                                 <a href="{{ route('admin.verifications.index') }}" class="block px-4 py-2 text-blue-600 font-bold hover:bg-blue-50">Panel Admin</a>
                             @endif
@@ -161,11 +221,42 @@
     </div>
 
     <!-- Mobile Navigation Drawer -->
-    <div x-show="mobileMenuOpen" x-cloak class="xl:hidden border-t border-slate-100 bg-white px-4 pt-3 pb-6 space-y-2">
+    <div x-show="mobileMenuOpen" x-cloak class="xl:hidden border-t border-slate-100 bg-white px-4 pt-3 pb-6 space-y-2.5">
+        <!-- Mobile Search Form -->
+        <form action="{{ url('/') }}" method="GET" class="relative pb-1">
+            <input type="text" 
+                   name="q"
+                   value="{{ request('q') }}"
+                   placeholder="Cari barang atau kebutuhan..." 
+                   class="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/70 text-slate-700 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 transition">
+            <button type="submit" class="absolute left-3 top-3 text-slate-400 hover:text-blue-600 cursor-pointer" aria-label="Cari">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </button>
+        </form>
+
         <a href="{{ url('/') }}" class="block py-2 text-sm font-semibold text-blue-600">Beranda</a>
-        <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" class="block py-2 text-sm font-semibold text-slate-700">Kategori</a>
+        <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" class="block py-2 text-sm font-semibold text-slate-700">Katalog</a>
         @auth
-            <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block py-2 text-sm font-semibold text-slate-700">Iklan Saya</a>
+            <!-- Mobile Mode Switcher -->
+            <div class="py-2.5 px-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] text-slate-500 font-medium">Mode Anda:</span>
+                    <strong class="text-xs font-bold block {{ auth()->user()->isSeller() ? 'text-emerald-700' : 'text-blue-700' }}">
+                        {{ auth()->user()->isSeller() ? '🏷️ Mode Penjual' : '🛒 Mode Pembeli' }}
+                    </strong>
+                </div>
+                <form method="POST" action="{{ route('user.switch_mode') }}">
+                    @csrf
+                    <input type="hidden" name="mode" value="{{ auth()->user()->isSeller() ? 'buyer' : 'seller' }}">
+                    <button type="submit" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 shadow-2xs hover:bg-slate-50 cursor-pointer">
+                        Ganti Mode
+                    </button>
+                </form>
+            </div>
+
+            <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block py-2 text-sm font-semibold text-slate-700">Dashboard Saya</a>
         @endauth
         <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" class="block py-2 text-sm font-semibold text-slate-700">Lelang Terbuka</a>
         <a href="{{ Route::has('wanted-ads.index') ? route('wanted-ads.index') : url('/wanted-ads') }}" class="block py-2 text-sm font-semibold text-slate-700">Kebutuhan Mahasiswa</a>

@@ -25,7 +25,9 @@ use Illuminate\Notifications\Notifiable;
     'role',
     'campus',
     'phone',
-    'status'
+    'status',
+    'google_id',
+    'avatar'
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -75,5 +77,20 @@ class User extends Authenticatable
     public function messages(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function getActiveMode(): string
+    {
+        return session('user_mode', $this->role === 'seller' ? 'seller' : 'buyer');
+    }
+
+    public function isSeller(): bool
+    {
+        return $this->getActiveMode() === 'seller';
+    }
+
+    public function isBuyer(): bool
+    {
+        return $this->getActiveMode() === 'buyer';
     }
 }
