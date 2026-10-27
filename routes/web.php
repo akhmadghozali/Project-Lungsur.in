@@ -57,6 +57,12 @@ Route::middleware(['auth', 'verified_student'])->group(function () {
 
     // POST handler — simpan iklan via IklanController
     Route::post('/katalog/pasang', [IklanController::class, 'store'])->name('iklan.store');
+
+    // Form edit iklan milik penjual
+    Route::get('/katalog/{listing}/edit', [IklanController::class, 'edit'])->name('iklan.edit');
+
+    // PUT/PATCH handler — perbarui iklan milik penjual
+    Route::match(['put', 'patch'], '/katalog/{listing}', [IklanController::class, 'update'])->name('iklan.update');
 });
 
 // Stub halaman detail barang (agar tombol "Lihat Detail" di beranda tidak 404)

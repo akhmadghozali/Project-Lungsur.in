@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreListingRequest;
 use App\Models\Category;
 use App\Models\Listing;
 use App\Models\ListingImage;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -28,66 +28,15 @@ class IklanController extends Controller
      * Simpan iklan baru beserta foto ke database.
      *
      * Alur:
-     *  1. Validasi input (termasuk custom rule kelipatan 1.000).
+     *  1. Validasi input via StoreListingRequest (termasuk custom rule kelipatan 1.000).
      *  2. Upload foto + INSERT listings + INSERT listings_images dalam satu DB::transaction.
      *  3. Redirect ke halaman utama dengan flash sukses.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreListingRequest $request): RedirectResponse
     {
-        // ── 1. VALIDASI ────────────────────────────────────────────────────
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:200'],  // sesuai VARCHAR(200) di DB
+        $validated = $request->validated();
 
-            'price' => [
-                'required',
-                'numeric',
-                'min:1000',
-                // Kustom closure: harga wajib kelipatan 1.000
-                function (string $attribute, mixed $value, \Closure $fail): void {
-                    if ((int) $value % 1000 !== 0) {
-                        $fail('Harga harus dalam kelipatan Rp1.000 (contoh: Rp15.000, Rp20.000).');
-                    }
-                },
-            ],
-
-            'condition' => [
-                'required',
-                'string',
-                'in:baru,bekas_mulus,bekas_baik,bekas_normal,bekas_perlu_perbaikan',
-            ],
-
-            'category_id' => ['required', 'integer', 'exists:categories,id'],
-
-            'addresses' => ['required', 'string', 'max:255'],
-
-            'description' => ['required', 'string'],
-
-            'image' => [
-                'required',
-                'image',
-                'mimes:jpeg,png,jpg,webp',
-                'max:2048',  // 2 MB
-            ],
-        ], [
-            // ── Pesan error kustom (Bahasa Indonesia) ──
-            'title.required'        => 'Judul barang wajib diisi.',
-            'title.max'             => 'Judul barang maksimal 200 karakter.',
-            'price.required'        => 'Harga barang wajib diisi.',
-            'price.numeric'         => 'Harga harus berupa angka.',
-            'price.min'             => 'Harga minimal adalah Rp1.000.',
-            'condition.required'    => 'Kondisi barang wajib dipilih.',
-            'condition.in'          => 'Kondisi barang yang dipilih tidak valid.',
-            'category_id.required'  => 'Kategori barang wajib dipilih.',
-            'category_id.exists'    => 'Kategori yang dipilih tidak valid.',
-            'addresses.required'    => 'Lokasi/area kampus wajib diisi.',
-            'description.required'  => 'Deskripsi barang wajib diisi.',
-            'image.required'        => 'Foto barang wajib diunggah.',
-            'image.image'           => 'File yang diunggah harus berupa gambar.',
-            'image.mimes'           => 'Format foto harus JPEG, PNG, JPG, atau WEBP.',
-            'image.max'             => 'Ukuran foto maksimal 2 MB.',
-        ]);
-
-        // ── 2. SIMPAN ATOMIK (upload foto + DB dalam satu transaction) ─────
+        // ── SIMPAN ATOMIK (upload foto + DB dalam satu transaction) ─────
         try {
             DB::transaction(function () use ($validated, $request): void {
                 // Upload foto di dalam transaction; jika DB gagal → rollback + hapus file
@@ -123,8 +72,98 @@ class IklanController extends Controller
                 ->with('error', 'Terjadi kesalahan saat menyimpan iklan. Silakan coba lagi.');
         }
 
-        // ── 3. REDIRECT SUKSES ─────────────────────────────────────────────
+        // ── REDIRECT SUKSES ─────────────────────────────────────────────
         return redirect('/')
             ->with('success', 'Iklan "' . $validated['title'] . '" berhasil dipasang! Terima kasih. 🎉');
+    }
+
+    /**
+     * Tampilkan form edit iklan milik penjual.
+     */
+    public function edit(Listing $listing): View
+    {
+        abort_if($listing->user_id !== Auth::id(), 403, 'Anda tidak memiliki hak untuk mengedit iklan ini.');
+
+        $categories = Category::orderBy('name')->get();
+        $listing->load('images');
+
+        return view('iklan.edit', compact('listing', 'categories'));
+    }
+
+    /**
+     * Perbarui data iklan milik penjual.
+     *
+     * Alur:
+     *  1. Validasi via StoreListingRequest (foto opsional jika tidak diganti).
+     *  2. Otorisasi kepemilikan iklan.
+     *  3. Update data iklan dan foto baru (jika diunggah) secara atomik.
+     *  4. Hapus foto lama hanya setelah transaksi berhasil dan tidak dipakai oleh iklan lain.
+     */
+    public function update(StoreListingRequest $request, Listing $listing): RedirectResponse
+    {
+        abort_if($listing->user_id !== Auth::id(), 403, 'Anda tidak memiliki hak untuk memperbarui iklan ini.');
+
+        $validated = $request->validated();
+        $newImagePath = null;
+        $oldImagePathToDelete = null;
+
+        try {
+            DB::transaction(function () use ($validated, $request, $listing, &$newImagePath, &$oldImagePathToDelete): void {
+                if ($request->hasFile('image')) {
+                    $newImagePath = $request->file('image')->store('listings', 'public');
+
+                    try {
+                        $primaryImage = $listing->images()->where('is_primary', true)->first() ?? $listing->images()->first();
+
+                        if ($primaryImage) {
+                            $oldImagePathToDelete = $primaryImage->image_url;
+                            $primaryImage->update([
+                                'image_url'  => $newImagePath,
+                                'is_primary' => true,
+                            ]);
+                        } else {
+                            ListingImage::create([
+                                'listing_id' => $listing->id,
+                                'image_url'  => $newImagePath,
+                                'is_primary' => true,
+                            ]);
+                        }
+                    } catch (\Throwable $dbError) {
+                        if ($newImagePath) {
+                            Storage::disk('public')->delete($newImagePath);
+                        }
+                        throw $dbError;
+                    }
+                }
+
+                $listing->update([
+                    'category_id'         => $validated['category_id'],
+                    'title'               => $validated['title'],
+                    'description'         => $validated['description'],
+                    'price'               => $validated['price'],
+                    'condition_checklist' => ['kondisi' => $validated['condition']],
+                    'addresses'           => $validated['addresses'],
+                ]);
+            });
+
+            // Hapus foto lama hanya jika transaksi sukses dan tidak dipakai oleh data lain
+            if ($oldImagePathToDelete && $oldImagePathToDelete !== $newImagePath) {
+                $isUsedElsewhere = ListingImage::where('image_url', $oldImagePathToDelete)->exists();
+                if (! $isUsedElsewhere && Storage::disk('public')->exists($oldImagePathToDelete)) {
+                    Storage::disk('public')->delete($oldImagePathToDelete);
+                }
+            }
+        } catch (\Throwable $e) {
+            if ($newImagePath && Storage::disk('public')->exists($newImagePath)) {
+                Storage::disk('public')->delete($newImagePath);
+            }
+
+            return back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat memperbarui iklan. Silakan coba lagi.');
+        }
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Iklan "' . $listing->title . '" berhasil diperbarui! 🎉');
     }
 }

@@ -92,20 +92,35 @@ class DashboardController extends Controller
     {
         abort_if($listing->user_id !== Auth::id(), 403, 'Anda tidak memiliki hak untuk mengelola iklan ini.');
 
-        $validated = $request->validate([
-            'status' => ['required', 'in:available,sold,booked,archived'],
-        ]);
+        $targetUrl = strtok(url()->previous(), '#') . '#listing-' . $listing->id;
 
-        $listing->update(['status' => $validated['status']]);
+        try {
+            $validated = $request->validate([
+                'status' => ['required', 'in:available,sold,booked,archived'],
+            ], [
+                'status.required' => 'Status iklan wajib diisi.',
+                'status.in'       => 'Pilihan status iklan tidak valid.',
+            ]);
 
-        $statusLabel = [
-            'available' => 'Tersedia',
-            'sold'      => 'Terjual',
-            'booked'    => 'Dibooking',
-            'archived'  => 'Diarsipkan',
-        ][$validated['status']] ?? $validated['status'];
+            $listing->update(['status' => $validated['status']]);
 
-        return back()->with('success', "Status iklan '{$listing->title}' berhasil diubah menjadi {$statusLabel}.");
+            $statusLabel = [
+                'available' => 'Tersedia',
+                'sold'      => 'Terjual',
+                'booked'    => 'Dibooking',
+                'archived'  => 'Diarsipkan',
+            ][$validated['status']] ?? $validated['status'];
+
+            return redirect()->to($targetUrl)
+                ->with('success', "Status iklan '{$listing->title}' berhasil diubah menjadi {$statusLabel}.");
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->to($targetUrl)
+                ->withErrors($e->validator)
+                ->with('error', $e->validator->errors()->first('status') ?? 'Status iklan tidak valid.');
+        } catch (\Throwable $e) {
+            return redirect()->to($targetUrl)
+                ->with('error', 'Terjadi kesalahan saat memperbarui status iklan. Silakan coba lagi.');
+        }
     }
 
     /**
