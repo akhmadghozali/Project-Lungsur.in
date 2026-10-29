@@ -124,15 +124,20 @@
                         </p>
 
                         <div class="pt-2 flex flex-wrap items-center gap-3">
-                            @auth
+                            @if ($isUserBuyer)
                                 <button type="button" 
                                         @click="createModalOpen = true" 
                                         class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-2xl shadow-md shadow-blue-500/25 transition cursor-pointer">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                                     </svg>
-                                    <span>+ Pasang Kebutuhan Baru</span>
+                                    <span>Pasang Kebutuhan Baru</span>
                                 </button>
+                            @elseif ($isUserSeller)
+                                <div class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-emerald-50 text-emerald-800 text-xs sm:text-sm font-semibold border border-emerald-200/80">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                    <span>Mode Penjual: Temukan pembeli dan tawarkan barangmu di bawah</span>
+                                </div>
                             @else
                                 <a href="{{ route('login') }}" 
                                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-2xl shadow-md shadow-blue-500/25 transition">
@@ -141,7 +146,7 @@
                                     </svg>
                                     <span>Masuk untuk Pasang Kebutuhan</span>
                                 </a>
-                            @endauth
+                            @endif
                             <a href="{{ url('/') }}" 
                                class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold px-5 py-3 rounded-2xl border border-slate-200 shadow-2xs transition">
                                 <span>Jelajahi Katalog Barang Dijual</span>
@@ -260,7 +265,7 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                         </svg>
-                        <span>+ Pasang Kebutuhan Baru</span>
+                        <span>Pasang Kebutuhan Baru</span>
                     </button>
                 @elseif ($isUserSeller)
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200/80">

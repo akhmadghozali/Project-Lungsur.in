@@ -26,10 +26,10 @@
 
                 <!-- Desktop Navigation Links dengan Ikon Sesuai Figma -->
                 <div class="hidden xl:flex items-center gap-1 font-medium text-sm text-slate-600">
-                    <!-- Beranda (Active State) -->
+                    <!-- Beranda -->
                     <a href="{{ url('/') }}" 
-                       class="flex items-center gap-2 px-3 py-2 rounded-xl text-blue-600 font-semibold bg-blue-50/60 transition">
-                        <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                       class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('home') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                        <svg class="w-4 h-4 {{ request()->routeIs('home') ? 'text-blue-600' : 'text-slate-400' }}" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                         </svg>
                         <span>Beranda</span>
@@ -37,8 +37,8 @@
 
                     <!-- Katalog -->
                     <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" 
-                       class="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-blue-600 hover:bg-slate-50 transition">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->is('katalog*') && !request()->is('katalog/pasang') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                        <svg class="w-4 h-4 {{ request()->is('katalog*') && !request()->is('katalog/pasang') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                         </svg>
                         <span>Katalog</span>
@@ -47,8 +47,8 @@
                     @auth
                         <!-- Iklan Saya -->
                         <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" 
-                           class="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-blue-600 hover:bg-slate-50 transition">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('dashboard*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                            <svg class="w-4 h-4 {{ request()->routeIs('dashboard*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                             <span>Iklan Saya</span>
@@ -57,8 +57,8 @@
 
                     <!-- Lelang -->
                     <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" 
-                       class="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-blue-600 hover:bg-slate-50 transition">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                        <svg class="w-4 h-4 {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
                         <span>Lelang</span>
@@ -66,8 +66,8 @@
 
                     <!-- Kebutuhan (Wanted Ads) -->
                     <a href="{{ route('wanted-ads.index') }}" 
-                       class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('wanted-ads.*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
-                        <svg class="w-4 h-4 {{ request()->routeIs('wanted-ads.*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                        <svg class="w-4 h-4 {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <span>Kebutuhan</span>
@@ -236,8 +236,8 @@
             </button>
         </form>
 
-        <a href="{{ url('/') }}" class="block py-2 text-sm font-semibold text-blue-600">Beranda</a>
-        <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" class="block py-2 text-sm font-semibold text-slate-700">Katalog</a>
+        <a href="{{ url('/') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('home') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Beranda</a>
+        <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" class="block py-2 text-sm font-semibold {{ request()->is('katalog*') && !request()->is('katalog/pasang') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Katalog</a>
         @auth
             <!-- Mobile Mode Switcher -->
             <div class="py-2.5 px-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
@@ -256,10 +256,10 @@
                 </form>
             </div>
 
-            <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block py-2 text-sm font-semibold text-slate-700">Dashboard Saya</a>
+            <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('dashboard*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Dashboard Saya</a>
         @endauth
-        <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" class="block py-2 text-sm font-semibold text-slate-700">Lelang Terbuka</a>
-        <a href="{{ route('wanted-ads.index') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('wanted-ads.*') ? 'text-blue-600' : 'text-slate-700' }}">Kebutuhan Mahasiswa</a>
+        <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Lelang Terbuka</a>
+        <a href="{{ route('wanted-ads.index') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Kebutuhan Mahasiswa</a>
         <div class="pt-2 border-t border-slate-100">
             <a href="{{ Route::has('listings.create') ? route('listings.create') : url('/katalog/pasang') }}" class="block text-center py-2.5 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-sm">
                 + Pasang Iklan Sekarang
