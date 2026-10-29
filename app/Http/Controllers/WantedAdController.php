@@ -14,9 +14,7 @@ use Illuminate\View\View;
 
 class WantedAdController extends Controller
 {
-    /**
-     * Menampilkan papan informasi barang yang sedang dicari mahasiswa (Wanted Ads).
-     */
+    //Menampilkan papan informasi barang yang sedang dicari mahasiswa (Wanted Ads).
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('q', ''));
