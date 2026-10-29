@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Conversation;
+use App\Models\Listing;
+use App\Models\Message;
 use App\Models\WantedAd;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -123,4 +126,71 @@ class WantedAdController extends Controller
         return redirect()->route('wanted-ads.index')
             ->with('success', 'Postingan kebutuhan berhasil dihapus.');
     }
+
+    /**
+     * Mengajukan penawaran barang dagangan penjual ke pembeli Wanted Ad.
+     * Otomatis mendeteksi postingan barang penjual dan menyambungkannya ke ruang chat internal (Conversation).
+     */
+    public function offerItem(Request $request, WantedAd $wantedAd): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if (!$user->isSeller()) {
+            return back()->with('error', 'Hanya akun dalam Mode Penjual yang dapat menawarkan barang dagangan.');
+        }
+
+        if ((int) $wantedAd->user_id === (int) $user->id) {
+            return back()->with('error', 'Anda tidak dapat menawarkan barang pada postingan kebutuhan Anda sendiri.');
+        }
+
+        $validated = $request->validate([
+            'listing_id' => ['required', 'integer', 'exists:listings,id'],
+            'note' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'listing_id.required' => 'Silakan pilih salah satu barang dagangan Anda yang ingin ditawarkan.',
+            'listing_id.exists' => 'Barang dagangan yang dipilih tidak valid atau tidak ditemukan.',
+            'note.max' => 'Catatan penawaran maksimal 1000 karakter.',
+        ]);
+
+        // Pastikan listing berstatus available dan dimiliki oleh penjual yang sedang login
+        $listing = $user->listings()
+            ->where('status', 'available')
+            ->findOrFail($validated['listing_id']);
+
+        // Sambungkan ke percakapan chat internal (Conversation) antara pembeli wanted ad dan penjual
+        $conversation = Conversation::firstOrCreate([
+            'listing_id' => $listing->id,
+            'buyer_id'   => $wantedAd->user_id,
+            'seller_id'  => $user->id,
+        ], [
+            'last_message_at' => now(),
+        ]);
+
+        // Susun pesan pembuka penawaran barang otomatis
+        $buyerName = $wantedAd->user->name ?? 'Kak';
+        $messageText = "Halo kak {$buyerName}! Saya melihat kebutuhan Anda di papan Wanted Ads untuk '{$wantedAd->title}'.\n"
+                     . "Saya menawarkan produk dagangan saya yang cocok:\n"
+                     . "📦 {$listing->title}\n"
+                     . "💰 Harga: Rp " . number_format($listing->price, 0, ',', '.') . "\n"
+                     . "🔗 Tautan Produk: " . route('listings.show', $listing->id);
+
+        if (!empty($validated['note'])) {
+            $messageText .= "\n\nCatatan Tambahan: " . trim($validated['note']);
+        }
+
+        Message::create([
+            'conversation_id' => $conversation->id,
+            'sender_id'       => $user->id,
+            'message_text'    => $messageText,
+            'is_read'         => false,
+        ]);
+
+        $conversation->update(['last_message_at' => now()]);
+
+        return redirect()->route('wanted-ads.index')->with(
+            'success',
+            "Tawaran postingan '{$listing->title}' berhasil disambungkan ke ruang chat internal pembeli ({$buyerName})!"
+        );
+    }
 }
+

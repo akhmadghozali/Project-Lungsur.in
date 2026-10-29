@@ -31,20 +31,17 @@
                  formatted_budget: '',
                  buyer_name: '',
                  buyer_campus: '',
-                 buyer_phone: '',
                  addresses: '',
                  description: ''
              },
              selectedListingId: null,
              myListings: {{ \Illuminate\Support\Js::from($myListingsPayload) }},
              customOfferNote: '',
-             copiedToast: false,
 
              openOffer(ad) {
                  this.selectedAd = ad;
                  this.selectedListingId = this.myListings.length > 0 ? this.myListings[0].id : null;
                  this.customOfferNote = '';
-                 this.copiedToast = false;
                  this.offerModalOpen = true;
              },
 
@@ -52,53 +49,25 @@
                  return this.myListings.find(l => l.id === this.selectedListingId) || null;
              },
 
-             getOfferMessage() {
+             getOfferMessagePreview() {
                  const listing = this.getSelectedListing();
                  let buyerName = (this.selectedAd.buyer_name || 'Kak').trim();
-                 let msg = 'Halo kak ' + buyerName + '! 👋\n\n' +
-                           'Saya melihat postingan kakak di papan Wanted Ads Lungsur.in sedang mencari *' + (this.selectedAd.title || '') + '* dengan pagu anggaran Rp ' + (this.selectedAd.formatted_budget || '') + '.\n\n';
+                 let msg = 'Halo kak ' + buyerName + '! Saya melihat kebutuhan Anda di papan Wanted Ads untuk \'' + (this.selectedAd.title || '') + '\'.\n';
                  
                  if (listing) {
-                     msg += 'Kebetulan saya ada barang yang cocok dengan kebutuhan kakak:\n' +
-                            '📦 Barang: *' + listing.title + '*\n' +
+                     msg += 'Saya menawarkan produk dagangan saya yang cocok:\n' +
+                            '📦 ' + listing.title + '\n' +
                             '💰 Harga: Rp ' + listing.formatted_price + '\n' +
-                            '🔗 Link Iklan: ' + listing.url + '\n\n';
+                            '🔗 Tautan Produk: ' + listing.url;
                  } else {
-                     msg += 'Saya memiliki barang perlengkapan kos yang cocok dengan kriteria yang kakak cari.\n\n';
+                     msg += 'Saya memiliki barang perlengkapan yang cocok dengan spesifikasi yang kakak cari.';
                  }
 
                  if (this.customOfferNote && this.customOfferNote.trim() !== '') {
-                     msg += 'Catatan Tambahan: ' + this.customOfferNote.trim() + '\n\n';
+                     msg += '\n\nCatatan Tambahan: ' + this.customOfferNote.trim();
                  }
 
-                 msg += 'Apakah kakak berminat atau ingin cek kondisi fisiknya terlebih dahulu? Terima kasih! 🙏';
                  return msg;
-             },
-
-             getWhatsAppUrl() {
-                 let phone = (this.selectedAd.buyer_phone || '').trim().replace(/[^0-9]/g, '');
-                 if (phone.startsWith('0')) {
-                     phone = '62' + phone.substring(1);
-                 }
-                 const text = encodeURIComponent(this.getOfferMessage());
-                 return phone ? ('https://wa.me/' + phone + '?text=' + text) : '#';
-             },
-
-             copyMessage() {
-                 if (navigator.clipboard && window.isSecureContext) {
-                     navigator.clipboard.writeText(this.getOfferMessage());
-                 } else {
-                     const textarea = document.createElement('textarea');
-                     textarea.value = this.getOfferMessage();
-                     textarea.style.position = 'fixed';
-                     textarea.style.opacity = '0';
-                     document.body.appendChild(textarea);
-                     textarea.select();
-                     document.execCommand('copy');
-                     document.body.removeChild(textarea);
-                 }
-                 this.copiedToast = true;
-                 setTimeout(() => { this.copiedToast = false; }, 2500);
              }
          }">
 
@@ -124,7 +93,7 @@
                         </h1>
 
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
-                            Papan ini adalah wadah mahasiswa pembeli yang sedang mencari barang kos impian mereka. Sebagai penjual, Anda dapat langsung <strong>menawarkan barang jualan</strong> Anda ke pembeli yang sesuai dengan pagu anggarannya.
+                            Papan ini adalah wadah mahasiswa pembeli yang sedang mencari barang kos impian mereka. Sebagai penjual, Anda dapat langsung <strong>menawarkan postingan barang jualan</strong> Anda ke pembeli yang sesuai dengan pagu anggarannya.
                         </p>
 
                         <div class="pt-2 flex flex-wrap items-center gap-3">
@@ -164,7 +133,7 @@
                         </h1>
 
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
-                            Tidak menemukan perabot atau perlengkapan kos yang cocok di katalog? Pasang pengumuman barang yang kamu cari secara <strong>gratis</strong>. Sesama mahasiswa yang punya barang tersebut akan langsung menawarkan barangnya kepadamu.
+                            Tidak menemukan perabot atau perlengkapan kos yang cocok di katalog? Pasang pengumuman barang yang kamu cari secara <strong>gratis</strong>. Sesama mahasiswa yang punya barang tersebut akan langsung menawarkan barang dagangannya kepadamu melalui fitur obrolan.
                         </p>
 
                         <div class="pt-2 flex flex-wrap items-center gap-3">
@@ -208,11 +177,11 @@
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg shrink-0">
-                                🤝
+                                💬
                             </div>
                             <div class="text-xs">
-                                <div class="font-bold text-slate-900">Penjual Langsung Menawar</div>
-                                <div class="text-slate-500">Kirim tawaran produk kos yang cocok</div>
+                                <div class="font-bold text-slate-900">Terhubung ke Chat</div>
+                                <div class="text-slate-500">Tawaran penjual langsung masuk ke obrolan</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -290,7 +259,7 @@
                     </h2>
                     <p class="text-xs text-slate-500 mt-0.5">
                         @if ($isUserSeller)
-                            Punya barang yang dicari di bawah? Klik tombol <strong>Tawari Barang Dagangan</strong> untuk menghubungkan produk jualanmu langsung ke pembeli!
+                            Punya barang yang dicari di bawah? Klik tombol <strong>Tawari Barang Dagangan</strong> untuk menghubungkan postingan jualanmu langsung ke chat pembeli!
                         @else
                             Forum bagi mahasiswa yang sedang membutuhkan perlengkapan kos. Penjual akan langsung menawarkan barang yang cocok.
                         @endif
@@ -389,7 +358,6 @@
                                                 formatted_budget: {{ \Illuminate\Support\Js::from(number_format($ad->budget_max, 0, ',', '.')) }},
                                                 buyer_name: {{ \Illuminate\Support\Js::from($ad->user->name ?? 'Mahasiswa') }},
                                                 buyer_campus: {{ \Illuminate\Support\Js::from($ad->user->campus ?? 'Mahasiswa Malang') }},
-                                                buyer_phone: {{ \Illuminate\Support\Js::from($ad->user->phone ?? '') }},
                                                 addresses: {{ \Illuminate\Support\Js::from($ad->addresses) }},
                                                 description: {{ \Illuminate\Support\Js::from($ad->description) }}
                                             })"
@@ -436,9 +404,9 @@
             </div>
         </section>
 
-        <!-- ========================================== -->
-        <!-- 4. MODAL TAWARI BARANG DAGANGAN (PENJUAL)  -->
-        <!-- ========================================== -->
+        <!-- ======================================================== -->
+        <!-- 4. MODAL TAWARI BARANG DAGANGAN (SAMBUNG KE CHAT INTERNAL) -->
+        <!-- ======================================================== -->
         <div x-show="offerModalOpen" 
              x-cloak 
              class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto"
@@ -458,15 +426,21 @@
                 <!-- Modal Header -->
                 <div class="mb-5">
                     <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 mb-2 border border-emerald-200/60">
-                        <span>🤝 Tawari Barang Dagangan</span>
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                        <span>Obrolan Internal (Chat)</span>
                     </div>
-                    <h3 class="text-xl font-black text-slate-900 tracking-tight">Tawarkan Produk ke Pembeli</h3>
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight">Tawarkan Produk Dagangan ke Pembeli</h3>
                     <p class="text-xs text-slate-500 mt-1">
-                        Pilih barang dagangan Anda yang sesuai dengan kriteria pembeli dan hubungi langsung melalui WhatsApp.
+                        Pilih salah satu postingan jualan Anda untuk otomatis disambungkan ke ruang obrolan internal pembeli.
                     </p>
                 </div>
 
-                <div class="space-y-5">
+                <!-- Form POST ke Controller untuk membuat Percakapan Internal & Pesan Penawaran -->
+                <form :action="'/cari-barang/' + selectedAd.id + '/tawari'" method="POST" class="space-y-5">
+                    @csrf
+
                     <!-- Ringkasan Kebutuhan Pembeli -->
                     <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
                         <div class="flex items-start justify-between gap-3">
@@ -489,27 +463,27 @@
 
                         <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-500 gap-2 pt-1">
                             <div>
-                                👤 Pembeli: <span class="font-bold text-slate-800" x-text="selectedAd.buyer_name"></span> (<span x-text="selectedAd.buyer_campus"></span>)
+                                👤 Calon Pembeli: <span class="font-bold text-slate-800" x-text="selectedAd.buyer_name"></span> (<span x-text="selectedAd.buyer_campus"></span>)
                             </div>
                             <div>
-                                📍 Lokasi: <span class="font-medium text-slate-700" x-text="selectedAd.addresses"></span>
+                                📍 Lokasi Serah Terima: <span class="font-medium text-slate-700" x-text="selectedAd.addresses"></span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Pilihan Barang Dagangan Milik Penjual -->
+                    <!-- Pilihan Barang Dagangan Milik Penjual (Otomatis Terdeteksi) -->
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <label class="block text-xs font-bold text-slate-800">
-                                Pilih Barang Dagangan Anda yang Ditawarkan:
+                                Pilih Postingan Dagangan Anda yang Ditawarkan: <span class="text-rose-500">*</span>
                             </label>
-                            <span class="text-[11px] text-slate-400" x-text="myListings.length + ' Barang Tersedia'"></span>
+                            <span class="text-[11px] font-semibold text-emerald-600" x-text="myListings.length + ' Postingan Aktif Terdeteksi'"></span>
                         </div>
 
                         <template x-if="myListings.length === 0">
-                            <div class="rounded-2xl border border-dashed border-amber-300 bg-amber-50/60 p-4 text-center space-y-2">
+                            <div class="rounded-2xl border border-dashed border-amber-300 bg-amber-50/60 p-5 text-center space-y-2">
                                 <p class="text-xs text-amber-900 font-medium">
-                                    Anda belum memiliki iklan barang yang berstatus <strong>Tersedia (Available)</strong> di katalog.
+                                    Anda belum memiliki iklan barang yang berstatus <strong>Tersedia (Available)</strong> di katalog Anda.
                                 </p>
                                 <a href="{{ route('katalog.pasang') }}" 
                                    class="inline-flex items-center gap-1.5 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl transition">
@@ -520,6 +494,9 @@
 
                         <template x-if="myListings.length > 0">
                             <div class="max-h-52 overflow-y-auto space-y-2 pr-1">
+                                <!-- Hidden input yang dikirim ke controller -->
+                                <input type="hidden" name="listing_id" :value="selectedListingId">
+
                                 <template x-for="item in myListings" :key="item.id">
                                     <div @click="selectedListingId = item.id"
                                          :class="selectedListingId === item.id 
@@ -529,6 +506,7 @@
                                         
                                         <div class="flex items-center gap-3 min-w-0">
                                             <input type="radio" 
+                                                   name="radio_listing_selector"
                                                    :value="item.id" 
                                                    :checked="selectedListingId === item.id"
                                                    class="w-4 h-4 text-emerald-600 border-slate-300 focus:ring-emerald-500 shrink-0">
@@ -574,70 +552,52 @@
                         <label for="offer_note" class="block text-xs font-bold text-slate-700 mb-1">
                             Catatan Tambahan untuk Pembeli (Opsional)
                         </label>
-                        <input type="text" 
-                               id="offer_note" 
-                               x-model="customOfferNote" 
-                               placeholder="Contoh: Kondisi 95% mulus kak, bisa COD langsung di gerbang kampus sore ini..." 
-                               class="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-100">
+                        <textarea id="offer_note" 
+                                  name="note" 
+                                  rows="2"
+                                  x-model="customOfferNote" 
+                                  placeholder="Contoh: Kondisi 95% mulus kak, bisa COD langsung di gerbang kampus..." 
+                                  class="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-100"></textarea>
                     </div>
 
-                    <!-- Preview Pesan Penawaran Otomatis -->
+                    <!-- Preview Draft Pesan Pembuka Chat -->
                     <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block text-xs font-bold text-slate-700">
-                                Preview Template Pesan WhatsApp:
-                            </label>
-                            <button type="button" 
-                                    @click="copyMessage()" 
-                                    class="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                </svg>
-                                <span x-text="copiedToast ? 'Tersalin ke Clipboard! ✅' : 'Salin Pesan'"></span>
-                            </button>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                            Pratinjau Pesan yang Masuk ke Ruang Obrolan:
+                        </label>
+                        <div class="bg-slate-900 text-slate-100 p-3.5 rounded-2xl text-xs font-mono leading-relaxed whitespace-pre-wrap max-h-32 overflow-y-auto border border-slate-800"
+                             x-text="getOfferMessagePreview()"></div>
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="bg-blue-50 border border-blue-200/80 rounded-2xl p-3.5 flex items-start gap-2.5 text-xs text-blue-900">
+                        <svg class="w-4 h-4 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div class="leading-relaxed">
+                            <strong>Terhubung Otomatis ke Obrolan Internal:</strong> Postingan barang yang Anda pilih di atas akan langsung disambungkan ke percakapan chat dengan pembeli ini. Anda dapat mendiskusikan negosiasi dan serah terima secara aman.
                         </div>
-                        <div class="bg-slate-900 text-slate-100 p-3.5 rounded-2xl text-xs font-mono leading-relaxed whitespace-pre-wrap max-h-36 overflow-y-auto border border-slate-800"
-                             x-text="getOfferMessage()"></div>
                     </div>
 
                     <!-- Footer / Action Buttons -->
-                    <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
                         <button type="button" 
                                 @click="offerModalOpen = false" 
-                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer text-center">
-                            Tutup
+                                class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+                            Batal
                         </button>
 
-                        <div class="w-full sm:w-auto flex flex-wrap items-center gap-2">
-                            <button type="button" 
-                                    @click="copyMessage()" 
-                                    class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer">
-                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                </svg>
-                                <span x-text="copiedToast ? 'Tersalin! ✅' : 'Salin Teks'"></span>
-                            </button>
-
-                            <template x-if="selectedAd.buyer_phone && selectedAd.buyer_phone.trim() !== ''">
-                                <a :href="getWhatsAppUrl()" 
-                                   target="_blank" 
-                                   rel="noopener noreferrer" 
-                                   class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl shadow-md shadow-emerald-600/25 transition">
-                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.155.57 4.178 1.564 5.927l-1.564 5.829 6.012-1.577c1.706.945 3.678 1.488 5.788 1.488 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/>
-                                    </svg>
-                                    <span>Kirim Tawaran via WhatsApp</span>
-                                </a>
-                            </template>
-
-                            <template x-if="!selectedAd.buyer_phone || selectedAd.buyer_phone.trim() === ''">
-                                <span class="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl">
-                                    No. WA pembeli belum ada di profil
-                                </span>
-                            </template>
-                        </div>
+                        <button type="submit" 
+                                :disabled="!selectedListingId || myListings.length === 0"
+                                :class="(!selectedListingId || myListings.length === 0) ? 'opacity-50 cursor-not-allowed bg-slate-400' : 'bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/25 cursor-pointer'"
+                                class="inline-flex items-center justify-center gap-2 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            <span>Kirim Tawaran ke Chat Pembeli</span>
+                        </button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
 

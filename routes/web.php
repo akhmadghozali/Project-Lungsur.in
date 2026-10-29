@@ -111,3 +111,8 @@ Route::delete('/cari-barang/{wantedAd}', [WantedAdController::class, 'destroy'])
     ->middleware(['auth', 'verified_student'])
     ->name('wanted-ads.destroy');
 
+Route::post('/cari-barang/{wantedAd}/tawari', [WantedAdController::class, 'offerItem'])
+    ->middleware(['auth', 'verified_student'])
+    ->name('wanted-ads.offer');
+
+
