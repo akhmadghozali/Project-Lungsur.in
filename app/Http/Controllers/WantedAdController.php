@@ -39,19 +39,34 @@ class WantedAdController extends Controller
         $wantedAds = $query->paginate(12)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
+        // Ambil daftar barang dagangan aktif milik user (jika sedang login sebagai penjual)
+        $myActiveListings = Auth::check()
+            ? Auth::user()->listings()->where('status', 'available')->with(['category', 'images'])->latest()->get()
+            : collect();
+
         return view('wanted_ads.index', compact(
             'wantedAds',
             'categories',
             'search',
-            'categoryParam'
+            'categoryParam',
+            'myActiveListings'
         ));
     }
 
     /**
      * Mempublikasikan permintaan barang kebutuhan kos baru.
+     * Khusus untuk Mahasiswa dalam Mode Pembeli (Buyer).
      */
     public function store(Request $request): RedirectResponse
     {
+        // ── 1. VALIDASI PERAN: Penjual dilarang memasang iklan kebutuhan ──
+        if (Auth::user()->isSeller()) {
+            return back()->withInput()->with(
+                'warning',
+                'Papan Wanted Ads khusus diperuntukkan bagi pembeli yang mencari barang. Akun dalam Mode Penjual tidak dapat memasang kebutuhan. Silakan beralih ke Mode Pembeli di menu profil atas jika Anda membutuhkan barang kos.'
+            );
+        }
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:200'],
             'category_id' => ['required', 'integer', 'exists:categories,id'],
