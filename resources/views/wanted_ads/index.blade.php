@@ -23,6 +23,7 @@
          x-data="{ 
              createModalOpen: {{ $errors->any() && $isUserBuyer ? 'true' : 'false' }},
              offerModalOpen: false,
+             chatUnavailable: false,
              selectedAd: {
                  id: null,
                  title: '',
@@ -36,12 +37,11 @@
              },
              selectedListingId: null,
              myListings: {{ \Illuminate\Support\Js::from($myListingsPayload) }},
-             customOfferNote: '',
 
              openOffer(ad) {
                  this.selectedAd = ad;
                  this.selectedListingId = this.myListings.length > 0 ? this.myListings[0].id : null;
-                 this.customOfferNote = '';
+                 this.chatUnavailable = false;
                  this.offerModalOpen = true;
              },
 
@@ -49,25 +49,12 @@
                  return this.myListings.find(l => l.id === this.selectedListingId) || null;
              },
 
-             getOfferMessagePreview() {
-                 const listing = this.getSelectedListing();
-                 let buyerName = (this.selectedAd.buyer_name || 'Kak').trim();
-                 let msg = 'Halo kak ' + buyerName + '! Saya melihat kebutuhan Anda di papan Wanted Ads untuk \'' + (this.selectedAd.title || '') + '\'.\n';
-                 
-                 if (listing) {
-                     msg += 'Saya menawarkan produk dagangan saya yang cocok:\n' +
-                            '📦 ' + listing.title + '\n' +
-                            '💰 Harga: Rp ' + listing.formatted_price + '\n' +
-                            '🔗 Tautan Produk: ' + listing.url;
-                 } else {
-                     msg += 'Saya memiliki barang perlengkapan yang cocok dengan spesifikasi yang kakak cari.';
+             submitOffer() {
+                 if (!this.selectedListingId) {
+                     alert('Silakan pilih salah satu postingan barang dagangan Anda terlebih dahulu.');
+                     return;
                  }
-
-                 if (this.customOfferNote && this.customOfferNote.trim() !== '') {
-                     msg += '\n\nCatatan Tambahan: ' + this.customOfferNote.trim();
-                 }
-
-                 return msg;
+                 this.chatUnavailable = true;
              }
          }">
 
@@ -93,7 +80,7 @@
                         </h1>
 
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
-                            Papan ini adalah wadah mahasiswa pembeli yang sedang mencari barang kos impian mereka. Sebagai penjual, Anda dapat langsung <strong>menawarkan postingan barang jualan</strong> Anda ke pembeli yang sesuai dengan pagu anggarannya.
+                            Papan ini adalah wadah mahasiswa pembeli yang sedang mencari barang kos impian mereka. Sebagai penjual, Anda dapat langsung <strong>menawarkan postingan barang jualan</strong> Anda ke pembeli yang sesuai dengan Budget Maksimalnya.
                         </p>
 
                         <div class="pt-2 flex flex-wrap items-center gap-3">
@@ -189,7 +176,7 @@
                                 💰
                             </div>
                             <div class="text-xs">
-                                <div class="font-bold text-slate-900">Pagu Anggaran Jelas</div>
+                                <div class="font-bold text-slate-900">Budget Maksimal Jelas</div>
                                 <div class="text-slate-500">Transaksi transparan sesuai budget mahasiswa</div>
                             </div>
                         </div>
@@ -313,7 +300,7 @@
                         <div class="space-y-3 pt-3 border-t border-slate-100">
                             <!-- Budget Max Box -->
                             <div class="bg-emerald-50/70 border border-emerald-200/60 rounded-xl px-3.5 py-2 flex items-center justify-between">
-                                <span class="text-[11px] font-semibold text-emerald-800">Pagu Anggaran Maks:</span>
+                                <span class="text-[11px] font-semibold text-emerald-800">Budget Maksimal:</span>
                                 <span class="text-sm font-black text-emerald-700">
                                     Rp {{ number_format($ad->budget_max, 0, ',', '.') }}
                                 </span>
@@ -437,9 +424,8 @@
                     </p>
                 </div>
 
-                <!-- Form POST ke Controller untuk membuat Percakapan Internal & Pesan Penawaran -->
-                <form :action="'/cari-barang/' + selectedAd.id + '/tawari'" method="POST" class="space-y-5">
-                    @csrf
+                <!-- Body Modal Penawaran Barang -->
+                <div class="space-y-5">
 
                     <!-- Ringkasan Kebutuhan Pembeli -->
                     <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
@@ -449,7 +435,7 @@
                                 <h4 class="text-sm font-black text-slate-900" x-text="selectedAd.title"></h4>
                             </div>
                             <div class="text-right shrink-0">
-                                <div class="text-[10px] text-slate-500">Pagu Anggaran Maks:</div>
+                                <div class="text-[10px] text-slate-500">Budget Maksimal:</div>
                                 <div class="text-xs sm:text-sm font-black text-emerald-700">
                                     Rp <span x-text="selectedAd.formatted_budget"></span>
                                 </div>
@@ -493,12 +479,9 @@
                         </template>
 
                         <template x-if="myListings.length > 0">
-                            <div class="max-h-52 overflow-y-auto space-y-2 pr-1">
-                                <!-- Hidden input yang dikirim ke controller -->
-                                <input type="hidden" name="listing_id" :value="selectedListingId">
-
+                            <div class="max-h-56 overflow-y-auto space-y-2 pr-1">
                                 <template x-for="item in myListings" :key="item.id">
-                                    <div @click="selectedListingId = item.id"
+                                    <div @click="selectedListingId = item.id; chatUnavailable = false;"
                                          :class="selectedListingId === item.id 
                                             ? 'border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-500/20' 
                                             : 'border-slate-200 hover:border-slate-300 bg-white'"
@@ -537,7 +520,7 @@
                                             </template>
                                             <template x-if="item.price > selectedAd.budget_max">
                                                 <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                                                    ⚠️ Di Atas Pagu
+                                                    ⚠️ Di Atas Budget Maksimal
                                                 </span>
                                             </template>
                                         </div>
@@ -547,35 +530,19 @@
                         </template>
                     </div>
 
-                    <!-- Catatan Tambahan (Opsional) -->
-                    <div>
-                        <label for="offer_note" class="block text-xs font-bold text-slate-700 mb-1">
-                            Catatan Tambahan untuk Pembeli (Opsional)
-                        </label>
-                        <textarea id="offer_note" 
-                                  name="note" 
-                                  rows="2"
-                                  x-model="customOfferNote" 
-                                  placeholder="Contoh: Kondisi 95% mulus kak, bisa COD langsung di gerbang kampus..." 
-                                  class="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-100"></textarea>
-                    </div>
-
-                    <!-- Preview Draft Pesan Pembuka Chat -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">
-                            Pratinjau Pesan yang Masuk ke Ruang Obrolan:
-                        </label>
-                        <div class="bg-slate-900 text-slate-100 p-3.5 rounded-2xl text-xs font-mono leading-relaxed whitespace-pre-wrap max-h-32 overflow-y-auto border border-slate-800"
-                             x-text="getOfferMessagePreview()"></div>
-                    </div>
-
-                    <!-- Info Box -->
-                    <div class="bg-blue-50 border border-blue-200/80 rounded-2xl p-3.5 flex items-start gap-2.5 text-xs text-blue-900">
-                        <svg class="w-4 h-4 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <!-- Alert Notifikasi Fitur Chat Belum Tersedia -->
+                    <div x-show="chatUnavailable" 
+                         x-cloak 
+                         x-transition 
+                         class="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 flex items-start gap-3 shadow-xs">
+                        <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                         </svg>
-                        <div class="leading-relaxed">
-                            <strong>Terhubung Otomatis ke Obrolan Internal:</strong> Postingan barang yang Anda pilih di atas akan langsung disambungkan ke percakapan chat dengan pembeli ini. Anda dapat mendiskusikan negosiasi dan serah terima secara aman.
+                        <div class="space-y-0.5 text-xs sm:text-sm">
+                            <div class="font-bold text-amber-950">Fitur chat saat ini masih belum tersedia</div>
+                            <div class="text-amber-800 text-xs">
+                                Antarmuka obrolan (chat) internal sedang dalam tahap pengerjaan. Postingan dagangan yang Anda pilih telah tersimpan dan siap disambungkan begitu fitur chat dirilis!
+                            </div>
                         </div>
                     </div>
 
@@ -587,7 +554,8 @@
                             Batal
                         </button>
 
-                        <button type="submit" 
+                        <button type="button" 
+                                @click="submitOffer()"
                                 :disabled="!selectedListingId || myListings.length === 0"
                                 :class="(!selectedListingId || myListings.length === 0) ? 'opacity-50 cursor-not-allowed bg-slate-400' : 'bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/25 cursor-pointer'"
                                 class="inline-flex items-center justify-center gap-2 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition">
@@ -597,7 +565,7 @@
                             <span>Kirim Tawaran ke Chat Pembeli</span>
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
 
@@ -627,7 +595,7 @@
                         </div>
                         <h3 class="text-xl font-black text-slate-900 tracking-tight">Pasang Iklan Kebutuhan Barang</h3>
                         <p class="text-xs text-slate-500 mt-1">
-                            Tuliskan perlengkapan kos yang sedang kamu cari beserta batas pagu anggaran maksimalmu.
+                            Tuliskan perlengkapan kos yang sedang kamu cari beserta batas budget maksimalmu.
                         </p>
                     </div>
 
@@ -675,10 +643,10 @@
                                 @enderror
                             </div>
 
-                            <!-- Pagu Anggaran Maksimal -->
+                            <!-- Budget Maksimal -->
                             <div>
                                 <label for="budget_max" class="block text-xs font-bold text-slate-700 mb-1">
-                                    Pagu Anggaran Maks (Rp) <span class="text-rose-500">*</span>
+                                    Budget Maksimal (Rp) <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="number" 
                                        id="budget_max" 
