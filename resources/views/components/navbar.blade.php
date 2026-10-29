@@ -65,9 +65,9 @@
                     </a>
 
                     <!-- Kebutuhan (Wanted Ads) -->
-                    <a href="{{ Route::has('wanted-ads.index') ? route('wanted-ads.index') : url('/wanted-ads') }}" 
-                       class="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-blue-600 hover:bg-slate-50 transition">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('wanted-ads.index') }}" 
+                       class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('wanted-ads.*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                        <svg class="w-4 h-4 {{ request()->routeIs('wanted-ads.*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <span>Kebutuhan</span>
@@ -259,7 +259,7 @@
             <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block py-2 text-sm font-semibold text-slate-700">Dashboard Saya</a>
         @endauth
         <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" class="block py-2 text-sm font-semibold text-slate-700">Lelang Terbuka</a>
-        <a href="{{ Route::has('wanted-ads.index') ? route('wanted-ads.index') : url('/wanted-ads') }}" class="block py-2 text-sm font-semibold text-slate-700">Kebutuhan Mahasiswa</a>
+        <a href="{{ route('wanted-ads.index') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('wanted-ads.*') ? 'text-blue-600' : 'text-slate-700' }}">Kebutuhan Mahasiswa</a>
         <div class="pt-2 border-t border-slate-100">
             <a href="{{ Route::has('listings.create') ? route('listings.create') : url('/katalog/pasang') }}" class="block text-center py-2.5 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-sm">
                 + Pasang Iklan Sekarang

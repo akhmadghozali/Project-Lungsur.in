@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\IklanController;
+use App\Http\Controllers\WantedAdController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -91,3 +92,22 @@ Route::post('/lelang/{id}/tawar', [AuctionController::class, 'placeBid'])
     ->middleware(['auth', 'verified_student'])
     ->whereNumber('id')
     ->name('auctions.bids.store');
+
+/*
+|--------------------------------------------------------------------------
+| Papan Kebutuhan Mahasiswa (Wanted Ads / Cari Barang)
+|--------------------------------------------------------------------------
+*/
+Route::get('/cari-barang', [WantedAdController::class, 'index'])
+    ->name('wanted-ads.index');
+
+Route::get('/wanted-ads', fn () => redirect()->route('wanted-ads.index'));
+
+Route::post('/cari-barang', [WantedAdController::class, 'store'])
+    ->middleware(['auth', 'verified_student'])
+    ->name('wanted-ads.store');
+
+Route::delete('/cari-barang/{wantedAd}', [WantedAdController::class, 'destroy'])
+    ->middleware(['auth', 'verified_student'])
+    ->name('wanted-ads.destroy');
+

@@ -79,6 +79,11 @@ class User extends Authenticatable
         return $this->hasMany(Message::class, 'sender_id');
     }
 
+    public function wantedAds(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(WantedAd::class);
+    }
+
     public function getActiveMode(): string
     {
         return session('user_mode', $this->role === 'seller' ? 'seller' : 'buyer');

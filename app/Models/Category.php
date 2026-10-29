@@ -20,4 +20,9 @@ class Category extends Model
     {
         return $this->hasMany(Listing::class);
     }
+
+    public function wantedAds(): HasMany
+    {
+        return $this->hasMany(WantedAd::class);
+    }
 }
