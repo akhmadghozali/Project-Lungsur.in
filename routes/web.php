@@ -66,12 +66,8 @@ Route::middleware(['auth', 'verified_student'])->group(function () {
 });
 
 // Stub halaman detail barang (agar tombol "Lihat Detail" di beranda tidak 404)
-Route::get('/katalog/{id}', function ($id) {
-    if (auth()->check() && auth()->user()->role === 'admin') {
-        return redirect()->route('admin.verifications.index');
-    }
-    return redirect('/')->with('info', 'Halaman detail barang akan segera hadir.');
-})->name('listings.show');
+Route::get('/katalog/{id}', [IklanController::class, 'show'])
+    ->name('listings.show');
 
 // Halaman daftar dan detail lelang
 Route::get('/lelang', [AuctionController::class, 'webIndex'])
@@ -91,3 +87,9 @@ Route::post('/lelang/{id}/tawar', [AuctionController::class, 'placeBid'])
     ->middleware(['auth', 'verified_student'])
     ->whereNumber('id')
     ->name('auctions.bids.store');
+
+// Route untuk Detail Iklan Barang Biasa
+Route::get('/listings/{id}', [IklanController::class, 'show'])->name('listings.show');
+
+// Route untuk Detail Lelang (pastikan path-nya berbeda, misalnya /auctions/{id})
+Route::get('/auctions/{id}', [AuctionController::class, 'show'])->name('auctions.show');
