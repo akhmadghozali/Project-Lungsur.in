@@ -52,6 +52,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 | Iklan (Listing) Routes
 |--------------------------------------------------------------------------
 */
+// Halaman katalog barang (listings.index)
+Route::get('/katalog', [HomeController::class, 'index'])->name('listings.index');
+
 Route::middleware(['auth', 'verified_student'])->group(function () {
     // Halaman form pasang iklan — hanya user terverifikasi
     Route::get('/katalog/pasang', [IklanController::class, 'create'])->name('katalog.pasang');

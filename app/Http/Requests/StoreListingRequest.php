@@ -9,10 +9,24 @@ class StoreListingRequest extends FormRequest
 {
     /**
      * Tentukan apakah pengguna memiliki otorisasi untuk melakukan permintaan ini.
+     * Hanya pengguna terautentikasi dalam Mode Penjual yang boleh mempublikasikan iklan.
      */
     public function authorize(): bool
     {
-        return Auth::check();
+        return Auth::check() && Auth::user()->isSeller();
+    }
+
+    /**
+     * Tangani kegagalan otorisasi dengan redirect ramah ke dasbor.
+     */
+    protected function failedAuthorization()
+    {
+        throw new \Illuminate\Http\Exceptions\HttpResponseException(
+            redirect()->route('dashboard')->with(
+                'warning',
+                'Akun dalam Mode Pembeli tidak dapat mempublikasikan iklan barang dagangan. Silakan beralih ke Mode Penjual terlebih dahulu.'
+            )
+        );
     }
 
     /**
