@@ -16,9 +16,17 @@ class IklanController extends Controller
 {
     /**
      * Tampilkan form pasang iklan beserta data kategori dari DB.
+     * Khusus untuk Mahasiswa dalam Mode Penjual (Seller).
      */
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
+        if (Auth::check() && !Auth::user()->isSeller()) {
+            return redirect()->route('dashboard')->with(
+                'warning',
+                'Fitur pasang iklan barang dagangan hanya tersedia untuk akun dalam Mode Penjual. Silakan beralih ke Mode Penjual terlebih dahulu.'
+            );
+        }
+
         $categories = Category::orderBy('name')->get();
 
         return view('iklan.create', compact('categories'));
@@ -34,6 +42,13 @@ class IklanController extends Controller
      */
     public function store(StoreListingRequest $request): RedirectResponse
     {
+        if (!Auth::user()->isSeller()) {
+            return redirect()->route('dashboard')->with(
+                'warning',
+                'Anda sedang dalam Mode Pembeli. Silakan beralih ke Mode Penjual untuk dapat mempublikasikan iklan barang dagangan.'
+            );
+        }
+
         $validated = $request->validated();
 
         // ── SIMPAN ATOMIK (upload foto + DB dalam satu transaction) ─────
@@ -80,9 +95,16 @@ class IklanController extends Controller
     /**
      * Tampilkan form edit iklan milik penjual.
      */
-    public function edit(Listing $listing): View
+    public function edit(Listing $listing): View|RedirectResponse
     {
         abort_if($listing->user_id !== Auth::id(), 403, 'Anda tidak memiliki hak untuk mengedit iklan ini.');
+
+        if (!Auth::user()->isSeller()) {
+            return redirect()->route('dashboard')->with(
+                'warning',
+                'Silakan beralih ke Mode Penjual untuk mengelola atau mengedit barang dagangan Anda.'
+            );
+        }
 
         $categories = Category::orderBy('name')->get();
         $listing->load('images');

@@ -1,6 +1,6 @@
 <x-layouts.app>
     <x-slot:title>
-        Lungsur.in - Platform Marketplace & Lelang Komunitas Mahasiswa Malang
+        {{ request()->is('katalog*') ? 'Katalog Barang Mahasiswa - Lungsur.in' : 'Lungsur.in - Platform Marketplace & Lelang Komunitas Mahasiswa Malang' }}
     </x-slot:title>
 
     <div class="space-y-12 sm:space-y-16">
@@ -8,6 +8,7 @@
         <!-- ========================================== -->
         <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
         <!-- ========================================== -->
+        @if (!request()->is('katalog*'))
         <section class="bg-gradient-to-br from-blue-50/90 via-sky-50/50 to-blue-50/70 rounded-3xl border border-blue-100/60 p-6 sm:p-10 lg:p-14 relative overflow-hidden shadow-xs">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
                 
@@ -118,10 +119,11 @@
 
             </div>
         </section>
+        @endif
 
 
         {{-- Spotlight Lelang Unggulan --}}
-        @if ($spotlight)
+        @if ($spotlight && !request()->is('katalog*'))
             @php
                 $spotlightListing = $spotlight->listing;
                 $spotlightRemaining = $spotlight->timeRemainingSeconds();
@@ -328,13 +330,28 @@
 
             <!-- Tombol Pasang Iklan -->
             <div class="shrink-0 w-full md:w-auto">
-                <a href="{{ Route::has('listings.create') ? route('listings.create') : url('/katalog/pasang') }}" 
-                   class="inline-flex w-full md:w-auto items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-7 py-3.5 rounded-2xl shadow-md shadow-blue-500/25 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    <span>+ Pasang Iklan</span>
-                </a>
+                @if (auth()->check() && !auth()->user()->isSeller())
+                    <form method="POST" action="{{ route('user.switch_mode') }}">
+                        @csrf
+                        <input type="hidden" name="mode" value="seller">
+                        <button type="submit" 
+                                class="inline-flex w-full md:w-auto items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-7 py-3.5 rounded-2xl shadow-md shadow-emerald-500/25 transition cursor-pointer"
+                                title="Beralih ke Mode Penjual untuk pasang iklan">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                            </svg>
+                            <span>Ganti Mode Penjual untuk Jual</span>
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ Route::has('listings.create') ? route('listings.create') : url('/katalog/pasang') }}" 
+                       class="inline-flex w-full md:w-auto items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-7 py-3.5 rounded-2xl shadow-md shadow-blue-500/25 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span>+ Pasang Iklan</span>
+                    </a>
+                @endif
             </div>
         </section>
 
@@ -454,7 +471,7 @@
 
             <!-- Bilah Filter Multi-Kriteria (Sesuai Proposal & Sprint 2) -->
             <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-xs">
-                <form action="{{ route('home') }}" method="GET" class="space-y-4">
+                <form action="{{ request()->is('katalog*') ? route('listings.index') : route('home') }}" method="GET" class="space-y-4">
                     @if (!empty($search))
                         <input type="hidden" name="q" value="{{ $search }}">
                     @endif
@@ -545,7 +562,7 @@
 
                         <div class="flex items-center gap-2 self-end sm:self-auto">
                             @if ($hasFilter ?? false)
-                                <a href="{{ url('/') }}" class="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline px-2.5 py-1.5 transition">
+                                <a href="{{ request()->is('katalog*') ? route('listings.index') : url('/') }}" class="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline px-2.5 py-1.5 transition">
                                     Reset Filter
                                 </a>
                             @endif
