@@ -23,6 +23,8 @@ Route::middleware('guest')->group(function () {
     // Google OAuth SSO
     Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
     Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+    Route::get('/auth/google/ktm', [AuthController::class, 'showGoogleKtmForm'])->name('auth.google.ktm');
+    Route::post('/auth/google/ktm', [AuthController::class, 'submitGoogleKtm'])->name('auth.google.ktm.submit');
 
     // Lupa Kata Sandi (Password Reset via OTP Email)
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
@@ -117,4 +119,3 @@ Route::post('/cari-barang/{wantedAd}/tawari', [WantedAdController::class, 'offer
 // Alias rute kompatibilitas untuk detail iklan & lelang
 Route::get('/listings/{id}', [IklanController::class, 'show']);
 Route::get('/auctions/{id}', fn ($id) => redirect()->route('auctions.show', $id));
-

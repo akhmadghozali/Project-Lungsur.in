@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -238,9 +239,9 @@ class AuthController extends Controller
 
         $emailType = $isCampusDomain ? 'campus' : 'public';
         $verificationStatus = $isCampusDomain ? 'active' : 'pending';
-        $ktmPath = null;
 
-        // Jika email umum, wajib upload berkas KTM
+        // A. JIKA EMAIL UMUM (GMAIL, YAHOO, DLL.):
+        // Wajib unggah foto KTM, akun dibuat berstatus 'pending' (menunggu verifikasi admin), TANPA OTP!
         if (!$isCampusDomain) {
             if (!$request->hasFile('ktm_file')) {
                 if ($request->wantsJson()) {
@@ -257,19 +258,45 @@ class AuthController extends Controller
 
             // Simpan foto KTM ke storage/app/public/ktm
             $ktmPath = $request->file('ktm_file')->store('ktm', 'public');
+
+            // Langsung daftarkan akun dengan status pending verifikasi KTM
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => strtolower($validated['email']),
+                'email_type' => 'public',
+                'ktm_image_path' => $ktmPath,
+                'verification_status' => 'pending',
+                'password' => Hash::make($validated['password']),
+                'role' => 'buyer',
+                'campus' => $validated['campus'],
+                'phone' => $validated['phone'],
+                'status' => 'active',
+            ]);
+
+            $successMsg = 'Pendaftaran berhasil! Karena Anda menggunakan email umum (' . $validated['email'] . '), berkas KTM Anda telah kami terima dan sedang dalam antrean verifikasi administrator.';
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'pending_verification',
+                    'message' => $successMsg,
+                    'redirect' => route('login'),
+                ], 200);
+            }
+
+            return redirect()->route('login')->with('info', $successMsg);
         }
 
-        // 1. Generate 6 digit numeric OTP
+        // B. JIKA EMAIL KAMPUS (.AC.ID):
+        // Kirim kode OTP 6-digit ke email kampus. Setelah OTP terverifikasi, akun otomatis 'active'!
         $otp = (string) random_int(100000, 999999);
         $cacheKey = 'reg_otp_' . md5(strtolower($validated['email']));
 
-        // 2. Simpan draft pendaftaran & OTP di Cache selama 10 menit
         Cache::put($cacheKey, [
             'name' => $validated['name'],
             'email' => strtolower($validated['email']),
-            'email_type' => $emailType,
-            'ktm_image_path' => $ktmPath,
-            'verification_status' => $verificationStatus,
+            'email_type' => 'campus',
+            'ktm_image_path' => null,
+            'verification_status' => 'active',
             'password' => Hash::make($validated['password']),
             'role' => 'buyer',
             'campus' => $validated['campus'],
@@ -280,21 +307,35 @@ class AuthController extends Controller
             'resend_available_at' => now()->addSeconds(60)->timestamp,
         ], now()->addMinutes(10));
 
-        // 3. Kirim email berisi kode OTP ke alamat pengguna
+        $mailSent = false;
         try {
             Mail::to($validated['email'])->send(new OtpVerificationMail($validated['name'], $otp));
+            $mailSent = true;
         } catch (\Throwable $e) {
             report($e);
+            \Log::error('Gagal mengirim email OTP pendaftaran: ' . $e->getMessage());
+        }
+
+        \Log::info("Kode OTP Pendaftaran untuk {$validated['email']}: {$otp}");
+
+        $responsePayload = [
+            'status' => 'otp_required',
+            'message' => 'Kode OTP verifikasi telah dikirimkan ke email Anda (' . $validated['email'] . ').',
+            'email' => strtolower($validated['email']),
+            'email_type' => 'campus',
+            'resend_cooldown' => 60,
+        ];
+
+        // Jika di lingkungan lokal / testing atau jika SMTP gagal kirim, sertakan dev_otp agar tester tidak buntu
+        if (app()->environment('local', 'testing') || !$mailSent) {
+            $responsePayload['dev_otp'] = $otp;
+            if (!$mailSent) {
+                $responsePayload['message'] .= " (Catatan Server: Pengiriman email gagal, gunakan kode OTP tes: {$otp})";
+            }
         }
 
         if ($request->wantsJson()) {
-            return response()->json([
-                'status' => 'otp_required',
-                'message' => 'Kode OTP verifikasi telah dikirimkan ke email Anda (' . $validated['email'] . ').',
-                'email' => strtolower($validated['email']),
-                'email_type' => $emailType,
-                'resend_cooldown' => 60,
-            ], 200);
+            return response()->json($responsePayload, 200);
         }
 
         return redirect()->route('register')->with([
@@ -568,8 +609,16 @@ class AuthController extends Controller
             return redirect()->route('login')->with('error', 'Akun Anda ditangguhkan karena pelanggaran ketentuan platform.');
         }
 
+        // Jika akun email umum berstatus pending:
         if ($user->verification_status === 'pending') {
-            return redirect()->route('login')->with('warning', 'Akun Google Anda berhasil terdaftar. Karena menggunakan email umum (@' . (explode('@', $email)[1] ?? 'gmail.com') . '), akun Anda memerlukan verifikasi berkas KTM oleh administrator sebelum dapat digunakan.');
+            // Jika belum ada foto KTM (pendaftar Google baru atau belum melengkapi KTM),
+            // ARAHKAN KE FORMULIR UNGGAH BERKAS KTM!
+            if (empty($user->ktm_image_path)) {
+                session(['google_ktm_user_id' => $user->id]);
+                return redirect()->route('auth.google.ktm');
+            }
+
+            return redirect()->route('login')->with('warning', 'Akun Google Anda (' . $user->email . ') telah terdaftar dan sedang dalam antrean verifikasi berkas KTM oleh administrator.');
         }
 
         if ($user->verification_status === 'rejected') {
@@ -580,6 +629,68 @@ class AuthController extends Controller
         request()->session()->regenerate();
 
         return $this->redirectAfterAuth($user)->with('success', 'Berhasil masuk dengan akun Google! Selamat datang, ' . $user->name . '.');
+    }
+
+    /**
+     * Tampilkan formulir unggah berkas KTM untuk pendaftar Google dengan email umum.
+     */
+    public function showGoogleKtmForm(Request $request)
+    {
+        $userId = session('google_ktm_user_id');
+        if (!$userId) {
+            return redirect()->route('login');
+        }
+
+        $user = User::find($userId);
+        if (!$user || $user->verification_status !== 'pending') {
+            return redirect()->route('login');
+        }
+
+        $campusList = CampusDomain::where('is_active', true)->orderBy('campus_name')->get();
+
+        return view('auth.google_ktm', compact('user', 'campusList'));
+    }
+
+    /**
+     * Simpan berkas KTM dan data profil untuk pendaftar Google email umum.
+     */
+    public function submitGoogleKtm(Request $request)
+    {
+        $userId = session('google_ktm_user_id');
+        if (!$userId) {
+            return redirect()->route('login')->with('error', 'Sesi verifikasi telah kedaluwarsa. Silakan login kembali dengan Google.');
+        }
+
+        $user = User::findOrFail($userId);
+
+        $validated = $request->validate([
+            'campus' => ['required', 'string', 'max:150'],
+            'nim' => ['required', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:25', Rule::unique('users', 'phone')->ignore($user->id)],
+            'ktm_file' => ['required', 'image', 'mimes:jpeg,jpg,png', 'max:2048'],
+        ], [
+            'campus.required' => 'Asal perguruan tinggi / kampus wajib dipilih.',
+            'nim.required' => 'Nomor Induk Mahasiswa (NIM) wajib diisi.',
+            'phone.required' => 'Nomor WhatsApp wajib diisi.',
+            'phone.unique' => 'Nomor WhatsApp ini sudah terdaftar sebelumnya.',
+            'ktm_file.required' => 'Foto Kartu Tanda Mahasiswa (KTM) wajib dilampirkan.',
+            'ktm_file.image' => 'Berkas KTM harus berupa gambar (JPG atau PNG).',
+            'ktm_file.max' => 'Ukuran berkas KTM maksimal 2 MB.',
+        ]);
+
+        $ktmPath = $request->file('ktm_file')->store('ktm', 'public');
+
+        $user->update([
+            'campus' => $validated['campus'],
+            'nim' => $validated['nim'],
+            'phone' => $validated['phone'],
+            'ktm_image_path' => $ktmPath,
+            'verification_status' => 'pending',
+        ]);
+
+        session()->forget('google_ktm_user_id');
+
+        return redirect()->route('login')->with('success', 'Terima kasih, ' . $user->name . '! Berkas KTM Anda berhasil diunggah. Akun Anda sedang dalam antrean verifikasi oleh administrator.');
     }
 
     /**

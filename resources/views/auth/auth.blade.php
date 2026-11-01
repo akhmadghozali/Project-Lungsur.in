@@ -1497,12 +1497,17 @@
                             this.otpEmail = data.email;
                             this.otpDigits = ['', '', '', '', '', ''];
                             this.otpError = '';
-                            this.otpSuccessMessage = '';
+                            this.otpSuccessMessage = data.dev_otp 
+                                ? 'Kode OTP Anda: ' + data.dev_otp 
+                                : '';
                             this.showOtpModal = true;
                             this.startOtpCountdown(data.resend_cooldown || 60);
                             this.$nextTick(() => {
                                 if (this.$refs.otpInput0) this.$refs.otpInput0.focus();
                             });
+                        } else if (response.ok && data.status === 'pending_verification') {
+                            alert(data.message || 'Pendaftaran berhasil diajukan! Berkas KTM Anda telah kami terima dan sedang dalam antrean verifikasi administrator.');
+                            window.location.href = data.redirect || '{{ route('login') }}';
                         } else if (!response.ok) {
                             if (data.errors) {
                                 const firstErrKey = Object.keys(data.errors)[0];
