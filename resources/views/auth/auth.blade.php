@@ -1552,6 +1552,9 @@
                         const data = await response.json();
 
                         if (response.ok && data.redirect) {
+                            if (data.status === 'pending_verification') {
+                                alert(data.message || 'Verifikasi email berhasil! Berkas KTM Anda telah kami terima dan sedang dalam antrean verifikasi administrator.');
+                            }
                             window.location.href = data.redirect;
                         } else {
                             this.otpError = data.message || 'Kode OTP yang Anda masukkan tidak sesuai.';
