@@ -256,14 +256,20 @@
                 </form>
             </div>
 
-            <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('dashboard*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Dashboard Saya</a>
+            <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('dashboard*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Iklan Saya</a>
         @endauth
         <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Lelang Terbuka</a>
         <a href="{{ route('wanted-ads.index') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Kebutuhan Mahasiswa</a>
         <div class="pt-2 border-t border-slate-100">
-            <a href="{{ Route::has('listings.create') ? route('listings.create') : url('/katalog/pasang') }}" class="block text-center py-2.5 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-sm">
-                + Pasang Iklan Sekarang
-            </a>
+            @if (auth()->check() && !auth()->user()->isSeller())
+                <a href="{{ route('wanted-ads.index') }}" class="block text-center py-2.5 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-sm">
+                    + Pasang Kebutuhan Baru
+                </a>
+            @else
+                <a href="{{ Route::has('listings.create') ? route('listings.create') : url('/katalog/pasang') }}" class="block text-center py-2.5 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-sm">
+                    + Pasang Iklan Sekarang
+                </a>
+            @endif
         </div>
     </div>
 </nav>

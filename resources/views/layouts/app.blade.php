@@ -9,21 +9,58 @@
 
     <!-- Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css">
+
+    <!-- CSS khusus setiap halaman -->
+    @stack('styles')
 </head>
+
 <body class="flex flex-col min-h-full font-sans antialiased text-slate-900 bg-white selection:bg-blue-600 selection:text-white">
-    <!-- Reusable Flash Message Notification (Alpine.js) -->
+
+    <!-- Flash Message -->
     <x-flash-message />
 
-    <!-- Top Navigation Bar Sesuai Desain Figma -->
+    <!-- Navbar -->
     <x-navbar />
 
-    <!-- Main Content Canvas -->
+    <!-- Main Content -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {{ $slot ?? '' }}
         @yield('content')
     </main>
 
-    <!-- Global Footer -->
+    <!-- Footer -->
     <x-footer />
+
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (document.querySelector('.mySwiper')) {
+                new Swiper('.mySwiper', {
+                    loop: true,
+                    pagination: {
+                        el: '.swiper-pagination',
+                        clickable: true
+                    },
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev'
+                    },
+                    slidesPerView: 1,
+                    spaceBetween: 10,
+                });
+            }
+        });
+    </script>
+
+    <!-- JavaScript khusus setiap halaman -->
+    @stack('scripts')
+
 </body>
 </html>
+```

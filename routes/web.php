@@ -54,6 +54,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 | Iklan (Listing) Routes
 |--------------------------------------------------------------------------
 */
+// Halaman katalog barang (listings.index)
+Route::get('/katalog', [HomeController::class, 'index'])->name('listings.index');
+
 Route::middleware(['auth', 'verified_student'])->group(function () {
     // Halaman form pasang iklan — hanya user terverifikasi
     Route::get('/katalog/pasang', [IklanController::class, 'create'])->name('katalog.pasang');
@@ -69,12 +72,8 @@ Route::middleware(['auth', 'verified_student'])->group(function () {
 });
 
 // Stub halaman detail barang (agar tombol "Lihat Detail" di beranda tidak 404)
-Route::get('/katalog/{id}', function ($id) {
-    if (auth()->check() && auth()->user()->role === 'admin') {
-        return redirect()->route('admin.verifications.index');
-    }
-    return redirect('/')->with('info', 'Halaman detail barang akan segera hadir.');
-})->name('listings.show');
+Route::get('/katalog/{id}', [IklanController::class, 'show'])
+    ->name('listings.show');
 
 // Halaman daftar dan detail lelang
 Route::get('/lelang', [AuctionController::class, 'webIndex'])
@@ -116,3 +115,7 @@ Route::delete('/cari-barang/{wantedAd}', [WantedAdController::class, 'destroy'])
 Route::post('/cari-barang/{wantedAd}/tawari', [WantedAdController::class, 'offerItem'])
     ->middleware(['auth', 'verified_student'])
     ->name('wanted-ads.offer');
+
+// Alias rute kompatibilitas untuk detail iklan & lelang
+Route::get('/listings/{id}', [IklanController::class, 'show']);
+Route::get('/auctions/{id}', fn ($id) => redirect()->route('auctions.show', $id));
