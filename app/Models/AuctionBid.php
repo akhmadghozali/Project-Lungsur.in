@@ -34,4 +34,20 @@ class AuctionBid extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Scope untuk mengurutkan tawaran dari nominal tertinggi ke terendah.
+     */
+    public function scopeHighestFirst($query)
+    {
+        return $query->orderByDesc('bid_amount');
+    }
+
+    /**
+     * Scope untuk memfilter tawaran berdasarkan ID pengguna tertentu.
+     */
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
 }

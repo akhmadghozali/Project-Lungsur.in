@@ -55,6 +55,34 @@ class Auction extends Model
     }
 
     /**
+     * Scope untuk mengambil hanya lelang yang berstatus aktif.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    /**
+     * Scope untuk mengambil hanya lelang yang telah ditutup.
+     */
+    public function scopeClosed($query)
+    {
+        return $query->where('status', 'closed');
+    }
+
+    /**
+     * Scope untuk mengambil lelang aktif yang masih dalam rentang waktu berjalan.
+     */
+    public function scopeOngoing($query)
+    {
+        return $query->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('end_time')
+                  ->orWhere('end_time', '>', now());
+            });
+    }
+
+    /**
      * Harga tawaran tertinggi saat ini atau harga awal jika belum ada tawaran.
      */
     public function currentPrice(): float
