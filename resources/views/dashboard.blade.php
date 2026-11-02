@@ -290,11 +290,11 @@
                                         {{-- Badge Status --}}
                                         <div class="absolute top-2.5 left-2.5">
                                             @if ($listing->status === 'available')
-                                                <span class="bg-emerald-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs">Tersedia</span>
+                                                <span data-testid="listing-status-badge" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs">Tersedia</span>
                                             @elseif ($listing->status === 'sold')
-                                                <span class="bg-slate-700 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs">Terjual</span>
+                                                <span data-testid="listing-status-badge" class="bg-slate-700 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs">Terjual</span>
                                             @else
-                                                <span class="bg-amber-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs">{{ $listing->status }}</span>
+                                                <span data-testid="listing-status-badge" class="bg-amber-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs">{{ $listing->status }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -322,6 +322,7 @@
                                         @method('PATCH')
                                         <input type="hidden" name="status" value="{{ $listing->status === 'available' ? 'sold' : 'available' }}">
                                         <button type="submit" 
+                                                data-testid="btn-toggle-status"
                                                 class="w-full py-1.5 px-2 rounded-lg text-xs font-bold transition text-center {{ $listing->status === 'available' ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200' }}">
                                             {{ $listing->status === 'available' ? 'Tandai Terjual' : 'Jadikan Tersedia' }}
                                         </button>

@@ -25,3 +25,12 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Environment testing - do not commit credentials
+.env.testing
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Playwright temporary results
+tests/e2e/test-results/

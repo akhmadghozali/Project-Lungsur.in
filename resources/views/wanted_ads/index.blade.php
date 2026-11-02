@@ -260,6 +260,7 @@
 
                 @if ($isUserBuyer)
                     <button type="button" 
+                            data-testid="btn-open-create-modal"
                             @click="createModalOpen = true" 
                             class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 px-3.5 py-2 rounded-xl transition self-start sm:self-auto cursor-pointer">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,7 +279,7 @@
             <!-- Grid Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 @forelse ($wantedAds as $ad)
-                    <article class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-md transition p-5 flex flex-col justify-between space-y-4 group">
+                    <article data-testid="wanted-ad-card" class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-md transition p-5 flex flex-col justify-between space-y-4 group">
                         <!-- Top Metadata -->
                         <div class="space-y-2.5">
                             <div class="flex items-center justify-between gap-2 text-xs">
@@ -710,6 +711,7 @@
                                 Batal
                             </button>
                             <button type="submit" 
+                                    data-testid="btn-submit-wanted-ad"
                                     class="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/25 transition cursor-pointer">
                                 Publikasikan Kebutuhan (Gratis)
                             </button>
