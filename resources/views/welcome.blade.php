@@ -344,8 +344,12 @@
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-6">
                 @forelse ($listings as $listing)
                     <div class="bg-white rounded-2xl border border-slate-100 shadow-2xs hover:shadow-md transition overflow-hidden flex flex-col group relative">
-                        <!-- Foto Barang -->
-                        <div class="aspect-[4/3] bg-slate-100 overflow-hidden relative">
+                        <!-- Foto Barang - Slider / Carousel -->
+                        <div class="aspect-[4/3] bg-slate-100 overflow-hidden relative group/img"
+                             @if ($listing->images->count() > 1)
+                                 x-data="{ current: 0, total: {{ $listing->images->count() }} }"
+                             @endif
+                        >
                             @if ($listing->is_boosted && ($listing->boosted_until === null || $listing->boosted_until->isFuture()))
                                 <div class="absolute top-2.5 left-2.5 bg-amber-500/95 backdrop-blur-xs text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg shadow-sm flex items-center gap-1 z-10">
                                     <svg class="w-3 h-3 text-white fill-current" viewBox="0 0 20 20">
@@ -355,11 +359,58 @@
                                 </div>
                             @endif
 
-                            @if ($listing->photo_url)
-                                <img src="{{ $listing->photo_url }}"
-                                     alt="{{ $listing->title }}"
-                                     loading="lazy"
-                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            @if ($listing->images->count() > 0)
+                                @foreach ($listing->images as $imgIdx => $img)
+                                    @php
+                                        $imgSrc = Str::startsWith($img->image_url, ['http://', 'https://']) ? $img->image_url : asset('storage/' . ltrim($img->image_url, '/'));
+                                    @endphp
+                                    <div
+                                        @if ($listing->images->count() > 1)
+                                            x-show="current === {{ $imgIdx }}"
+                                            x-transition.opacity.duration.200ms
+                                        @endif
+                                        class="w-full h-full absolute inset-0"
+                                    >
+                                        <img src="{{ $imgSrc }}"
+                                             alt="{{ $listing->title }}"
+                                             loading="lazy"
+                                             class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                    </div>
+                                @endforeach
+
+                                @if ($listing->images->count() > 1)
+                                    {{-- Tombol Navigasi Kiri --}}
+                                    <button
+                                        type="button"
+                                        @click.stop.prevent="current = (current === 0) ? total - 1 : current - 1"
+                                        class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white flex items-center justify-center backdrop-blur-xs transition opacity-0 group-hover/img:opacity-100 z-10 shadow-sm cursor-pointer"
+                                        aria-label="Foto sebelumnya"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                    </button>
+
+                                    {{-- Tombol Navigasi Kanan --}}
+                                    <button
+                                        type="button"
+                                        @click.stop.prevent="current = (current === total - 1) ? 0 : current + 1"
+                                        class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white flex items-center justify-center backdrop-blur-xs transition opacity-0 group-hover/img:opacity-100 z-10 shadow-sm cursor-pointer"
+                                        aria-label="Foto berikutnya"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+
+                                    {{-- Titik Indikator Dots --}}
+                                    <div class="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-1 z-10 pointer-events-none">
+                                        @for ($d = 0; $d < $listing->images->count(); $d++)
+                                            <span class="h-1 rounded-full transition-all duration-200" :class="current === {{ $d }} ? 'w-3.5 bg-white' : 'w-1 bg-white/60'"></span>
+                                        @endfor
+                                    </div>
+
+                                    {{-- Badge Counter --}}
+                                    <div class="absolute top-2.5 right-2.5 bg-slate-900/70 backdrop-blur-xs text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md z-10">
+                                        <span x-text="(current + 1) + '/' + total"></span>
+                                    </div>
+                                @endif
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-[11px] font-medium text-slate-400">
                                     Belum ada foto
