@@ -9,18 +9,40 @@ class StoreListingRequest extends FormRequest
 {
     /**
      * Tentukan apakah pengguna memiliki otorisasi untuk melakukan permintaan ini.
+     * Hanya pengguna terautentikasi dalam Mode Penjual yang boleh mempublikasikan iklan.
      */
     public function authorize(): bool
     {
+        if (! Auth::check() || ! Auth::user()->isSeller()) {
+            return false;
+        }
+
         if ($this->route('listing') !== null) {
             $listing = $this->route('listing') instanceof \App\Models\Listing
                 ? $this->route('listing')
                 : \App\Models\Listing::find($this->route('listing'));
 
-            return Auth::check() && $listing && (int) $listing->user_id === (int) Auth::id();
+            return $listing && (int) $listing->user_id === (int) Auth::id();
         }
 
-        return Auth::check();
+        return true;
+    }
+
+    /**
+     * Tangani kegagalan otorisasi dengan redirect ramah ke dasbor.
+     */
+    protected function failedAuthorization()
+    {
+        if (Auth::check() && ! Auth::user()->isSeller()) {
+            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                redirect()->route('dashboard')->with(
+                    'warning',
+                    'Akun dalam Mode Pembeli tidak dapat mempublikasikan atau mengelola iklan barang dagangan. Silakan beralih ke Mode Penjual terlebih dahulu.'
+                )
+            );
+        }
+
+        abort(403, 'Anda tidak memiliki hak untuk melakukan aksi ini.');
     }
 
     /**

@@ -1,6 +1,6 @@
 <x-layouts.app>
     <x-slot:title>
-        Lungsur.in - Platform Marketplace & Lelang Komunitas Mahasiswa Malang
+        {{ request()->is('katalog*') ? 'Katalog Barang Mahasiswa - Lungsur.in' : 'Lungsur.in - Platform Marketplace & Lelang Komunitas Mahasiswa Malang' }}
     </x-slot:title>
 
     <div class="space-y-12 sm:space-y-16">
@@ -8,6 +8,7 @@
         <!-- ========================================== -->
         <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
         <!-- ========================================== -->
+        @if (!request()->is('katalog*'))
         <section class="bg-gradient-to-br from-blue-50/90 via-sky-50/50 to-blue-50/70 rounded-3xl border border-blue-100/60 p-6 sm:p-10 lg:p-14 relative overflow-hidden shadow-xs">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
                 
@@ -118,6 +119,140 @@
 
             </div>
         </section>
+        @endif
+
+
+        {{-- Spotlight Lelang Unggulan --}}
+        @if ($spotlight && !request()->is('katalog*'))
+            @php
+                $spotlightListing = $spotlight->listing;
+                $spotlightRemaining = $spotlight->timeRemainingSeconds();
+            @endphp
+
+            <section class="space-y-5">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-100 text-lg text-blue-600">
+                            ✦
+                        </div>
+
+                        <div>
+                            <h2 class="text-xl font-black tracking-tight text-slate-900">
+                                Spotlight Lelang Unggulan
+                            </h2>
+                            <p class="mt-1 text-xs text-slate-500">
+                                Barang yang sedang ramai diminati mahasiswa.
+                            </p>
+                        </div>
+                    </div>
+
+                    <a
+                        href="{{ route('auctions.index') }}"
+                        class="shrink-0 text-xs font-bold text-blue-600 transition hover:text-blue-700 sm:text-sm"
+                    >
+                        Lihat Semua →
+                    </a>
+                </div>
+
+                <article class="grid overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm lg:grid-cols-[0.9fr_1.1fr]">
+
+                    {{-- Foto barang --}}
+                    <a
+                        href="{{ route('auctions.show', $spotlight->id) }}"
+                        class="group relative block aspect-[4/3] overflow-hidden bg-slate-100 lg:aspect-auto lg:min-h-[320px]"
+                    >
+                        @if ($spotlightListing?->photo_url)
+                            <img
+                                src="{{ $spotlightListing->photo_url }}"
+                                alt="{{ $spotlightListing->title }}"
+                                loading="lazy"
+                                class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                            >
+                        @else
+                            <div class="flex h-full min-h-56 items-center justify-center text-sm text-slate-400">
+                                Belum ada foto
+                            </div>
+                        @endif
+
+                        <span class="absolute left-3 top-3 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow">
+                            ✦ SPOTLIGHT
+                        </span>
+
+                        <span class="absolute bottom-3 left-3 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-bold text-slate-700">
+                            {{ (int) ($spotlight->unique_bidders_count ?? 0) }} penawar berbeda
+                        </span>
+                    </a>
+
+                    {{-- Informasi lelang --}}
+                    <div class="flex flex-col justify-center p-5 sm:p-7">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <span class="rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">
+                                {{ $spotlightListing?->category?->name ?? 'Perlengkapan Kos' }}
+                            </span>
+
+                            <span
+                                data-home-auction-status
+                                class="rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700"
+                            >
+                                ● Sedang Berlangsung
+                            </span>
+                        </div>
+
+                        <h3 class="text-xl font-black leading-snug text-slate-900 sm:text-2xl">
+                            {{ $spotlightListing?->title ?? 'Barang lelang' }}
+                        </h3>
+
+                        <p class="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-500">
+                            {{ $spotlightListing?->description ?? 'Lihat detail barang dan ajukan penawaran selama lelang berlangsung.' }}
+                        </p>
+
+                        <div class="my-5 grid grid-cols-2 gap-3 border-y border-slate-100 py-4">
+                            <div>
+                                <p class="text-xs font-medium text-slate-500">
+                                    Harga tertinggi
+                                </p>
+
+                                <p class="mt-1 text-xl font-black text-blue-700">
+                                    Rp {{ number_format($spotlight->currentPrice(), 0, ',', '.') }}
+                                </p>
+
+                                <p class="mt-1 text-xs text-slate-400">
+                                    {{ $spotlight->bids()->count() }} penawaran
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs font-bold text-rose-600">
+                                    ◷ Sisa waktu
+                                </p>
+
+                                <div
+                                    data-home-auction-countdown
+                                    data-remaining-seconds="{{ $spotlightRemaining }}"
+                                    class="mt-1 text-lg font-black tabular-nums text-slate-900"
+                                >
+                                    <span data-home-countdown-text>
+                                        Memuat waktu...
+                                    </span>
+                                </div>
+
+                                <p class="mt-1 text-xs text-slate-400">
+                                    Sebelum lelang berakhir
+                                </p>
+                            </div>
+                        </div>
+
+                        <a
+                            href="{{ route('auctions.show', $spotlight->id) }}"
+                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
+                        >
+                            Lihat & Ikut Lelang
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </div>
+                </article>
+            </section>
+        @endif
 
 
         <!-- ========================================== -->
@@ -195,13 +330,28 @@
 
             <!-- Tombol Pasang Iklan -->
             <div class="shrink-0 w-full md:w-auto">
-                <a href="{{ Route::has('listings.create') ? route('listings.create') : url('/katalog/pasang') }}" 
-                   class="inline-flex w-full md:w-auto items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-7 py-3.5 rounded-2xl shadow-md shadow-blue-500/25 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    <span>+ Pasang Iklan</span>
-                </a>
+                @if (auth()->check() && !auth()->user()->isSeller())
+                    <form method="POST" action="{{ route('user.switch_mode') }}">
+                        @csrf
+                        <input type="hidden" name="mode" value="seller">
+                        <button type="submit" 
+                                class="inline-flex w-full md:w-auto items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-7 py-3.5 rounded-2xl shadow-md shadow-emerald-500/25 transition cursor-pointer"
+                                title="Beralih ke Mode Penjual untuk pasang iklan">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                            </svg>
+                            <span>Ganti Mode Penjual untuk Jual</span>
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ Route::has('listings.create') ? route('listings.create') : url('/katalog/pasang') }}" 
+                       class="inline-flex w-full md:w-auto items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-7 py-3.5 rounded-2xl shadow-md shadow-blue-500/25 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span>+ Pasang Iklan</span>
+                    </a>
+                @endif
             </div>
         </section>
 
@@ -319,8 +469,129 @@
                 </div>
             </div>
 
+            <!-- Bilah Filter Multi-Kriteria (Sesuai Proposal & Sprint 2) -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-xs">
+                <form action="{{ request()->is('katalog*') ? route('listings.index') : route('home') }}" method="GET" class="space-y-4">
+                    @if (!empty($search))
+                        <input type="hidden" name="q" value="{{ $search }}">
+                    @endif
+                    <input type="hidden" name="sort" value="{{ $sort }}">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        <!-- 1. Kampus Penjual -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Asal Kampus</label>
+                            <select name="kampus" class="w-full text-xs rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-700 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-100">
+                                <option value="">Semua Kampus</option>
+                                <option value="UB" {{ ($filters['kampus'] ?? '') === 'UB' ? 'selected' : '' }}>UB (Universitas Brawijaya)</option>
+                                <option value="Polinema" {{ ($filters['kampus'] ?? '') === 'Polinema' ? 'selected' : '' }}>Politeknik Negeri Malang</option>
+                                <option value="UM" {{ ($filters['kampus'] ?? '') === 'UM' ? 'selected' : '' }}>UM (Universitas Negeri Malang)</option>
+                                <option value="UIN" {{ ($filters['kampus'] ?? '') === 'UIN' ? 'selected' : '' }}>UIN Maulana Malik Ibrahim</option>
+                                <option value="UMM" {{ ($filters['kampus'] ?? '') === 'UMM' ? 'selected' : '' }}>UMM (Muhammadiyah)</option>
+                                <option value="ITN" {{ ($filters['kampus'] ?? '') === 'ITN' ? 'selected' : '' }}>ITN Malang</option>
+                            </select>
+                        </div>
+
+                        <!-- 2. Kondisi Barang -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Kondisi Barang</label>
+                            <select name="kondisi" class="w-full text-xs rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-700 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-100">
+                                <option value="">Semua Kondisi</option>
+                                <option value="bekas" {{ ($filters['kondisi'] ?? '') === 'bekas' ? 'selected' : '' }}>Bekas (Semua Varian)</option>
+                                <option value="baru" {{ ($filters['kondisi'] ?? '') === 'baru' ? 'selected' : '' }}>Baru</option>
+                            </select>
+                        </div>
+
+                        <!-- 3. Kategori Perlengkapan Kos -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Kategori</label>
+                            <select name="category" class="w-full text-xs rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-700 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-100">
+                                <option value="">Semua Kategori</option>
+                                @foreach ($allCategories ?? [] as $cat)
+                                    <option value="{{ $cat->slug }}" {{ ($filters['category'] ?? '') === $cat->slug ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- 4. Harga Minimum -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Harga Min (Rp)</label>
+                            <input type="number" step="1000" min="0" name="min" value="{{ $filters['min'] ?? '' }}" placeholder="Contoh: 50000" class="w-full text-xs rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-700 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-100">
+                        </div>
+
+                        <!-- 5. Harga Maksimum -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Harga Maks (Rp)</label>
+                            <input type="number" step="1000" min="0" name="max" value="{{ $filters['max'] ?? '' }}" placeholder="Contoh: 200000" class="w-full text-xs rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-700 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-100">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
+                        <div class="flex flex-wrap items-center gap-1.5 text-slate-600">
+                            @if ($hasFilter ?? false)
+                                <span class="text-[11px] font-semibold text-slate-400">Filter aktif:</span>
+                                @if (!empty($filters['kampus']))
+                                    <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-semibold text-[11px] border border-blue-200/60">
+                                        Kampus: {{ strtoupper($filters['kampus']) }}
+                                    </span>
+                                @endif
+                                @if (!empty($filters['kondisi']))
+                                    <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-semibold text-[11px] border border-blue-200/60">
+                                        Kondisi: {{ ucfirst($filters['kondisi']) }}
+                                    </span>
+                                @endif
+                                @if (!empty($filters['min']))
+                                    <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-semibold text-[11px] border border-blue-200/60">
+                                        Min: Rp{{ number_format($filters['min'], 0, ',', '.') }}
+                                    </span>
+                                @endif
+                                @if (!empty($filters['max']))
+                                    <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-semibold text-[11px] border border-blue-200/60">
+                                        Maks: Rp{{ number_format($filters['max'], 0, ',', '.') }}
+                                    </span>
+                                @endif
+                                @if (!empty($filters['category']))
+                                    <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-semibold text-[11px] border border-blue-200/60">
+                                        Kategori: {{ ucfirst($filters['category']) }}
+                                    </span>
+                                @endif
+                            @else
+                                <span class="text-[11px] text-slate-400">Gunakan filter untuk menyaring perlengkapan kos sesuai kebutuhan dan anggaran Anda.</span>
+                            @endif
+                        </div>
+
+                        <div class="flex items-center gap-2 self-end sm:self-auto">
+                            @if ($hasFilter ?? false)
+                                <a href="{{ request()->is('katalog*') ? route('listings.index') : url('/') }}" class="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline px-2.5 py-1.5 transition">
+                                    Reset Filter
+                                </a>
+                            @endif
+                            <button type="submit" class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                                </svg>
+                                <span>Terapkan Filter</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
         <div id="listing-content">
-            @if (!empty($search))
+            @if ($hasFilter ?? false)
+                <div class="mt-4 flex items-center justify-between bg-blue-50/70 border border-blue-100 rounded-2xl px-4 py-3 text-xs text-blue-900">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <span>Menampilkan hasil filter spesifik (<strong>{{ $listings instanceof \Illuminate\Pagination\LengthAwarePaginator ? $listings->total() : $listings->count() }}</strong> barang ditemukan)</span>
+                    </div>
+                    <a href="{{ url('/') }}" class="font-bold text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1 shrink-0">
+                        <span>Reset Semua</span>
+                        <span>&times;</span>
+                    </a>
+                </div>
+            @elseif (!empty($search))
                 <div class="mt-4 flex items-center justify-between bg-blue-50/70 border border-blue-100 rounded-2xl px-4 py-3 text-xs text-blue-900">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -431,13 +702,22 @@
                                     </span>
                                 </div>
 
-                                @if (!empty($listing->condition_checklist['kondisi']))
-                                    <div class="mb-1.5">
+                                <div class="flex items-center gap-1.5 flex-wrap mb-1.5">
+                                    @if (!empty($listing->condition_checklist['kondisi']))
                                         <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md {{ $listing->condition_checklist['kondisi'] === 'baru' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
                                             {{ ucfirst(str_replace('_', ' ', $listing->condition_checklist['kondisi'])) }}
                                         </span>
-                                    </div>
-                                @endif
+                                    @endif
+
+                                    @if (!empty($listing->user?->campus))
+                                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 rounded-md truncate max-w-[140px]" title="{{ $listing->user->campus }}">
+                                            <svg class="w-2.5 h-2.5 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                            </svg>
+                                            <span class="truncate">{{ $listing->user->campus }}</span>
+                                        </span>
+                                    @endif
+                                </div>
 
                                 <!-- Judul Barang -->
                                 <h3 class="font-bold text-xs sm:text-sm text-slate-800 line-clamp-2 leading-snug group-hover:text-blue-600 transition">
@@ -618,6 +898,65 @@
         const sortButton = document.getElementById('sort-button');
         let sortMenu = document.getElementById('sort-menu');
         let sortLabel = document.getElementById('sort-label');
+ 
+        // Countdown Spotlight Lelang Unggulan
+        document.querySelectorAll('[data-home-auction-countdown]').forEach((timer) => {
+            const initial = Math.max(
+                0,
+                Number(timer.dataset.remainingSeconds || 0)
+            );
+
+            const startedAt = performance.now();
+            const output = timer.querySelector('[data-home-countdown-text]');
+            const status = document.querySelector('[data-home-auction-status]');
+
+            const renderCountdown = () => {
+                const elapsed = Math.floor(
+                    (performance.now() - startedAt) / 1000
+                );
+
+                const remaining = Math.max(0, initial - elapsed);
+
+                const days = Math.floor(remaining / 86400);
+                const hours = Math.floor((remaining % 86400) / 3600);
+                const minutes = Math.floor((remaining % 3600) / 60);
+                const seconds = remaining % 60;
+
+                const pad = (value) => String(value).padStart(2, '0');
+
+                if (remaining <= 0) {
+                    output.textContent = 'Lelang Ditutup';
+
+                    if (status) {
+                        status.textContent = '● Lelang Ditutup';
+                        status.classList.remove(
+                            'bg-emerald-50',
+                            'text-emerald-700'
+                        );
+                        status.classList.add(
+                            'bg-slate-100',
+                            'text-slate-600'
+                        );
+                    }
+
+                    return false;
+                }
+
+                output.textContent = days > 0
+                    ? `${days}h ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+                    : `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
+                return true;
+            };
+
+            if (renderCountdown()) {
+                const interval = window.setInterval(() => {
+                    if (!renderCountdown()) {
+                        window.clearInterval(interval);
+                    }
+                }, 1000);
+            }
+        });
 
         // AJAX untuk mengambil daftar iklan
         function loadListings(url, updateHistory = true) {

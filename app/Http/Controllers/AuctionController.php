@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class AuctionController extends Controller
 {
@@ -64,6 +65,7 @@ class AuctionController extends Controller
                 'status' => 'closed',
                 'winner_id' => $highestBid?->user_id,
             ]);
+            $this->markListingBookedIfWinner($auction, $highestBid);
             $auction->refresh();
         }
 
@@ -235,6 +237,8 @@ class AuctionController extends Controller
                     'winner_id' => $highestBid?->user_id,
                 ]);
 
+                $this->markListingBookedIfWinner($auction, $highestBid);
+
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Waktu lelang telah berakhir pada ' . $auction->end_time->format('d/m/Y H:i') . ' WIB. Penawaran baru tidak diterima.',
@@ -399,6 +403,8 @@ class AuctionController extends Controller
             'end_time' => now(),
         ]);
 
+        $this->markListingBookedIfWinner($auction, $highestBid);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Lelang berhasil ditutup.',
@@ -409,5 +415,212 @@ class AuctionController extends Controller
                 'highest_bid' => $highestBid ? (float) $highestBid->bid_amount : null,
             ],
         ]);
+    }
+        /**
+     * Halaman web daftar lelang.
+     */
+    
+/**
+ * Halaman web daftar lelang.
+ */
+    public function webIndex(Request $request): View
+    {
+        // Desktop: 20 lelang per halaman. HP: 10 lelang per halaman.
+        $perPage = (int) $request->query('per_page', 20);
+
+        if (! in_array($perPage, [10, 20], true)) {
+            $perPage = 20;
+        }
+
+        // Query dasar untuk daftar lelang.
+        $baseQuery = Auction::with([
+            'listing.category',
+            'listing.images',
+            'highestBid.user',
+        ])
+            ->whereIn('auctions.status', ['active', 'closed'])
+            ->whereHas('listing');
+
+        // Hitung jumlah pengguna berbeda yang pernah menawar.
+        $uniqueBiddersQuery = AuctionBid::query()
+            ->selectRaw('COUNT(DISTINCT user_id)')
+            ->whereColumn('auction_id', 'auctions.id');
+
+        // Spotlight: lelang aktif yang sudah memiliki penawar,
+        // diurutkan berdasarkan jumlah pengguna yang menawar.
+        $spotlight = (clone $baseQuery)
+            ->where('auctions.status', 'active')
+            ->whereNotNull('auctions.end_time')
+            ->where('auctions.end_time', '>', now())
+            ->whereHas('bids')
+            ->select('auctions.*')
+            ->selectSub($uniqueBiddersQuery, 'unique_bidders_count')
+            ->orderByDesc('unique_bidders_count')
+            ->orderByDesc('auctions.created_at')
+            ->first();
+
+        // Daftar lelang lainnya tidak mengulang kartu Spotlight.
+        // Urutkan berdasarkan waktu mulai paling awal.
+        $auctions = (clone $baseQuery)
+            ->when($spotlight, function ($query) use ($spotlight) {
+                $query->where('auctions.id', '!=', $spotlight->id);
+            })
+            ->orderByRaw(
+                'CASE WHEN auctions.start_time IS NULL THEN 1 ELSE 0 END'
+            )
+            ->orderBy('auctions.start_time', 'asc')
+            ->orderByDesc('auctions.created_at')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return view('auctions.index', compact(
+            'auctions',
+            'spotlight'
+        ));
+    }
+
+    /**
+     * Halaman web detail lelang.
+     */
+    public function webShow(int $id): View
+    {
+        $auction = Auction::with([
+            'listing.category',
+            'listing.images',
+            'listing.user',
+            'bids.user',
+            'highestBid.user',
+            'winner',
+        ])->findOrFail($id);
+
+        // Tutup lelang jika waktunya sudah habis.
+        if (
+            $auction->status === 'active' &&
+            $auction->isExpired()
+        ) {
+            $this->finalizeExpiredAuction($auction->id);
+
+            $auction->refresh()->load([
+                'listing.category',
+                'listing.images',
+                'listing.user',
+                'bids.user',
+                'highestBid.user',
+                'winner',
+            ]);
+        }
+
+        abort_unless($auction->listing, 404);
+
+        return view('auctions.show', compact('auction'));
+    }
+
+    /**
+     * Sinkronisasi penutupan lelang ketika countdown habis.
+     */
+    public function expire(int $id): JsonResponse
+    {
+        $result = DB::transaction(function () use ($id): array {
+            $auction = Auction::query()
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            // Jangan tutup jika lelang tidak aktif atau waktunya belum habis.
+            if ($auction->status !== 'active') {
+                return [
+                    'status' => $auction->status,
+                    'message' => 'Status lelang sudah diperbarui.',
+                ];
+            }
+
+            if (
+                ! $auction->end_time ||
+                now()->lt($auction->end_time)
+            ) {
+                return [
+                    'status' => $auction->status,
+                    'message' => 'Waktu lelang belum berakhir.',
+                ];
+            }
+
+            $highestBid = AuctionBid::query()
+                ->where('auction_id', $auction->id)
+                ->orderByDesc('bid_amount')
+                ->orderBy('created_at')
+                ->first();
+
+            $auction->update([
+                'status' => 'closed',
+                'winner_id' => $highestBid?->user_id,
+            ]);
+
+            $this->markListingBookedIfWinner($auction, $highestBid);
+
+            return [
+                'status' => 'closed',
+                'winner_id' => $highestBid?->user_id,
+                'message' => 'Lelang berhasil ditutup.',
+            ];
+        });
+
+        if ($result['status'] !== 'closed') {
+            return response()->json($result, 409);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $result,
+        ]);
+    }
+
+    /**
+     * Menutup lelang kedaluwarsa dan menentukan penawar tertinggi.
+     */
+    private function finalizeExpiredAuction(int $id): void
+    {
+        DB::transaction(function () use ($id): void {
+            $auction = Auction::query()
+                ->lockForUpdate()
+                ->find($id);
+
+            if (
+                ! $auction ||
+                $auction->status !== 'active' ||
+                ! $auction->end_time ||
+                now()->lt($auction->end_time)
+            ) {
+                return;
+            }
+
+            $highestBid = AuctionBid::query()
+                ->where('auction_id', $auction->id)
+                ->orderByDesc('bid_amount')
+                ->orderBy('created_at')
+                ->first();
+
+            $auction->update([
+                'status' => 'closed',
+                'winner_id' => $highestBid?->user_id,
+            ]);
+            $this->markListingBookedIfWinner($auction, $highestBid);
+        });
+    }
+        /**
+     * Mengubah status barang menjadi booked jika lelang
+     * berakhir dan memiliki pemenang.
+     */
+    private function markListingBookedIfWinner(
+        Auction $auction,
+        ?AuctionBid $highestBid
+    ): void {
+        if (!$highestBid) {
+            return;
+        }
+
+        $listing = $auction->listing;
+
+        if ($listing) {
+            $listing->update(['status' => 'booked']);
+        }
     }
 }
