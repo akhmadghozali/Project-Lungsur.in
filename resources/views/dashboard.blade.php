@@ -277,10 +277,61 @@
                         @foreach ($myListings as $listing)
                             <div id="listing-{{ $listing->id }}" class="border border-slate-200 rounded-2xl overflow-hidden flex flex-col justify-between bg-white hover:border-slate-300 transition group scroll-mt-24">
                                 <div>
-                                    {{-- Foto Barang --}}
-                                    <div class="aspect-[4/3] bg-slate-100 relative overflow-hidden">
-                                        @if ($listing->photo_url)
-                                            <img src="{{ $listing->photo_url }}" alt="{{ $listing->title }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                    {{-- Foto Barang - Slider / Carousel --}}
+                                    <div class="aspect-[4/3] bg-slate-100 relative overflow-hidden group/img"
+                                         @if ($listing->images->count() > 1)
+                                             x-data="{ current: 0, total: {{ $listing->images->count() }} }"
+                                         @endif
+                                    >
+                                        @if ($listing->images->count() > 0)
+                                            @foreach ($listing->images as $imgIdx => $img)
+                                                @php
+                                                    $imgSrc = Str::startsWith($img->image_url, ['http://', 'https://']) ? $img->image_url : asset('storage/' . ltrim($img->image_url, '/'));
+                                                @endphp
+                                                <div
+                                                    @if ($listing->images->count() > 1)
+                                                        x-show="current === {{ $imgIdx }}"
+                                                        x-transition.opacity.duration.200ms
+                                                    @endif
+                                                    class="w-full h-full absolute inset-0"
+                                                >
+                                                    <img src="{{ $imgSrc }}" alt="{{ $listing->title }}" class="w-full h-full object-cover">
+                                                </div>
+                                            @endforeach
+
+                                            @if ($listing->images->count() > 1)
+                                                {{-- Tombol Navigasi Kiri --}}
+                                                <button
+                                                    type="button"
+                                                    @click.stop.prevent="current = (current === 0) ? total - 1 : current - 1"
+                                                    class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white flex items-center justify-center backdrop-blur-xs transition opacity-0 group-hover/img:opacity-100 z-10 shadow-sm cursor-pointer"
+                                                    aria-label="Foto sebelumnya"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                                </button>
+
+                                                {{-- Tombol Navigasi Kanan --}}
+                                                <button
+                                                    type="button"
+                                                    @click.stop.prevent="current = (current === total - 1) ? 0 : current + 1"
+                                                    class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white flex items-center justify-center backdrop-blur-xs transition opacity-0 group-hover/img:opacity-100 z-10 shadow-sm cursor-pointer"
+                                                    aria-label="Foto berikutnya"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                                </button>
+
+                                                {{-- Titik Indikator Dots --}}
+                                                <div class="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-1 z-10 pointer-events-none">
+                                                    @for ($d = 0; $d < $listing->images->count(); $d++)
+                                                        <span class="h-1 rounded-full transition-all duration-200" :class="current === {{ $d }} ? 'w-3.5 bg-white' : 'w-1 bg-white/60'"></span>
+                                                    @endfor
+                                                </div>
+
+                                                {{-- Badge Counter --}}
+                                                <div class="absolute top-2.5 right-2.5 bg-slate-900/70 backdrop-blur-xs text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md z-10">
+                                                    <span x-text="(current + 1) + '/' + total"></span>
+                                                </div>
+                                            @endif
                                         @else
                                             <div class="w-full h-full flex items-center justify-center text-xs text-slate-400 font-medium">
                                                 Belum ada foto
@@ -288,7 +339,7 @@
                                         @endif
 
                                         {{-- Badge Status --}}
-                                        <div class="absolute top-2.5 left-2.5">
+                                        <div class="absolute top-2.5 left-2.5 z-10">
                                             @if ($listing->status === 'available')
                                                 <span class="bg-emerald-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs">Tersedia</span>
                                             @elseif ($listing->status === 'sold')

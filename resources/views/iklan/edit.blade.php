@@ -227,95 +227,169 @@
                 {{-- SECTION 2: Foto Barang             --}}
                 {{-- ══════════════════════════════════ --}}
                 <div class="px-5 sm:px-7 py-5 space-y-4">
-                    <h2 class="text-sm font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-extrabold shrink-0">2</span>
-                        Foto Barang
-                    </h2>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-extrabold shrink-0">2</span>
+                            Foto Barang
+                            <span class="text-rose-500 ml-0.5">*</span>
+                        </h2>
+                        <span class="text-xs font-semibold text-slate-400" x-text="totalPhotosCount + ' / 5 Foto'"></span>
+                    </div>
 
-                    {{-- Dropzone / File Input --}}
+                    {{-- Upload Area & Thumbnails --}}
                     <div>
-                        {{-- Image Preview (shown when an image is available) --}}
-                        <div x-cloak x-show="previewUrl" x-transition class="relative mb-3">
-                            <div class="relative rounded-xl overflow-hidden bg-slate-100 border border-slate-200 aspect-video flex items-center justify-center">
-                                <img
-                                    :src="previewUrl"
-                                    :alt="previewName || 'Foto Barang'"
-                                    class="max-h-64 max-w-full object-contain"
+                        {{-- Hidden input for deleted existing images --}}
+                        <template x-for="delId in deletedImageIds" :key="'del-' + delId">
+                            <input type="hidden" name="deleted_image_ids[]" :value="delId">
+                        </template>
+
+                        {{-- Hidden real file input submitted with form --}}
+                        <input
+                            type="file"
+                            name="images[]"
+                            multiple
+                            x-ref="realInput"
+                            class="hidden"
+                        >
+
+                        {{-- Hidden file selector trigger --}}
+                        <input
+                            id="foto_barang_edit_input"
+                            type="file"
+                            multiple
+                            accept="image/png,image/jpeg,image/webp"
+                            x-ref="fileSelector"
+                            @change="handleFileChange($event)"
+                            class="hidden"
+                        >
+
+                        {{-- Thumbnails Grid --}}
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                {{-- 1. Foto Lama yang Belum Dihapus --}}
+                                <template x-for="(photo, index) in activeExistingPhotos" :key="'existing-' + photo.id">
+                                    <div class="aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 relative group shadow-xs">
+                                        <img
+                                            :src="photo.url"
+                                            alt="Foto Barang Lama"
+                                            class="w-full h-full object-cover"
+                                        >
+
+                                        {{-- Badge Nomor Urut --}}
+                                        <div class="absolute top-2 left-2 bg-slate-900/60 backdrop-blur-xs text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md" x-text="index + 1"></div>
+
+                                        {{-- Badge Foto Utama / Tersimpan --}}
+                                        <div class="absolute bottom-2 left-2 flex flex-col gap-1">
+                                            <span x-show="index === 0" class="bg-blue-600/90 backdrop-blur-xs text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs">
+                                                Utama
+                                            </span>
+                                            <span class="bg-slate-800/80 backdrop-blur-xs text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-md shadow-xs">
+                                                Tersimpan
+                                            </span>
+                                        </div>
+
+                                        {{-- Tombol Hapus Foto Lama --}}
+                                        <button
+                                            type="button"
+                                            @click="removeExistingPhoto(photo.id)"
+                                            class="absolute top-2 right-2 w-7 h-7 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center shadow-md transition cursor-pointer"
+                                            title="Hapus foto ini"
+                                            aria-label="Hapus foto ini"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                {{-- 2. Foto Baru yang Baru Dipilih --}}
+                                <template x-for="(photo, nIndex) in newPhotos" :key="photo.id">
+                                    <div class="aspect-square rounded-2xl overflow-hidden bg-slate-100 border-2 border-emerald-400 relative group shadow-xs">
+                                        <img
+                                            :src="photo.url"
+                                            :alt="photo.name"
+                                            class="w-full h-full object-cover"
+                                        >
+
+                                        {{-- Badge Nomor Urut --}}
+                                        <div class="absolute top-2 left-2 bg-slate-900/60 backdrop-blur-xs text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md" x-text="activeExistingPhotos.length + nIndex + 1"></div>
+
+                                        {{-- Badge Foto Baru --}}
+                                        <div class="absolute bottom-2 left-2 flex flex-col gap-1">
+                                            <span x-show="activeExistingPhotos.length === 0 && nIndex === 0" class="bg-blue-600/90 backdrop-blur-xs text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs">
+                                                Utama
+                                            </span>
+                                            <span class="bg-emerald-600/90 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-xs">
+                                                Baru
+                                            </span>
+                                        </div>
+
+                                        {{-- Tombol Hapus Foto Baru --}}
+                                        <button
+                                            type="button"
+                                            @click="removeNewPhoto(nIndex)"
+                                            class="absolute top-2 right-2 w-7 h-7 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center shadow-md transition cursor-pointer"
+                                            title="Batalkan foto baru ini"
+                                            aria-label="Batalkan foto baru ini"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                {{-- 3. Tombol Tambah (+) berikutnya (hilang saat total foto mencapai 5) --}}
+                                <div
+                                    x-show="totalPhotosCount < 5"
+                                    @click="$refs.fileSelector.click()"
+                                    class="aspect-square rounded-2xl border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50 hover:bg-blue-50/40 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition text-slate-500 hover:text-blue-600 group"
+                                    title="Tambah foto berikutnya"
                                 >
-                                {{-- Badge nama / status file --}}
-                                <div class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full truncate max-w-[70%]"
-                                     x-text="hasNewImage ? ('Foto baru: ' + previewName) : (existingName ? 'Foto tersimpan: ' + existingName : 'Foto saat ini')"></div>
-                            </div>
-                            {{-- Tombol Ganti / Batal Foto Baru --}}
-                            <div class="absolute top-2 right-2 flex items-center gap-2">
-                                <label
-                                    for="foto_barang"
-                                    class="px-3 py-1.5 bg-slate-900/80 hover:bg-slate-900 text-white rounded-xl text-xs font-bold backdrop-blur-sm flex items-center gap-1.5 shadow-md transition cursor-pointer"
-                                    title="Pilih file foto baru"
-                                >
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    <span>Ganti Foto</span>
-                                </label>
-                                <button
-                                    x-show="hasNewImage"
-                                    type="button"
-                                    @click="removeImage()"
-                                    class="w-8 h-8 bg-rose-600 hover:bg-rose-700 text-white rounded-xl flex items-center justify-center shadow-md transition cursor-pointer"
-                                    title="Batalkan foto baru (kembali ke foto tersimpan)"
-                                    aria-label="Batalkan foto baru"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </button>
+                                    <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 group-hover:border-blue-300 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition shadow-xs text-slate-600">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-xs font-bold">Tambah Foto</span>
+                                    <span class="text-[10px] text-slate-400" x-text="'(' + totalPhotosCount + '/5)'"></span>
+                                </div>
                             </div>
                         </div>
 
-                        {{-- Upload Area (shown when no previewUrl is available) --}}
-                        <label
-                            for="foto_barang"
-                            x-show="!previewUrl"
-                            x-transition
-                            class="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-slate-200 hover:border-blue-400 bg-slate-50/50 hover:bg-blue-50/30 rounded-xl p-8 cursor-pointer transition group"
-                        >
-                            <div class="w-12 h-12 rounded-2xl bg-blue-100 group-hover:bg-blue-600 text-blue-600 group-hover:text-white flex items-center justify-center transition">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-sm font-bold text-slate-700 group-hover:text-blue-700 transition">
-                                    Klik untuk unggah foto baru
-                                </p>
-                                <p class="text-xs text-slate-400 mt-0.5">PNG, JPG, WEBP – Maks. 2 MB</p>
-                            </div>
-                        </label>
+                        {{-- Pesan Validasi Foto --}}
+                        <div x-cloak x-show="uploadError" class="mt-2.5 text-xs text-rose-600 font-semibold flex items-center gap-1">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span x-text="uploadError"></span>
+                        </div>
 
-                        {{-- Hidden file input --}}
-                        <input
-                            id="foto_barang"
-                            type="file"
-                            name="image"
-                            accept="image/png,image/jpeg,image/webp"
-                            x-ref="fotoInput"
-                            @change="handleFileChange($event)"
-                            class="sr-only"
-                        >
+                        @error('images')
+                            <p class="mt-2 text-xs text-rose-600 font-medium flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                        @error('images.*')
+                            <p class="mt-1 text-xs text-rose-600 font-medium flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                        @error('deleted_image_ids.*')
+                            <p class="mt-1 text-xs text-rose-600 font-medium flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
-
-                    @error('image')
-                        <p class="text-xs text-rose-600 font-medium flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            {{ $message }}
-                        </p>
-                    @enderror
 
                     {{-- Tips --}}
                     <div class="flex items-start gap-2.5 text-xs text-slate-500 bg-blue-50/60 border border-blue-100 rounded-xl px-4 py-3">
                         <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span>Foto baru bersifat opsional. Jika kamu tidak mengunggah file baru, foto barang yang lama akan tetap dipertahankan.</span>
+                        <span>Kamu dapat mempertahankan foto lama, menghapus foto yang tidak diinginkan, atau menambah foto baru hingga maksimal 5 foto. Iklan harus memiliki minimal 1 foto aktif.</span>
                     </div>
                 </div>
 
@@ -445,12 +519,68 @@
                     {{-- Konten preview --}}
                     <div class="p-5 space-y-4">
 
-                        {{-- Foto barang --}}
-                        <div class="rounded-xl overflow-hidden bg-slate-100 aspect-video flex items-center justify-center border border-slate-200">
-                            <template x-if="previewUrl">
-                                <img :src="previewUrl" :alt="title" class="w-full h-full object-cover">
+                        {{-- Foto barang - Slider / Carousel --}}
+                        <div class="rounded-xl overflow-hidden bg-slate-100 aspect-video flex items-center justify-center border border-slate-200 relative group">
+                            <template x-if="allPreviewPhotos.length > 0">
+                                <div class="w-full h-full relative">
+                                    <template x-for="(photo, idx) in allPreviewPhotos" :key="photo.id">
+                                        <div
+                                            x-show="activePreviewIndex === idx"
+                                            x-transition:enter="transition ease-out duration-200"
+                                            x-transition:enter-start="opacity-0 scale-98"
+                                            x-transition:enter-end="opacity-100 scale-100"
+                                            class="w-full h-full flex items-center justify-center"
+                                        >
+                                            <img :src="photo.url" :alt="title" class="w-full h-full object-cover">
+                                        </div>
+                                    </template>
+
+                                    {{-- Tombol Navigasi Kiri --}}
+                                    <button
+                                        type="button"
+                                        x-show="allPreviewPhotos.length > 1"
+                                        @click="activePreviewIndex = (activePreviewIndex === 0) ? allPreviewPhotos.length - 1 : activePreviewIndex - 1"
+                                        class="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-900/80 text-white flex items-center justify-center backdrop-blur-xs transition shadow-md cursor-pointer"
+                                        aria-label="Foto sebelumnya"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                    </button>
+
+                                    {{-- Tombol Navigasi Kanan --}}
+                                    <button
+                                        type="button"
+                                        x-show="allPreviewPhotos.length > 1"
+                                        @click="activePreviewIndex = (activePreviewIndex === allPreviewPhotos.length - 1) ? 0 : activePreviewIndex + 1"
+                                        class="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-900/80 text-white flex items-center justify-center backdrop-blur-xs transition shadow-md cursor-pointer"
+                                        aria-label="Foto berikutnya"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </button>
+
+                                    {{-- Titik Indikator Slider --}}
+                                    <div x-show="allPreviewPhotos.length > 1" class="absolute bottom-2.5 left-0 right-0 flex items-center justify-center gap-1.5 z-10">
+                                        <template x-for="(photo, idx) in allPreviewPhotos" :key="'dot-' + idx">
+                                            <button
+                                                type="button"
+                                                @click="activePreviewIndex = idx"
+                                                class="h-1.5 rounded-full transition-all duration-200 cursor-pointer"
+                                                :class="activePreviewIndex === idx ? 'w-5 bg-blue-600' : 'w-1.5 bg-white/80 hover:bg-white'"
+                                            ></button>
+                                        </template>
+                                    </div>
+
+                                    {{-- Badge Indikator Posisi --}}
+                                    <div x-show="allPreviewPhotos.length > 1" class="absolute top-2.5 right-2.5 bg-slate-900/60 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                        <span x-text="(activePreviewIndex + 1) + ' / ' + allPreviewPhotos.length"></span>
+                                    </div>
+                                </div>
                             </template>
-                            <template x-if="!previewUrl">
+
+                            <template x-if="allPreviewPhotos.length === 0">
                                 <div class="flex flex-col items-center gap-2 text-slate-400">
                                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -572,6 +702,19 @@
     {{-- ===================================== --}}
     {{-- Alpine.js Edit Form Component Script  --}}
     {{-- ===================================== --}}
+    @php
+        $initialExistingPhotos = $listing->images->map(function ($img) {
+            $url = $img->image_url;
+            return [
+                'id' => $img->id,
+                'url' => \Illuminate\Support\Str::startsWith($url, ['http://', 'https://'])
+                    ? $url
+                    : asset('storage/' . ltrim($url, '/')),
+                'is_primary' => (bool) $img->is_primary,
+            ];
+        })->values()->all();
+    @endphp
+
     <script>
         function editListingForm() {
             return {
@@ -583,29 +726,106 @@
                 addresses: @json(old('addresses', $listing->addresses)),
                 description: @json(old('description', $listing->description)),
 
-                /* ── Image Preview State ── */
-                existingUrl: @json($listing->photo_url ?? ''),
-                existingName: @json($listing->images->first()?->image_url ? basename($listing->images->first()->image_url) : 'Foto Tersimpan'),
-                previewUrl: @json($listing->photo_url ?? ''),
-                previewName: '',
-                hasNewImage: false,
+                /* ── Image State for Edit (Multi-photo max 5) ── */
+                existingPhotos: @json($initialExistingPhotos),
+                deletedImageIds: [],
+                newPhotos: [],
+                uploadError: '',
+                activePreviewIndex: 0,
 
-                handleFileChange(event) {
-                    const file = event.target.files[0];
-                    if (!file) return;
-                    this.previewName = file.name;
-                    this.hasNewImage = true;
-                    const reader = new FileReader();
-                    reader.onload = (e) => { this.previewUrl = e.target.result; };
-                    reader.readAsDataURL(file);
+                get activeExistingPhotos() {
+                    return this.existingPhotos.filter(p => !this.deletedImageIds.includes(p.id));
                 },
 
-                removeImage() {
-                    this.previewUrl  = this.existingUrl;
-                    this.previewName = '';
-                    this.hasNewImage = false;
-                    if (this.$refs.fotoInput) {
-                        this.$refs.fotoInput.value = '';
+                get totalPhotosCount() {
+                    return this.activeExistingPhotos.length + this.newPhotos.length;
+                },
+
+                get allPreviewPhotos() {
+                    const photos = [];
+                    this.activeExistingPhotos.forEach(p => {
+                        photos.push({ id: 'existing-' + p.id, url: p.url, is_existing: true });
+                    });
+                    this.newPhotos.forEach(p => {
+                        photos.push({ id: 'new-' + p.id, url: p.url, is_existing: false });
+                    });
+                    return photos;
+                },
+
+                handleFileChange(event) {
+                    const newFiles = Array.from(event.target.files);
+                    if (!newFiles.length) return;
+
+                    this.uploadError = '';
+
+                    if (this.totalPhotosCount + newFiles.length > 5) {
+                        this.uploadError = 'Unggah maksimal 5 foto.';
+                        event.target.value = '';
+                        return;
+                    }
+
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                    const maxSize = 5 * 1024 * 1024; // 5 MB
+
+                    for (const file of newFiles) {
+                        if (!allowedTypes.includes(file.type)) {
+                            this.uploadError = 'Format foto harus JPG, JPEG, PNG, atau WEBP.';
+                            event.target.value = '';
+                            return;
+                        }
+                        if (file.size > maxSize) {
+                            this.uploadError = 'Ukuran setiap foto maksimal 5 MB.';
+                            event.target.value = '';
+                            return;
+                        }
+                    }
+
+                    newFiles.forEach(file => {
+                        this.newPhotos.push({
+                            id: Math.random().toString(36).substring(2, 9),
+                            file: file,
+                            url: URL.createObjectURL(file),
+                            name: file.name
+                        });
+                    });
+
+                    this.syncNewFiles();
+                    event.target.value = '';
+                },
+
+                removeExistingPhoto(id) {
+                    if (this.totalPhotosCount <= 1) {
+                        this.uploadError = 'Iklan wajib memiliki minimal 1 foto barang.';
+                        return;
+                    }
+                    this.uploadError = '';
+                    if (!this.deletedImageIds.includes(id)) {
+                        this.deletedImageIds.push(id);
+                    }
+                    if (this.activePreviewIndex >= this.allPreviewPhotos.length) {
+                        this.activePreviewIndex = Math.max(0, this.allPreviewPhotos.length - 1);
+                    }
+                },
+
+                removeNewPhoto(index) {
+                    if (this.totalPhotosCount <= 1) {
+                        this.uploadError = 'Iklan wajib memiliki minimal 1 foto barang.';
+                        return;
+                    }
+                    this.uploadError = '';
+                    URL.revokeObjectURL(this.newPhotos[index].url);
+                    this.newPhotos.splice(index, 1);
+                    if (this.activePreviewIndex >= this.allPreviewPhotos.length) {
+                        this.activePreviewIndex = Math.max(0, this.allPreviewPhotos.length - 1);
+                    }
+                    this.syncNewFiles();
+                },
+
+                syncNewFiles() {
+                    const dt = new DataTransfer();
+                    this.newPhotos.forEach(item => dt.items.add(item.file));
+                    if (this.$refs.realInput) {
+                        this.$refs.realInput.files = dt.files;
                     }
                 },
 
