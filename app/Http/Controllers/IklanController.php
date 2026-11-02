@@ -36,7 +36,7 @@ class IklanController extends Controller
      * Simpan iklan baru beserta foto ke database.
      *
      * Alur:
-     *  1. Validasi input via StoreListingRequest (termasuk custom rule kelipatan 1.000).
+     *  1. Validasi input via StoreListingRequest (termasuk custom rule kelipatan 1.000 dan maks 5 foto).
      *  2. Upload foto + INSERT listings + INSERT listings_images dalam satu DB::transaction.
      *  3. Redirect ke halaman utama dengan flash sukses.
      */
@@ -50,38 +50,43 @@ class IklanController extends Controller
         }
 
         $validated = $request->validated();
+        $uploadedFilePaths = [];
 
         // ── SIMPAN ATOMIK (upload foto + DB dalam satu transaction) ─────
         try {
-            DB::transaction(function () use ($validated, $request): void {
-                // Upload foto di dalam transaction; jika DB gagal → rollback + hapus file
-                $imagePath = $request->file('image')->store('listings', 'public');
+            DB::transaction(function () use ($validated, $request, &$uploadedFilePaths): void {
+                $listing = Listing::create([
+                    'user_id'             => Auth::id(),  // wajib user asli, tidak ada fallback
+                    'category_id'         => $validated['category_id'],
+                    'title'               => $validated['title'],
+                    'description'         => $validated['description'],
+                    'price'               => $validated['price'],
+                    // Simpan sebagai array murni — Eloquent cast 'array' menangani JSON encoding
+                    'condition_checklist' => ['kondisi' => $validated['condition']],
+                    'addresses'           => $validated['addresses'],
+                    'status'              => 'available',
+                ]);
 
-                try {
-                    $listing = Listing::create([
-                        'user_id'             => Auth::id(),  // wajib user asli, tidak ada fallback
-                        'category_id'         => $validated['category_id'],
-                        'title'               => $validated['title'],
-                        'description'         => $validated['description'],
-                        'price'               => $validated['price'],
-                        // Simpan sebagai array murni — Eloquent cast 'array' menangani JSON encoding
-                        'condition_checklist' => ['kondisi' => $validated['condition']],
-                        'addresses'           => $validated['addresses'],
-                        'status'              => 'available',
-                    ]);
+                $images = $request->file('images', []);
+                foreach ($images as $index => $image) {
+                    $imagePath = $image->store('listings', 'public');
+                    $uploadedFilePaths[] = $imagePath;
 
                     ListingImage::create([
                         'listing_id' => $listing->id,
                         'image_url'  => $imagePath,
-                        'is_primary' => true,
+                        'is_primary' => $index === 0,
                     ]);
-                } catch (\Throwable $dbError) {
-                    // DB gagal → hapus foto yang sudah terlanjur diupload
-                    Storage::disk('public')->delete($imagePath);
-                    throw $dbError;  // re-throw agar transaction rollback
                 }
             });
         } catch (\Throwable $e) {
+            // DB gagal → hapus seluruh foto yang sudah terlanjur diupload
+            foreach ($uploadedFilePaths as $path) {
+                if (Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
+                }
+            }
+
             return back()
                 ->withInput()
                 ->with('error', 'Terjadi kesalahan saat menyimpan iklan. Silakan coba lagi.');
@@ -116,48 +121,56 @@ class IklanController extends Controller
      * Perbarui data iklan milik penjual.
      *
      * Alur:
-     *  1. Validasi via StoreListingRequest (foto opsional jika tidak diganti).
+     *  1. Validasi via StoreListingRequest (gabungan foto lama dan baru maks 5, min 1).
      *  2. Otorisasi kepemilikan iklan.
-     *  3. Update data iklan dan foto baru (jika diunggah) secara atomik.
-     *  4. Hapus foto lama hanya setelah transaksi berhasil dan tidak dipakai oleh iklan lain.
+     *  3. Update data iklan, hapus relasi foto yang dibuang, upload foto baru secara atomik.
+     *  4. Pastikan ada foto utama (is_primary = true) otomatis jika foto utama lama dihapus.
+     *  5. Hapus fisik foto lama hanya setelah transaksi DB berhasil dan tidak dipakai oleh data lain.
      */
     public function update(StoreListingRequest $request, Listing $listing): RedirectResponse
     {
         abort_if($listing->user_id !== Auth::id(), 403, 'Anda tidak memiliki hak untuk memperbarui iklan ini.');
 
         $validated = $request->validated();
-        $newImagePath = null;
-        $oldImagePathToDelete = null;
+        $newUploadedFilePaths = [];
+        $oldFilePathsToDelete = [];
 
         try {
-            DB::transaction(function () use ($validated, $request, $listing, &$newImagePath, &$oldImagePathToDelete): void {
-                if ($request->hasFile('image')) {
-                    $newImagePath = $request->file('image')->store('listings', 'public');
-
-                    try {
-                        $primaryImage = $listing->images()->where('is_primary', true)->first() ?? $listing->images()->first();
-
-                        if ($primaryImage) {
-                            $oldImagePathToDelete = $primaryImage->image_url;
-                            $primaryImage->update([
-                                'image_url'  => $newImagePath,
-                                'is_primary' => true,
-                            ]);
-                        } else {
-                            ListingImage::create([
-                                'listing_id' => $listing->id,
-                                'image_url'  => $newImagePath,
-                                'is_primary' => true,
-                            ]);
-                        }
-                    } catch (\Throwable $dbError) {
-                        if ($newImagePath) {
-                            Storage::disk('public')->delete($newImagePath);
-                        }
-                        throw $dbError;
+            DB::transaction(function () use ($validated, $request, $listing, &$newUploadedFilePaths, &$oldFilePathsToDelete): void {
+                // 1. Hapus record foto lama yang ditandai untuk dihapus (hanya yang benar milik listing ini)
+                $deletedImageIds = array_filter((array) $request->input('deleted_image_ids', []));
+                if (! empty($deletedImageIds)) {
+                    $imagesToDelete = $listing->images()->whereIn('id', $deletedImageIds)->get();
+                    foreach ($imagesToDelete as $img) {
+                        $oldFilePathsToDelete[] = $img->image_url;
+                        $img->delete();
                     }
                 }
 
+                // 2. Upload foto-foto baru jika ada
+                if ($request->hasFile('images')) {
+                    foreach ($request->file('images') as $file) {
+                        $newPath = $file->store('listings', 'public');
+                        $newUploadedFilePaths[] = $newPath;
+
+                        ListingImage::create([
+                            'listing_id' => $listing->id,
+                            'image_url'  => $newPath,
+                            'is_primary' => false,
+                        ]);
+                    }
+                }
+
+                // 3. Pastikan tetap ada satu foto primary
+                $hasPrimary = $listing->images()->where('is_primary', true)->exists();
+                if (! $hasPrimary) {
+                    $firstRemaining = $listing->images()->oldest('id')->first();
+                    if ($firstRemaining) {
+                        $firstRemaining->update(['is_primary' => true]);
+                    }
+                }
+
+                // 4. Update detail listing
                 $listing->update([
                     'category_id'         => $validated['category_id'],
                     'title'               => $validated['title'],
@@ -168,16 +181,19 @@ class IklanController extends Controller
                 ]);
             });
 
-            // Hapus foto lama hanya jika transaksi sukses dan tidak dipakai oleh data lain
-            if ($oldImagePathToDelete && $oldImagePathToDelete !== $newImagePath) {
-                $isUsedElsewhere = ListingImage::where('image_url', $oldImagePathToDelete)->exists();
-                if (! $isUsedElsewhere && Storage::disk('public')->exists($oldImagePathToDelete)) {
-                    Storage::disk('public')->delete($oldImagePathToDelete);
+            // 5. Transaksi berhasil: Hapus foto lama dari storage disk jika tidak dipakai oleh data lain
+            foreach ($oldFilePathsToDelete as $oldPath) {
+                $isUsedElsewhere = ListingImage::where('image_url', $oldPath)->exists();
+                if (! $isUsedElsewhere && Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
                 }
             }
         } catch (\Throwable $e) {
-            if ($newImagePath && Storage::disk('public')->exists($newImagePath)) {
-                Storage::disk('public')->delete($newImagePath);
+            // Transaksi gagal: Bersihkan foto baru yang sempat diupload, foto lama tetap aman
+            foreach ($newUploadedFilePaths as $newPath) {
+                if (Storage::disk('public')->exists($newPath)) {
+                    Storage::disk('public')->delete($newPath);
+                }
             }
 
             return back()

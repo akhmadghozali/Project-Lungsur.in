@@ -13,7 +13,19 @@ class StoreListingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::check() && Auth::user()->isSeller();
+        if (! Auth::check() || ! Auth::user()->isSeller()) {
+            return false;
+        }
+
+        if ($this->route('listing') !== null) {
+            $listing = $this->route('listing') instanceof \App\Models\Listing
+                ? $this->route('listing')
+                : \App\Models\Listing::find($this->route('listing'));
+
+            return $listing && (int) $listing->user_id === (int) Auth::id();
+        }
+
+        return true;
     }
 
     /**
@@ -21,12 +33,16 @@ class StoreListingRequest extends FormRequest
      */
     protected function failedAuthorization()
     {
-        throw new \Illuminate\Http\Exceptions\HttpResponseException(
-            redirect()->route('dashboard')->with(
-                'warning',
-                'Akun dalam Mode Pembeli tidak dapat mempublikasikan iklan barang dagangan. Silakan beralih ke Mode Penjual terlebih dahulu.'
-            )
-        );
+        if (Auth::check() && ! Auth::user()->isSeller()) {
+            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                redirect()->route('dashboard')->with(
+                    'warning',
+                    'Akun dalam Mode Pembeli tidak dapat mempublikasikan atau mengelola iklan barang dagangan. Silakan beralih ke Mode Penjual terlebih dahulu.'
+                )
+            );
+        }
+
+        abort(403, 'Anda tidak memiliki hak untuk melakukan aksi ini.');
     }
 
     /**
@@ -39,7 +55,7 @@ class StoreListingRequest extends FormRequest
     {
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH') || $this->route('listing') !== null;
 
-        return [
+        $rules = [
             'title' => ['required', 'string', 'max:200'],
 
             'price' => [
@@ -64,14 +80,64 @@ class StoreListingRequest extends FormRequest
             'addresses' => ['required', 'string', 'max:255'],
 
             'description' => ['required', 'string'],
-
-            'image' => [
-                $isUpdate ? 'nullable' : 'required',
-                'image',
-                'mimes:jpeg,png,jpg,webp',
-                'max:2048', // 2 MB
-            ],
         ];
+
+        if ($isUpdate) {
+            $listing = $this->route('listing') instanceof \App\Models\Listing
+                ? $this->route('listing')
+                : \App\Models\Listing::find($this->route('listing'));
+
+            $rules['deleted_image_ids'] = ['nullable', 'array'];
+            $rules['deleted_image_ids.*'] = [
+                'integer',
+                function (string $attribute, mixed $value, \Closure $fail) use ($listing): void {
+                    if (! $listing || ! $listing->images()->where('id', $value)->exists()) {
+                        $fail('Foto yang ingin dihapus tidak valid untuk iklan ini.');
+                    }
+                },
+            ];
+
+            $rules['images'] = ['nullable', 'array'];
+            $rules['images.*'] = ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'];
+        } else {
+            $rules['images'] = ['required', 'array', 'min:1', 'max:5'];
+            $rules['images.*'] = ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'];
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Tambahkan validasi kustom setelah aturan utama dijalankan.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH') || $this->route('listing') !== null;
+
+            if ($isUpdate) {
+                $listing = $this->route('listing') instanceof \App\Models\Listing
+                    ? $this->route('listing')
+                    : \App\Models\Listing::find($this->route('listing'));
+
+                if ($listing) {
+                    $deletedIds = array_filter((array) $this->input('deleted_image_ids', []));
+                    $existingCount = $listing->images()->count();
+                    $validDeletedCount = $listing->images()->whereIn('id', $deletedIds)->count();
+                    $retainedCount = max(0, $existingCount - $validDeletedCount);
+
+                    $newFiles = $this->file('images');
+                    $newCount = is_array($newFiles) ? count($newFiles) : 0;
+                    $total = $retainedCount + $newCount;
+
+                    if ($total > 5) {
+                        $validator->errors()->add('images', 'Unggah maksimal 5 foto.');
+                    } elseif ($total < 1) {
+                        $validator->errors()->add('images', 'Iklan wajib memiliki minimal 1 foto barang.');
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -105,10 +171,14 @@ class StoreListingRequest extends FormRequest
             'description.required' => 'Deskripsi barang wajib diisi.',
             'description.string'   => 'Deskripsi harus berupa teks.',
 
-            'image.required'       => 'Foto barang wajib diunggah.',
-            'image.image'          => 'File yang diunggah harus berupa gambar.',
-            'image.mimes'          => 'Format foto harus JPEG, PNG, JPG, atau WEBP.',
-            'image.max'            => 'Ukuran foto maksimal 2 MB.',
+            'images.required'      => 'Foto barang wajib diunggah minimal 1 foto.',
+            'images.array'         => 'Format data foto tidak valid.',
+            'images.min'           => 'Foto barang wajib diunggah minimal 1 foto.',
+            'images.max'           => 'Unggah maksimal 5 foto.',
+            'images.*.required'    => 'Foto barang wajib diunggah.',
+            'images.*.image'       => 'File yang diunggah harus berupa gambar.',
+            'images.*.mimes'       => 'Format foto harus JPG, JPEG, PNG, atau WEBP.',
+            'images.*.max'         => 'Ukuran setiap foto maksimal 5 MB.',
         ];
     }
 
@@ -126,7 +196,8 @@ class StoreListingRequest extends FormRequest
             'category_id' => 'kategori barang',
             'addresses'   => 'lokasi/area kampus',
             'description' => 'deskripsi barang',
-            'image'       => 'foto barang',
+            'images'      => 'foto barang',
+            'images.*'    => 'foto barang',
         ];
     }
 }

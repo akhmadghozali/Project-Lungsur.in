@@ -42,23 +42,68 @@
                 addresses: '{{ old('addresses', auth()->user()->addresses ?? '') }}',
                 description: '{{ old('description', '') }}',
 
-                /* ── Image Preview State ── */
-                previewUrl: null,
-                previewName: '',
+                /* ── Image State (Multi-photo max 5) ── */
+                photos: [],
+                uploadError: '',
+                activePreviewIndex: 0,
 
                 handleFileChange(event) {
-                    const file = event.target.files[0];
-                    if (!file) return;
-                    this.previewName = file.name;
-                    const reader = new FileReader();
-                    reader.onload = (e) => { this.previewUrl = e.target.result; };
-                    reader.readAsDataURL(file);
+                    const newFiles = Array.from(event.target.files);
+                    if (!newFiles.length) return;
+
+                    this.uploadError = '';
+
+                    if (this.photos.length + newFiles.length > 5) {
+                        this.uploadError = 'Unggah maksimal 5 foto.';
+                        event.target.value = '';
+                        return;
+                    }
+
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                    const maxSize = 5 * 1024 * 1024; // 5 MB
+
+                    for (const file of newFiles) {
+                        if (!allowedTypes.includes(file.type)) {
+                            this.uploadError = 'Format foto harus JPG, JPEG, PNG, atau WEBP.';
+                            event.target.value = '';
+                            return;
+                        }
+                        if (file.size > maxSize) {
+                            this.uploadError = 'Ukuran setiap foto maksimal 5 MB.';
+                            event.target.value = '';
+                            return;
+                        }
+                    }
+
+                    newFiles.forEach(file => {
+                        this.photos.push({
+                            id: Math.random().toString(36).substring(2, 9),
+                            file: file,
+                            url: URL.createObjectURL(file),
+                            name: file.name
+                        });
+                    });
+
+                    this.syncFiles();
+                    event.target.value = '';
                 },
 
-                removeImage() {
-                    this.previewUrl  = null;
-                    this.previewName = '';
-                    this.$refs.fotoInput.value = '';
+                removePhoto(index) {
+                    URL.revokeObjectURL(this.photos[index].url);
+                    this.photos.splice(index, 1);
+                    this.uploadError = '';
+                    if (this.activePreviewIndex >= this.photos.length) {
+                        this.activePreviewIndex = Math.max(0, this.photos.length - 1);
+                    }
+                    this.syncFiles();
+                },
+
+                syncFiles() {
+                    const dt = new DataTransfer();
+                    this.photos.forEach(item => dt.items.add(item.file));
+                    if (this.$refs.realInput) {
+                        this.$refs.realInput.files = dt.files;
+                    }
                 },
 
                 /* ── Price Validation State ── */
@@ -331,83 +376,136 @@
                 {{-- SECTION 2: Foto Barang             --}}
                 {{-- ══════════════════════════════════ --}}
                 <div class="px-5 sm:px-7 py-5 space-y-4">
-                    <h2 class="text-sm font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-extrabold shrink-0">2</span>
-                        Foto Barang
-                    </h2>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-extrabold shrink-0">2</span>
+                            Foto Barang
+                            <span class="text-rose-500 ml-0.5">*</span>
+                        </h2>
+                        <span class="text-xs font-semibold text-slate-400" x-text="photos.length + ' / 5 Foto'"></span>
+                    </div>
 
-                    {{-- Dropzone / File Input --}}
+                    {{-- Upload Area & Thumbnails --}}
                     <div>
-                        {{-- Image Preview (shown when a file is selected) --}}
-                        <div x-cloak x-show="previewUrl" x-transition class="relative mb-3">
-                            <div class="relative rounded-xl overflow-hidden bg-slate-100 border border-slate-200 aspect-video flex items-center justify-center">
-                                <img
-                                    :src="previewUrl"
-                                    :alt="previewName"
-                                    class="max-h-64 max-w-full object-contain"
-                                >
-                                {{-- Badge nama file --}}
-                                <div class="absolute bottom-2 left-2 bg-black/50 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full truncate max-w-[60%]" x-text="previewName"></div>
-                            </div>
-                            {{-- Tombol Hapus Foto --}}
-                            <button
-                                type="button"
-                                @click="removeImage()"
-                                class="absolute top-2 right-2 w-8 h-8 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center shadow-md transition"
-                                title="Hapus foto"
-                                aria-label="Hapus foto yang dipilih"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
-
-                        {{-- Upload Area (shown when no file is selected) --}}
-                        <label
-                            for="foto_barang"
-                            x-show="!previewUrl"
-                            x-transition
-                            class="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-slate-200 hover:border-blue-400 bg-slate-50/50 hover:bg-blue-50/30 rounded-xl p-8 cursor-pointer transition group"
+                        {{-- Hidden real file input submitted with form --}}
+                        <input
+                            type="file"
+                            name="images[]"
+                            multiple
+                            x-ref="realInput"
+                            class="hidden"
                         >
-                            <div class="w-12 h-12 rounded-2xl bg-blue-100 group-hover:bg-blue-600 text-blue-600 group-hover:text-white flex items-center justify-center transition">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+
+                        {{-- Hidden file selector trigger --}}
+                        <input
+                            id="foto_barang_input"
+                            type="file"
+                            multiple
+                            accept="image/png,image/jpeg,image/webp"
+                            x-ref="fileSelector"
+                            @change="handleFileChange($event)"
+                            class="hidden"
+                        >
+
+                        {{-- Initial Dropzone (shown when 0 photos) --}}
+                        <div
+                            x-show="photos.length === 0"
+                            @click="$refs.fileSelector.click()"
+                            class="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-slate-200 hover:border-blue-400 bg-slate-50/50 hover:bg-blue-50/30 rounded-2xl p-8 cursor-pointer transition group"
+                        >
+                            <div class="w-14 h-14 rounded-2xl bg-blue-100 group-hover:bg-blue-600 text-blue-600 group-hover:text-white flex items-center justify-center transition shadow-sm">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/>
                                 </svg>
                             </div>
                             <div class="text-center">
-                                <p class="text-sm font-bold text-slate-700 group-hover:text-blue-700 transition">
-                                    Klik untuk unggah foto
+                                <p class="text-sm font-bold text-slate-800 group-hover:text-blue-700 transition">
+                                    Unggah Foto Barang (Maks. 5 Foto)
                                 </p>
-                                <p class="text-xs text-slate-400 mt-0.5">PNG, JPG, WEBP – Maks. 2 MB</p>
+                                <p class="text-xs text-slate-400 mt-1">
+                                    Klik tombol (+) ini untuk memilih foto. Format JPG, JPEG, PNG, WEBP (Maks. 5 MB/foto).
+                                </p>
                             </div>
-                        </label>
+                        </div>
 
-                        {{-- Hidden file input --}}
-                        <input
-                            id="foto_barang"
-                            type="file"
-                            name="image"
-                            accept="image/png,image/jpeg,image/webp"
-                            x-ref="fotoInput"
-                            @change="handleFileChange($event)"
-                            class="sr-only"
-                        >
+                        {{-- Thumbnails Grid + (+) Button (shown when photos.length > 0) --}}
+                        <div x-cloak x-show="photos.length > 0" class="space-y-3">
+                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                <template x-for="(photo, index) in photos" :key="photo.id">
+                                    <div class="aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 relative group shadow-xs">
+                                        <img
+                                            :src="photo.url"
+                                            :alt="photo.name"
+                                            class="w-full h-full object-cover"
+                                        >
+
+                                        {{-- Badge Nomor Urut --}}
+                                        <div class="absolute top-2 left-2 bg-slate-900/60 backdrop-blur-xs text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md" x-text="index + 1"></div>
+
+                                        {{-- Badge Foto Utama --}}
+                                        <div x-show="index === 0" class="absolute bottom-2 left-2 bg-blue-600/90 backdrop-blur-xs text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs">
+                                            Utama
+                                        </div>
+
+                                        {{-- Tombol Hapus Thumbnail --}}
+                                        <button
+                                            type="button"
+                                            @click="removePhoto(index)"
+                                            class="absolute top-2 right-2 w-7 h-7 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center shadow-md transition cursor-pointer"
+                                            title="Hapus foto ini"
+                                            aria-label="Hapus foto ini"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                {{-- Tombol Tambah (+) berikutnya (hilang saat mencapai 5 foto) --}}
+                                <div
+                                    x-show="photos.length < 5"
+                                    @click="$refs.fileSelector.click()"
+                                    class="aspect-square rounded-2xl border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50 hover:bg-blue-50/40 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition text-slate-500 hover:text-blue-600 group"
+                                    title="Tambah foto berikutnya"
+                                >
+                                    <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 group-hover:border-blue-300 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition shadow-xs text-slate-600">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-xs font-bold">Tambah Foto</span>
+                                    <span class="text-[10px] text-slate-400" x-text="'(' + photos.length + '/5)'"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Pesan Validasi Foto --}}
+                        <div x-cloak x-show="uploadError" class="mt-2.5 text-xs text-rose-600 font-semibold flex items-center gap-1">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span x-text="uploadError"></span>
+                        </div>
+
+                        @error('images')
+                            <p class="mt-2 text-xs text-rose-600 font-medium flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                        @error('images.*')
+                            <p class="mt-1 text-xs text-rose-600 font-medium flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
-
-                    @error('image')
-                        <p class="text-xs text-rose-600 font-medium flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            {{ $message }}
-                        </p>
-                    @enderror
 
                     {{-- Tips --}}
                     <div class="flex items-start gap-2.5 text-xs text-slate-500 bg-blue-50/60 border border-blue-100 rounded-xl px-4 py-3">
                         <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span>Gunakan foto asli dan berkualitas baik. Iklan dengan foto menarik lebih cepat terjual!</span>
+                        <span>Unggah hingga 5 foto produk dari berbagai sudut agar calon pembeli dapat melihat kondisi barang dengan jelas. Foto pertama otomatis menjadi foto utama.</span>
                     </div>
                 </div>
 
@@ -537,12 +635,68 @@
                     {{-- Konten preview --}}
                     <div class="p-5 space-y-4">
 
-                        {{-- Foto barang --}}
-                        <div class="rounded-xl overflow-hidden bg-slate-100 aspect-video flex items-center justify-center border border-slate-200">
-                            <template x-if="previewUrl">
-                                <img :src="previewUrl" :alt="title" class="w-full h-full object-cover">
+                        {{-- Foto barang - Slider / Carousel --}}
+                        <div class="rounded-xl overflow-hidden bg-slate-100 aspect-video flex items-center justify-center border border-slate-200 relative group">
+                            <template x-if="photos.length > 0">
+                                <div class="w-full h-full relative">
+                                    <template x-for="(photo, idx) in photos" :key="photo.id">
+                                        <div
+                                            x-show="activePreviewIndex === idx"
+                                            x-transition:enter="transition ease-out duration-200"
+                                            x-transition:enter-start="opacity-0 scale-98"
+                                            x-transition:enter-end="opacity-100 scale-100"
+                                            class="w-full h-full flex items-center justify-center"
+                                        >
+                                            <img :src="photo.url" :alt="title" class="w-full h-full object-cover">
+                                        </div>
+                                    </template>
+
+                                    {{-- Tombol Navigasi Kiri --}}
+                                    <button
+                                        type="button"
+                                        x-show="photos.length > 1"
+                                        @click="activePreviewIndex = (activePreviewIndex === 0) ? photos.length - 1 : activePreviewIndex - 1"
+                                        class="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-900/80 text-white flex items-center justify-center backdrop-blur-xs transition shadow-md cursor-pointer"
+                                        aria-label="Foto sebelumnya"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                    </button>
+
+                                    {{-- Tombol Navigasi Kanan --}}
+                                    <button
+                                        type="button"
+                                        x-show="photos.length > 1"
+                                        @click="activePreviewIndex = (activePreviewIndex === photos.length - 1) ? 0 : activePreviewIndex + 1"
+                                        class="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-900/80 text-white flex items-center justify-center backdrop-blur-xs transition shadow-md cursor-pointer"
+                                        aria-label="Foto berikutnya"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </button>
+
+                                    {{-- Titik Indikator Slider --}}
+                                    <div x-show="photos.length > 1" class="absolute bottom-2.5 left-0 right-0 flex items-center justify-center gap-1.5 z-10">
+                                        <template x-for="(photo, idx) in photos" :key="'dot-' + idx">
+                                            <button
+                                                type="button"
+                                                @click="activePreviewIndex = idx"
+                                                class="h-1.5 rounded-full transition-all duration-200 cursor-pointer"
+                                                :class="activePreviewIndex === idx ? 'w-5 bg-blue-600' : 'w-1.5 bg-white/80 hover:bg-white'"
+                                            ></button>
+                                        </template>
+                                    </div>
+
+                                    {{-- Badge Indikator Posisi --}}
+                                    <div x-show="photos.length > 1" class="absolute top-2.5 right-2.5 bg-slate-900/60 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                        <span x-text="(activePreviewIndex + 1) + ' / ' + photos.length"></span>
+                                    </div>
+                                </div>
                             </template>
-                            <template x-if="!previewUrl">
+
+                            <template x-if="photos.length === 0">
                                 <div class="flex flex-col items-center gap-2 text-slate-400">
                                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
