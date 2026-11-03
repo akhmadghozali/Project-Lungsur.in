@@ -21,18 +21,19 @@
         <!-- ============================================================== -->
         <!-- SISI KIRI (BRANDING PANEL BERGANTI HALUS TANPA RELOAD)         -->
         <!-- ============================================================== -->
-        <div class="lg:col-span-5 relative flex flex-col justify-between overflow-hidden transition-colors duration-500"
+        <div class="lg:col-span-5 relative overflow-hidden transition-colors duration-500 min-h-[520px]"
              :class="mode === 'register' ? 'bg-slate-900' : (mode === 'forgot_password' || mode === 'reset_password' ? 'bg-indigo-950' : 'bg-blue-600')">
             
-            <!-- PANEL KIRI VERSI LOGIN (GAMBAR 5: BLUE STRIPED CARD) -->
-            <div x-show="mode === 'login'" 
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 translate-x-4"
-                 x-transition:enter-end="opacity-100 translate-x-0"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 translate-x-0"
-                 x-transition:leave-end="opacity-0 -translate-x-4"
-                 class="h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative">
+            <div class="grid grid-cols-1 items-stretch h-full">
+                <!-- PANEL KIRI VERSI LOGIN (GAMBAR 5: BLUE STRIPED CARD) -->
+                <div x-show="mode === 'login'" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-x-4"
+                     x-transition:enter-end="opacity-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 -translate-x-4"
+                     class="col-start-1 row-start-1 h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative">
                 
                 <!-- Diagonal Pinstripe Texture Sesuai Gambar 5 -->
                 <div class="absolute inset-0 pointer-events-none opacity-40"
@@ -94,7 +95,7 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 translate-x-0"
                  x-transition:leave-end="opacity-0 translate-x-4"
-                 class="h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative">
+                 class="col-start-1 row-start-1 h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative">
                 
                 <!-- Background Soft Glow -->
                 <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-blue-600/25 blur-3xl pointer-events-none"></div>
@@ -192,7 +193,7 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 translate-x-0"
                  x-transition:leave-end="opacity-0 -translate-x-4"
-                 class="h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative">
+                 class="col-start-1 row-start-1 h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative">
                 
                 <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"></div>
                 <div class="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none"></div>
@@ -261,6 +262,8 @@
                 </div>
             </div>
 
+            </div>
+
         </div>
 
         <!-- ============================================================== -->
@@ -323,16 +326,20 @@
                     </div>
                 @endif
 
-                <!-- ============================================================== -->
-                <!-- FORMULIR 1: LOGIN (AKTIF JIKA mode === 'login')               -->
-                <!-- ============================================================== -->
-                <div x-show="mode === 'login'" 
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 translate-y-3"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     x-transition:leave="transition ease-in duration-200"
-                     x-transition:leave-start="opacity-100 translate-y-0"
-                     x-transition:leave-end="opacity-0 -translate-y-3">
+                <!-- FORMS GRID STACK: Menjaga posisi form tetap halus dan tidak melompat saat transisi -->
+                <div class="grid grid-cols-1 items-start w-full">
+
+                    <!-- ============================================================== -->
+                    <!-- FORMULIR 1: LOGIN (AKTIF JIKA mode === 'login')               -->
+                    <!-- ============================================================== -->
+                    <div x-show="mode === 'login'" 
+                         class="col-start-1 row-start-1 w-full"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 translate-y-3"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-3">
                     
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
@@ -445,17 +452,18 @@
                     </form>
                 </div>
 
-                <!-- ============================================================== -->
-                <!-- FORMULIR 2: REGISTER (AKTIF JIKA mode === 'register')         -->
-                <!-- ============================================================== -->
-                <div x-show="mode === 'register'" 
-                     x-cloak
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 translate-y-3"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     x-transition:leave="transition ease-in duration-200"
-                     x-transition:leave-start="opacity-100 translate-y-0"
-                     x-transition:leave-end="opacity-0 -translate-y-3">
+                    <!-- ============================================================== -->
+                    <!-- FORMULIR 2: REGISTER (AKTIF JIKA mode === 'register')         -->
+                    <!-- ============================================================== -->
+                    <div x-show="mode === 'register'" 
+                         x-cloak
+                         class="col-start-1 row-start-1 w-full"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 translate-y-3"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-3">
                     
                     <div class="mb-5">
                         <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
@@ -834,17 +842,18 @@
                     </form>
                 </div>
 
-                <!-- ============================================================== -->
-                <!-- FORMULIR 3: LUPA PASSWORD (KIRIM KODE OTP)                     -->
-                <!-- ============================================================== -->
-                <div x-show="mode === 'forgot_password'" 
-                     x-cloak
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 translate-y-3"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     x-transition:leave="transition ease-in duration-200"
-                     x-transition:leave-start="opacity-100 translate-y-0"
-                     x-transition:leave-end="opacity-0 -translate-y-3">
+                    <!-- ============================================================== -->
+                    <!-- FORMULIR 3: LUPA PASSWORD (KIRIM KODE OTP)                     -->
+                    <!-- ============================================================== -->
+                    <div x-show="mode === 'forgot_password'" 
+                         x-cloak
+                         class="col-start-1 row-start-1 w-full"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 translate-y-3"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-3">
                     
                     <div class="mb-6">
                         <button type="button" 
@@ -899,109 +908,115 @@
                     </form>
                 </div>
 
-                <!-- ============================================================== -->
-                <!-- FORMULIR 4: RESET PASSWORD (VERIFIKASI OTP & KATA SANDI BARU) -->
-                <!-- ============================================================== -->
-                <div x-show="mode === 'reset_password'" 
-                     x-cloak
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 translate-y-3"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     x-transition:leave="transition ease-in duration-200"
-                     x-transition:leave-start="opacity-100 translate-y-0"
-                     x-transition:leave-end="opacity-0 -translate-y-3">
-                    
-                    <div class="mb-6">
-                        <button type="button" 
-                                @click="switchMode('forgot_password')"
-                                class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-blue-600 transition mb-3 cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Ganti Email / Kirim Ulang OTP
-                        </button>
-                        <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-                            Atur Kata Sandi Baru
-                        </h1>
-                        <p class="text-xs sm:text-sm font-medium text-slate-500 mt-1">
-                            Masukkan kode OTP yang dikirimkan ke email Anda dan buat kata sandi baru.
-                        </p>
-                    </div>
-
-                    <form action="{{ route('password.update') }}" method="POST" class="space-y-4">
-                        @csrf
+                    <!-- ============================================================== -->
+                    <!-- FORMULIR 4: RESET PASSWORD (VERIFIKASI OTP & KATA SANDI BARU) -->
+                    <!-- ============================================================== -->
+                    <div x-show="mode === 'reset_password'" 
+                         x-cloak
+                         class="col-start-1 row-start-1 w-full"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 translate-y-3"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-3">
                         
-                        <div>
-                            <label for="reset_email" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                                Alamat Email
-                            </label>
-                            <input id="reset_email" 
-                                   name="email" 
-                                   type="email" 
-                                   value="{{ old('email', $presetEmail ?? '') }}"
-                                   placeholder="nama@email.com" 
-                                   required 
-                                   class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                        <div class="mb-6">
+                            <button type="button" 
+                                    @click="switchMode('forgot_password')"
+                                    class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-blue-600 transition mb-3 cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Ganti Email / Kirim Ulang OTP
+                            </button>
+                            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                                Atur Kata Sandi Baru
+                            </h1>
+                            <p class="text-xs sm:text-sm font-medium text-slate-500 mt-1">
+                                Masukkan kode OTP yang dikirimkan ke email Anda dan buat kata sandi baru.
+                            </p>
                         </div>
 
-                        <div>
-                            <label for="reset_otp" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                                Kode OTP (6 Digit)
-                            </label>
-                            <input id="reset_otp" 
-                                   name="otp" 
-                                   type="text" 
-                                   maxlength="6"
-                                   placeholder="123456" 
-                                   required 
-                                   class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 font-mono text-center tracking-[0.4em] text-lg font-bold focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
-                        </div>
-
-                        <div x-data="{ show: false }">
-                            <label for="reset_password_field" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                                Kata Sandi Baru
-                            </label>
-                            <div class="relative">
-                                <input id="reset_password_field" 
-                                       name="password" 
-                                       :type="show ? 'text' : 'password'" 
-                                       placeholder="Minimal 8 karakter" 
+                        <form action="{{ route('password.update') }}" method="POST" class="space-y-4">
+                            @csrf
+                            
+                            <div>
+                                <label for="reset_email" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                    Alamat Email
+                                </label>
+                                <input id="reset_email" 
+                                       name="email" 
+                                       type="email" 
+                                       value="{{ old('email', $presetEmail ?? '') }}"
+                                       placeholder="nama@email.com" 
                                        required 
-                                       class="w-full px-4 py-3 pr-11 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
-                                <button type="button" 
-                                        @click="show = !show" 
-                                        class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
-                                        tabindex="-1">
-                                    <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                    <svg x-show="show" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                                    </svg>
+                                       class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                            </div>
+
+                            <div>
+                                <label for="reset_otp" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                    Kode OTP (6 Digit)
+                                </label>
+                                <input id="reset_otp" 
+                                       name="otp" 
+                                       type="text" 
+                                       inputmode="numeric"
+                                       pattern="[0-9]*"
+                                       autocomplete="one-time-code"
+                                       maxlength="6"
+                                       placeholder="123456" 
+                                       required 
+                                       class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 font-mono text-center tracking-[0.4em] text-lg font-bold focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                            </div>
+
+                            <div x-data="{ show: false }">
+                                <label for="reset_password_field" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                    Kata Sandi Baru
+                                </label>
+                                <div class="relative">
+                                    <input id="reset_password_field" 
+                                           name="password" 
+                                           :type="show ? 'text' : 'password'" 
+                                           placeholder="Minimal 8 karakter" 
+                                           required 
+                                           class="w-full px-4 py-3 pr-11 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                                    <button type="button" 
+                                            @click="show = !show" 
+                                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                                            tabindex="-1">
+                                        <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        <svg x-show="show" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="reset_password_confirmation" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                    Konfirmasi Kata Sandi Baru
+                                </label>
+                                <input id="reset_password_confirmation" 
+                                       name="password_confirmation" 
+                                       type="password" 
+                                       placeholder="Ulangi kata sandi baru" 
+                                       required 
+                                       class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                            </div>
+
+                            <div class="pt-2">
+                                <button type="submit" 
+                                        class="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm tracking-wide shadow-md shadow-emerald-500/20 focus:outline-none focus:ring-4 focus:ring-emerald-100 transition cursor-pointer">
+                                    Simpan Kata Sandi Baru
                                 </button>
                             </div>
-                        </div>
+                        </form>
+                    </div>
 
-                        <div>
-                            <label for="reset_password_confirmation" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                                Konfirmasi Kata Sandi Baru
-                            </label>
-                            <input id="reset_password_confirmation" 
-                                   name="password_confirmation" 
-                                   type="password" 
-                                   placeholder="Ulangi kata sandi baru" 
-                                   required 
-                                   class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
-                        </div>
-
-                        <div class="pt-2">
-                            <button type="submit" 
-                                    class="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm tracking-wide shadow-md shadow-emerald-500/20 focus:outline-none focus:ring-4 focus:ring-emerald-100 transition cursor-pointer">
-                                Simpan Kata Sandi Baru
-                            </button>
-                        </div>
-                    </form>
                 </div>
 
             </div>
@@ -1015,6 +1030,7 @@
     <!-- ======================================================== -->
     <div x-show="showOtpModal" 
          x-cloak 
+         @keydown.escape.window="if (showOtpModal) closeOtpModal()"
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs"
          x-transition:enter="ease-out duration-300"
          x-transition:enter-start="opacity-0"
@@ -1024,12 +1040,23 @@
          x-transition:leave-end="opacity-0">
 
         <div class="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200 text-center relative overflow-hidden"
+             @click.away="closeOtpModal()"
              x-transition:enter="ease-out duration-300"
              x-transition:enter-start="opacity-0 translate-y-4 scale-95"
              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
              x-transition:leave="ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-y-0 scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 scale-95">
+
+            <!-- Tombol Tutup (X) -->
+            <button type="button" 
+                    @click="closeOtpModal()" 
+                    class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center transition cursor-pointer"
+                    aria-label="Tutup modal verifikasi">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
 
             <!-- Soft ambient accent in modal -->
             <div class="absolute -right-12 -top-12 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl pointer-events-none"></div>
@@ -1068,22 +1095,104 @@
                 <span x-text="otpSuccessMessage"></span>
             </div>
 
-            <!-- 6 Input OTP Boxes -->
+            <!-- 6 Input OTP Boxes: Static x-ref untuk auto-focus dan auto-advance lancar -->
             <div class="my-6">
-                <div class="flex justify-center items-center gap-2 sm:gap-2.5" @paste="handleOtpPaste($event)">
-                    <template x-for="(digit, index) in otpDigits" :key="index">
-                        <input type="text"
-                               inputmode="numeric"
-                               maxlength="1"
-                               :x-ref="'otpInput' + index"
-                               x-model="otpDigits[index]"
-                               @input="handleOtpInput($event, index)"
-                               @keydown="handleOtpKeydown($event, index)"
-                               class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition shadow-2xs">
-                    </template>
+                <div class="flex justify-center items-center gap-2 sm:gap-2.5" 
+                     x-ref="otpContainer" 
+                     @paste="handleOtpPaste($event)">
+                    
+                    <input type="text"
+                           inputmode="numeric"
+                           pattern="[0-9]*"
+                           autocomplete="one-time-code"
+                           maxlength="1"
+                           x-ref="otpInput0"
+                           x-model="otpDigits[0]"
+                           @input="handleOtpInput($event, 0)"
+                           @keydown="handleOtpKeydown($event, 0)"
+                           @focus="$event.target.select()"
+                           @paste="handleOtpPaste($event)"
+                           aria-label="Digit OTP ke-1"
+                           :class="otpDigits[0] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
+                           class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
+
+                    <input type="text"
+                           inputmode="numeric"
+                           pattern="[0-9]*"
+                           autocomplete="one-time-code"
+                           maxlength="1"
+                           x-ref="otpInput1"
+                           x-model="otpDigits[1]"
+                           @input="handleOtpInput($event, 1)"
+                           @keydown="handleOtpKeydown($event, 1)"
+                           @focus="$event.target.select()"
+                           @paste="handleOtpPaste($event)"
+                           aria-label="Digit OTP ke-2"
+                           :class="otpDigits[1] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
+                           class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
+
+                    <input type="text"
+                           inputmode="numeric"
+                           pattern="[0-9]*"
+                           autocomplete="one-time-code"
+                           maxlength="1"
+                           x-ref="otpInput2"
+                           x-model="otpDigits[2]"
+                           @input="handleOtpInput($event, 2)"
+                           @keydown="handleOtpKeydown($event, 2)"
+                           @focus="$event.target.select()"
+                           @paste="handleOtpPaste($event)"
+                           aria-label="Digit OTP ke-3"
+                           :class="otpDigits[2] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
+                           class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
+
+                    <input type="text"
+                           inputmode="numeric"
+                           pattern="[0-9]*"
+                           autocomplete="one-time-code"
+                           maxlength="1"
+                           x-ref="otpInput3"
+                           x-model="otpDigits[3]"
+                           @input="handleOtpInput($event, 3)"
+                           @keydown="handleOtpKeydown($event, 3)"
+                           @focus="$event.target.select()"
+                           @paste="handleOtpPaste($event)"
+                           aria-label="Digit OTP ke-4"
+                           :class="otpDigits[3] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
+                           class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
+
+                    <input type="text"
+                           inputmode="numeric"
+                           pattern="[0-9]*"
+                           autocomplete="one-time-code"
+                           maxlength="1"
+                           x-ref="otpInput4"
+                           x-model="otpDigits[4]"
+                           @input="handleOtpInput($event, 4)"
+                           @keydown="handleOtpKeydown($event, 4)"
+                           @focus="$event.target.select()"
+                           @paste="handleOtpPaste($event)"
+                           aria-label="Digit OTP ke-5"
+                           :class="otpDigits[4] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
+                           class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
+
+                    <input type="text"
+                           inputmode="numeric"
+                           pattern="[0-9]*"
+                           autocomplete="one-time-code"
+                           maxlength="1"
+                           x-ref="otpInput5"
+                           x-model="otpDigits[5]"
+                           @input="handleOtpInput($event, 5)"
+                           @keydown="handleOtpKeydown($event, 5)"
+                           @focus="$event.target.select()"
+                           @paste="handleOtpPaste($event)"
+                           aria-label="Digit OTP ke-6"
+                           :class="otpDigits[5] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
+                           class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
                 </div>
-                <p class="text-[11px] text-slate-400 mt-2 font-medium">
-                    Masukkan 6 digit angka dari email (bisa di-paste langsung)
+                <p class="text-[11px] text-slate-400 mt-2.5 font-medium">
+                    Ketik 6 digit angka dari email atau tempel (paste) langsung ke kotak
                 </p>
             </div>
 
@@ -1223,9 +1332,7 @@
 
                     if (this.showOtpModal) {
                         this.startOtpCountdown(60);
-                        this.$nextTick(() => {
-                            if (this.$refs.otpInput0) this.$refs.otpInput0.focus();
-                        });
+                        this.focusOtpInput(0);
                     }
                 },
 
@@ -1443,32 +1550,83 @@
                     }, 1000);
                 },
 
+                focusOtpInput(index) {
+                    this.$nextTick(() => {
+                        const target = this.$refs['otpInput' + index];
+                        if (target) {
+                            target.focus();
+                            target.select();
+                        }
+                    });
+                },
+
                 handleOtpInput(event, index) {
-                    const val = event.target.value.replace(/[^0-9]/g, '');
-                    this.otpDigits[index] = val ? val[val.length - 1] : '';
-                    if (val && index < 5) {
-                        this.$refs['otpInput' + (index + 1)].focus();
+                    const rawVal = event.target.value;
+                    const digits = rawVal.replace(/[^0-9]/g, '');
+
+                    // Jika user paste atau ketik lebih dari 1 digit sekaligus di kotak ini
+                    if (digits.length > 1) {
+                        const splitDigits = digits.split('');
+                        for (let i = 0; i < splitDigits.length; i++) {
+                            if (index + i < 6) {
+                                this.otpDigits[index + i] = splitDigits[i];
+                            }
+                        }
+                        const nextIndex = Math.min(index + splitDigits.length, 5);
+                        this.focusOtpInput(nextIndex);
+                        if (this.otpDigits.every(d => d !== '')) {
+                            this.submitVerifyOtp();
+                        }
+                        return;
                     }
+
+                    this.otpDigits[index] = digits;
+
+                    // Otomatis geser kursor ke kotak berikutnya setelah angka diketik
+                    if (digits && index < 5) {
+                        this.focusOtpInput(index + 1);
+                    }
+
+                    // Otomatis verifikasi jika 6 digit sudah lengkap
                     if (this.otpDigits.every(d => d !== '')) {
                         this.submitVerifyOtp();
                     }
                 },
 
                 handleOtpKeydown(event, index) {
-                    if (event.key === 'Backspace' && !this.otpDigits[index] && index > 0) {
-                        this.$refs['otpInput' + (index - 1)].focus();
+                    if (event.key === 'Backspace') {
+                        // Jika kotak saat ini kosong dan bukan kotak pertama, mundur dan hapus kotak sebelumnya
+                        if (!this.otpDigits[index] && index > 0) {
+                            event.preventDefault();
+                            this.otpDigits[index - 1] = '';
+                            this.focusOtpInput(index - 1);
+                        } else {
+                            this.otpDigits[index] = '';
+                        }
+                    } else if (event.key === 'ArrowLeft' && index > 0) {
+                        event.preventDefault();
+                        this.focusOtpInput(index - 1);
+                    } else if (event.key === 'ArrowRight' && index < 5) {
+                        event.preventDefault();
+                        this.focusOtpInput(index + 1);
+                    } else if (event.key === 'Delete') {
+                        this.otpDigits[index] = '';
                     }
                 },
 
                 handleOtpPaste(event) {
                     event.preventDefault();
                     const pasted = (event.clipboardData || window.clipboardData).getData('text').trim().replace(/[^0-9]/g, '');
-                    if (pasted.length >= 6) {
+                    if (pasted.length > 0) {
+                        const digits = pasted.slice(0, 6).split('');
                         for (let i = 0; i < 6; i++) {
-                            this.otpDigits[i] = pasted[i];
+                            this.otpDigits[i] = digits[i] || '';
                         }
-                        if (this.$refs.otpInput5) this.$refs.otpInput5.focus();
-                        this.submitVerifyOtp();
+                        const targetFocus = Math.min(digits.length, 5);
+                        this.focusOtpInput(targetFocus);
+                        if (this.otpDigits.every(d => d !== '')) {
+                            this.submitVerifyOtp();
+                        }
                     }
                 },
 
@@ -1502,9 +1660,7 @@
                                 : '';
                             this.showOtpModal = true;
                             this.startOtpCountdown(data.resend_cooldown || 60);
-                            this.$nextTick(() => {
-                                if (this.$refs.otpInput0) this.$refs.otpInput0.focus();
-                            });
+                            this.focusOtpInput(0);
                         } else if (response.ok && data.status === 'pending_verification') {
                             alert(data.message || 'Pendaftaran berhasil diajukan! Berkas KTM Anda telah kami terima dan sedang dalam antrean verifikasi administrator.');
                             window.location.href = data.redirect || '{{ route('login') }}';
@@ -1590,12 +1746,12 @@
                         const data = await response.json();
 
                         if (response.ok) {
-                            this.otpSuccessMessage = data.message || 'Kode OTP baru telah berhasil dikirimkan.';
+                            this.otpSuccessMessage = data.dev_otp 
+                                ? data.message + ' [Kode: ' + data.dev_otp + ']'
+                                : (data.message || 'Kode OTP baru telah berhasil dikirimkan.');
                             this.otpDigits = ['', '', '', '', '', ''];
                             this.startOtpCountdown(data.resend_cooldown || 60);
-                            this.$nextTick(() => {
-                                if (this.$refs.otpInput0) this.$refs.otpInput0.focus();
-                            });
+                            this.focusOtpInput(0);
                         } else {
                             this.otpError = data.message || 'Gagal mengirim ulang kode OTP.';
                         }
