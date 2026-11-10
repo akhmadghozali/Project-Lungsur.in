@@ -8,6 +8,7 @@ use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\IklanController;
 use App\Http\Controllers\WantedAdController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ChatController; // Sesuaikan nanti jika controller chat sudah ada
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -115,7 +116,17 @@ Route::delete('/cari-barang/{wantedAd}', [WantedAdController::class, 'destroy'])
 Route::post('/cari-barang/{wantedAd}/tawari', [WantedAdController::class, 'offerItem'])
     ->middleware(['auth', 'verified_student'])
     ->name('wanted-ads.offer');
-
+    
 // Alias rute kompatibilitas untuk detail iklan & lelang
 Route::get('/listings/{id}', [IklanController::class, 'show']);
 Route::get('/auctions/{id}', fn ($id) => redirect()->route('auctions.show', $id));
+
+// Rute sementara/dummy untuk chat.start
+Route::get('/chat/start/{listing}', function ($listing) {
+    return redirect()->back()->with('info', 'Fitur chat sedang dalam tahap pengembangan.');
+})->name('chat.start')->middleware('auth');
+
+// Rute sementara/dummy untuk chat.start
+Route::get('/chat/start/{listing}', function ($listing) {
+    return redirect()->back()->with('info', 'Fitur chat sedang dalam tahap pengembangan.');
+})->name('chat.start')->middleware('auth');

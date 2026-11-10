@@ -37,41 +37,94 @@
         font-size: 13px;
     }
 
-    .ld-back-link {
+.ld-back-link {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 9px 13px;
-        color: #263247;
-        background: #fff;
-        border: 1px solid var(--ld-border);
+        padding: 9px 15px;
+        color: #ffffff;
+        background: var(--ld-blue); /* Menggunakan warna biru utama Lungsur.in (#2563eb) */
+        border: 1px solid transparent;
         border-radius: 9px;
         text-decoration: none;
         font-weight: 600;
-        transition: .2s ease;
+        box-shadow: 0 1px 2px rgba(37, 99, 235, 0.15);
+        transition: all 0.2s ease;
     }
 
     .ld-back-link:hover {
-        color: var(--ld-blue);
-        border-color: #b9cdfd;
-        background: #f8fbff;
+        color: #ffffff;
+        background: #1d4ed8; /* Warna biru sedikit lebih gelap saat kursor diarahkan (hover) */
+        border-color: #1e40af;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        transform: translateY(-1px); /* Efek sedikit terangkat saat di-hover */
     }
 
+    .ld-back-link:active {
+        transform: translateY(0); /* Efek membal saat tombol benar-benar diklik */
+        background: #1e40af;
+        box-shadow: none;
+    }
+
+  /* Efek Border Neon Hijau Berjalan secara Otomatis saat di Halaman */
     .ld-crumbs {
-        display: flex;
+        position: relative;
+        display: inline-flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: 7px;
-        color: #64748b;
+        gap: 8px;
+        padding: 9px 16px;
+        background: #ffffff;
+        border: 1px solid var(--ld-border);
+        border-radius: 12px;
+        /* Kotak langsung memancarkan cahaya hijau lembut secara permanen */
+        box-shadow: 0 0 15px #1e40af(16, 185, 129, 0.3);
+        overflow: hidden;
+        z-index: 1;
     }
 
-    .ld-crumbs a {
-        color: #64748b;
-        text-decoration: none;
+    /* Lapisan animasi cahaya biru yang berputar otomatis */
+    .ld-crumbs::before {
+        content: '';
+        position: absolute;
+        inset: -50%;
+        background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 270deg, #10b981 360deg);
+        animation: rotateGlow 3s linear infinite;
+        z-index: -2;
     }
 
-    .ld-crumbs a:hover { color: var(--ld-blue); }
-    .ld-crumb-current { color: #172033; font-weight: 600; }
+    /* Menutup bagian tengah agar tetap berwarna putih bersih dan hanya pinggirannya yang bercahaya */
+    .ld-crumbs::after {
+        content: '';
+        position: absolute;
+        inset: 1.5px;
+        background: #ffffff;
+        border-radius: 10.5px;
+        z-index: -1;
+    }
+
+    @keyframes rotateGlow {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+    .ld-crumbs:hover {
+        box-shadow: 0 0 15px #1e40af(16, 185, 129, 0.35);
+        color: var(--ld-blue);
+    }
+
+    
+  .ld-crumb-current { 
+        color: #172033; 
+        font-weight: 700;
+        max-width: 280px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
     .ld-layout {
         display: grid;
@@ -106,7 +159,7 @@
     .ld-main-photo {
         position: relative;
         height: 420px;
-        overflow: hidden;
+        overflow: visible !important;
         border-radius: 9px;
         background: #eef2f7;
     }
@@ -116,15 +169,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-    }
-
-    .ld-no-photo {
-        display: grid;
-        place-items: center;
-        width: 100%;
-        height: 100%;
-        color: #64748b;
-        font-size: 14px;
+        border-radius: 9px;
     }
 
     .ld-original-badge {
@@ -142,6 +187,7 @@
         box-shadow: 0 2px 8px rgba(15,23,42,.08);
         font-size: 11px;
         font-weight: 700;
+        z-index: 10;
     }
 
     .ld-original-badge span { color: #059669; font-size: 14px; }
@@ -156,6 +202,7 @@
         border-radius: 4px;
         font-size: 12px;
         font-weight: 700;
+        z-index: 10;
     }
 
     .ld-thumbnails {
@@ -584,6 +631,7 @@
         .ld-card-heading { align-items: flex-start; }
         .ld-heading-note { white-space: normal; text-align: right; }
     }
+
 </style>
 @endpush
 
@@ -591,13 +639,6 @@
 @php
     $images = $listing->images ?? collect();
     $firstImage = $images->first();
-
-    $thumbnailTitles = [
-        ['Tampak Depan', 'Siap pakai'],
-        ['Samping & Kaki', 'Engsel kokoh'],
-        ['Detail Kondisi', 'Detail permukaan'],
-        ['Saat Dilipat', 'Mudah disimpan'],
-    ];
 
     $categoryName = $listing->category->name ?? 'Perabot';
     $conditionName = $listing->condition ?? 'Bekas';
@@ -607,15 +648,14 @@
 <main class="listing-detail-page">
     <div class="ld-container">
         <nav class="ld-breadcrumb" aria-label="Breadcrumb">
-            <a href="{{ url()->previous() }}" class="ld-back-link">
+            <a href="{{ url('/') }}" class="ld-back-link">
                 <span aria-hidden="true">←</span> Kembali ke Katalog
             </a>
 
             <div class="ld-crumbs">
                 <a href="{{ url('/') }}">Home</a>
                 <span>/</span>
-                <span>{{ $categoryName }}</span>
-                <span>/</span>
+                <span class="ld-crumb-category" style="color: #64748b; font-weight: 500;">{{ $categoryName }}</span>
                 <span class="ld-crumb-current">{{ $listing->name }}</span>
             </div>
         </nav>
@@ -624,36 +664,41 @@
             {{-- KOLOM KIRI: GALERI DAN SPESIFIKASI --}}
             <section class="ld-left" aria-label="Foto dan spesifikasi barang">
                 <div class="ld-card ld-gallery">
-                    <div class="ld-main-photo">
-                       @if ($listing->photo_url)
-    <img
-        src="{{ $listing->photo_url }}"
-        alt="{{ $listing->title }}"
-        class="w-full h-full object-cover"
-    >
-@else
-    <div class="w-full h-full flex items-center justify-center bg-gray-100">
-        <span class="text-gray-400">Foto belum tersedia</span>
-    </div>
-@endif
+                    {{-- FOTO UTAMA DENGAN TOMBOL NAVIGASI KIRI & KANAN --}}
+                    <div class="ld-main-photo position-relative">
+                        @if ($images->count() > 0)
+                            @php
+                                $firstUrl = $images->first()->image_url ?? '';
+                                $resolvedFirstUrl = Str::startsWith($firstUrl, ['http://', 'https://']) 
+                                    ? $firstUrl 
+                                    : asset('storage/' . ltrim($firstUrl, '/'));
+                            @endphp
+                            <img
+                                id="ldMainImage"
+                                src="{{ $resolvedFirstUrl }}"
+                                alt="{{ $listing->title }}"
+                            >
+                            
+                            <div class="ld-original-badge">
+                                  <span>●</span> Foto Asli Penjual (Bukan Katalog)
+                            </div>
 
-                        <div class="ld-original-badge">
-                            <span>●</span> Foto Asli Penjual (Bukan Katalog)
-                        </div>
-                        @foreach ($listing->images as $image)
-    <img
-        src="{{ Str::startsWith($image->image_url, ['http://', 'https://'])
-            ? $image->image_url
-            : asset('storage/' . ltrim($image->image_url, '/')) }}"
-        alt="{{ $listing->title }}"
-        class="w-20 h-20 object-cover rounded-lg"
-    >
-@endforeach
+                          <div class="ld-photo-count" id="ldPhotoCount">
+                              1 / {{ $images->count() }}
+                          </div>
 
-
-                        @if($images->count() > 0)
-                            <div class="ld-photo-count" id="ldPhotoCount">
-                                1 / {{ $images->count() }}
+                          {{-- Tombol Navigasi Kiri & Kanan --}}
+                          @if($images->count() > 1)
+                            <button type="button" onclick="prevSlide()" style="position: absolute; top: 50%; left: 12px; transform: translateY(-50%); width: 40px; height: 40px; background: white; color: #172033; border: none; border-radius: 50%; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 30; display: flex; align-items: center; justify-content: center;">
+                              ❮
+                            </button>
+                            <button type="button" onclick="nextSlide()" style="position: absolute; top: 50%; right: 12px; transform: translateY(-50%); width: 40px; height: 40px; background: white; color: #172033; border: none; border-radius: 50%; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 30; display: flex; align-items: center; justify-content: center;">
+                              ❯
+                            </button>
+                          @endif
+                        @else
+                            <div class="ld-no-photo">
+                                <span>Foto belum tersedia</span>
                             </div>
                         @endif
                     </div>
@@ -664,8 +709,11 @@
                         @foreach($images as $index => $image)
                             @php
                                 $caption = $thumbnailTitles[$index] ?? ['Foto ' . ($index + 1), 'Detail barang'];
-                                $imageUrl = $image->image_url;
-                            @endphp
+                                $rawUrl = $image->image_url ?? '';
+                                $imageUrl = Str::startsWith($rawUrl, ['http://', 'https://']) 
+                                    ? $rawUrl 
+                                    : asset('storage/' . ltrim($rawUrl, '/'));
+                          @endphp
 
                             <button
                                 type="button"
@@ -673,11 +721,11 @@
                                 onclick="changeListingImage(@js($imageUrl), this, {{ $index + 1 }})"
                                 aria-label="Tampilkan foto {{ $index + 1 }}"
                                 aria-pressed="{{ $index === 0 ? 'true' : 'false' }}"
-                            >
-                                <img src="{{ $imageUrl }}" alt="Foto {{ $index + 1 }} {{ $listing->name }}">
-                                <span class="ld-thumb-title">{{ $caption[0] }}</span>
-                                <span class="ld-thumb-subtitle">{{ $caption[1] }}</span>
-                            </button>
+                          >
+                              <img src="{{ $imageUrl }}" alt="Foto {{ $index + 1 }} {{ $listing->name }}">
+                              <span class="ld-thumb-title">{{ $caption[0] }}</span>
+                              <span class="ld-thumb-subtitle">{{ $caption[1] }}</span>
+                        </button>
                         @endforeach
                     </div>
                 @endif
@@ -705,30 +753,32 @@
                             <span class="ld-spec-label">Beban Maksimal</span>
                             <strong class="ld-spec-value">15 kg</strong>
                         </div>
-                    </div>
-                </section>
+                  </div>
+              </section>
             </section>
 
             {{-- KOLOM KANAN: INFORMASI IKLAN DAN PENJUAL --}}
             <aside class="ld-right">
                 <section class="ld-card ld-product-card">
                     <div class="ld-badges">
-                        <span class="ld-badge ld-badge-primary">Perabot Kos</span>
+                        @if($listing->category)
+                            <span class="ld-badge ld-badge-primary">{{ $listing->category->name }}</span>
+                        @endif
                         <span class="ld-badge ld-badge-primary">Kayu Solid</span>
-                        <span class="ld-badge">Kondisi {{ $conditionName }}</span>
+                        <span class="ld-badge">Kondisi {{ $conditionName ?? 'Bekas' }}</span>
                         <span class="ld-badge">Nego Tipis COD</span>
                     </div>
 
-                    <h1 class="ld-product-title">{{ $listing->name ?? 'Meja Belajar Kayu Lipat' }}</h1>
+                    <h1 class="ld-product-title">{{ $listing->title }}</h1>
 
                     <p class="ld-price">
-                        Rp {{ number_format((float) ($listing->price ?? 75000), 0, ',', '.') }}
+                        Rp {{ number_format((float) $listing->price, 0, ',', '.') }}
                     </p>
 
                     <div class="ld-location">
                         <span class="ld-location-icon" aria-hidden="true">⌖</span>
                         <div>
-                            <strong>Sekitar Kampus UB &amp; Polinema</strong>
+                            <strong>{{ $listing->location ?? 'Sekitar Kampus UB & Polinema' }}</strong>
                             <small>Kecamatan Lowokwaru, Kota Malang</small>
                         </div>
                     </div>
@@ -736,62 +786,76 @@
 
                 <section class="ld-card ld-description-card">
                     <h2 class="ld-card-heading">Deskripsi &amp; Kondisi Fisik</h2>
-
-                    <p class="ld-description">{{ $listing->description ?? 'Meja lipat kayu pinus solid ukuran 60 × 40 cm dengan tinggi 30 cm. Cocok untuk belajar di kos atau lesehan. Kondisi siap pakai dan engsel aman.' }}</p>
-
-                    <div class="ld-condition-list">
-                        <div class="ld-condition-row">
-                            <span class="ld-check">●</span>
-                            <span>Engsel normal dan kokoh tanpa goyang</span>
-                        </div>
-                        <div class="ld-condition-row">
-                            <span class="ld-check">●</span>
-                            <span>Permukaan kayu bebas dari noda cairan dan tinta</span>
-                        </div>
-                        <div class="ld-condition-row ld-minus">
-                            <span class="ld-info">●</span>
-                            <span><strong>Minus Fisik:</strong> Lecet pemakaian halus pada permukaan sudut kanan (cek foto thumbnail ke-3).</span>
-                        </div>
-                    </div>
+                    <p class="ld-description">{{ $listing->description }}</p>
                 </section>
 
                 <section class="ld-card ld-seller-card">
-                    <div class="ld-secure-heading">
-                        <span class="ld-lock-icon" aria-hidden="true">♙</span>
-                        <span>Identitas Penjual Dilindungi</span>
-                    </div>
-                    <p class="ld-secure-subtitle">Protokol Keamanan Komunitas Mahasiswa</p>
+                    @guest
+                        <div class="ld-secure-heading">
+                            <span class="ld-lock-icon" aria-hidden="true">♙</span>
+                            <span>Identitas Penjual Dilindungi</span>
+                        </div>
+                        <p class="ld-secure-subtitle">Protokol Keamanan Komunitas Mahasiswa</p>
+                        <p class="ld-secure-description">
+                            Informasi kontak dan lokasi kos hanya dapat diakses akun mahasiswa yang terverifikasi email kampus aktif.
+                        </p>
 
-                    <p class="ld-secure-description">
-                        Informasi kontak dan lokasi kos hanya dapat diakses akun mahasiswa yang terverifikasi email kampus aktif.
-                    </p>
-
-                    <div class="ld-seller-inner">
-                        <div class="ld-seller-top">
-                            <div class="ld-seller-identity">
-                                <div class="ld-avatar" aria-hidden="true">
-                                    {{ strtoupper(substr($sellerName, 0, 1)) }}
+                        <div class="ld-seller-inner">
+                            <div class="ld-seller-top">
+                                <div class="ld-seller-identity">
+                                    <div class="ld-avatar" aria-hidden="true">
+                                        {{ strtoupper(substr($sellerName ?? 'B', 0, 1)) }}
+                                    </div>
+                                    <div style="min-width:0">
+                                        <strong class="ld-seller-name">{{ $sellerName ?? 'Budi Santoso' }}</strong>
+                                        <span class="ld-sso-status">● SSO Kampus Aktif</span>
+                                    </div>
                                 </div>
-                                <div style="min-width:0">
-                                    <strong class="ld-seller-name">{{ $sellerName }}</strong>
-                                    <span class="ld-sso-status">● SSO Kampus Aktif</span>
+                                <span class="ld-verified" title="Identitas dilindungi">♙</span>
+                            </div>
+
+                            <div class="ld-seller-contact">
+                                <span class="ld-contact-masked">▤ &nbsp;0812••••••••</span>
+                                <span class="ld-contact-masked">⌖ &nbsp;Kos Tersembunyi [Tidak di tampilkan]</span>
+                            </div>
+                        </div>
+
+                        <a href="{{ route('login') }}" class="ld-contact-action">
+                            <span aria-hidden="true">♧</span>
+                            <span>Masuk dengan Email Kampus untuk<br> Hubungi Penjual</span>
+                        </a>
+                    @else
+                        <div class="ld-secure-heading">
+                            <span class="ld-lock-icon" aria-hidden="true">✓</span>
+                            <span>Informasi Penjual</span>
+                        </div>
+                        <p class="ld-secure-subtitle">Akun Mahasiswa Terverifikasi</p>
+
+                        <div class="ld-seller-inner mb-3">
+                            <div class="ld-seller-top">
+                                <div class="ld-seller-identity">
+                                    <div class="ld-avatar" aria-hidden="true">
+                                        {{ strtoupper(substr($listing->user->name ?? 'U', 0, 1)) }}
+                                    </div>
+                                    <div style="min-width:0">
+                                        <strong class="ld-seller-name">{{ $listing->user->name ?? 'Penjual' }}</strong>
+                                        <span class="ld-sso-status text-success">● Terverifikasi</span>
+                                    </div>
                                 </div>
                             </div>
-                            <span class="ld-verified" title="Identitas dilindungi">♙</span>
+
+                            <div class="ld-seller-contact mt-2">
+                                <div>📞 {{ $listing->user->phone ?? '08123456789' }}</div>
+                                <div>📍 {{ $listing->location }}</div>
+                            </div>
                         </div>
 
-                        <div class="ld-seller-contact">
-                            <span class="ld-contact-masked">▤ &nbsp;0812••••••••</span>
-                            <span class="ld-contact-masked">⌖ &nbsp;Kos MT Haryono (Terkunci)</span>
-                        </div>
-                    </div>
+                        <a href="#" onclick="alert('Fitur chat sedang dalam tahap pengembangan.'); return false;" class="ld-contact-action btn-primary text-center" style="display: block; background: #2563eb; color: #fff; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                            <span>💬 Hubungi Penjual (Chat)</span>
+                        </a>
+                    @endguest
 
-                    <a href="{{ route('login') }}" class="ld-contact-action">
-                        <span aria-hidden="true">♧</span>
-                        <span>Masuk dengan Email Kampus untuk<br> Hubungi Penjual</span>
-                    </a>
-
-                    <p class="ld-campus-domains">
+                    <p class="ld-campus-domains mt-3">
                         SSO resmi @student.ub.ac.id, @student.polinema.ac.id,
                         @student.um.ac.id, @webmail.umm.ac.id
                     </p>
@@ -815,24 +879,68 @@
 
 @push('scripts')
 <script>
+    let currentImageIndex = 0;
+    const listingImages = [
+        @foreach($images as $image)
+            @php
+                $rawUrl = $image->image_url ?? '';
+                $resolvedUrl = Str::startsWith($rawUrl, ['http://', 'https://']) 
+                    ? $rawUrl 
+                    : asset('storage/' . ltrim($rawUrl, '/'));
+            @endphp
+            "{{ $resolvedUrl }}",
+        @endforeach
+    ];
+
     function changeListingImage(src, button, imageNumber) {
         const mainImage = document.getElementById('ldMainImage');
         if (!mainImage) return;
 
         mainImage.src = src;
+        currentImageIndex = imageNumber - 1;
 
-        document.querySelectorAll('.ld-thumb').forEach((thumbnail) => {
-            thumbnail.classList.remove('is-active');
-            thumbnail.setAttribute('aria-pressed', 'false');
+        const thumbnails = document.querySelectorAll('.ld-thumb');
+        thumbnails.forEach((thumbnail, idx) => {
+            if (idx === currentImageIndex) {
+                thumbnail.classList.add('is-active');
+                thumbnail.setAttribute('aria-pressed', 'true');
+            } else {
+                thumbnail.classList.remove('is-active');
+                thumbnail.setAttribute('aria-pressed', 'false');
+            }
         });
 
-        button.classList.add('is-active');
-        button.setAttribute('aria-pressed', 'true');
+        updatePhotoCounter(imageNumber);
+    }
 
+    function updatePhotoCounter(imageNumber) {
         const counter = document.getElementById('ldPhotoCount');
-        if (counter) {
-            const total = document.querySelectorAll('.ld-thumb').length;
-            counter.textContent = `${imageNumber} / ${total}`;
+        if (counter && listingImages.length > 0) {
+            counter.textContent = `${imageNumber} / ${listingImages.length}`;
+        }
+    }
+
+    function nextSlide() {
+        if (listingImages.length === 0) return;
+        currentImageIndex = (currentImageIndex + 1) % listingImages.length;
+        triggerSlideChange();
+    }
+
+    function prevSlide() {
+        if (listingImages.length === 0) return;
+        currentImageIndex = (currentImageIndex - 1 + listingImages.length) % listingImages.length;
+        triggerSlideChange();
+    }
+
+    function triggerSlideChange() {
+        const nextUrl = listingImages[currentImageIndex];
+        const thumbnails = document.querySelectorAll('.ld-thumb');
+        if (thumbnails[currentImageIndex]) {
+            thumbnails[currentImageIndex].click();
+        } else {
+            const mainImage = document.getElementById('ldMainImage');
+            if (mainImage) mainImage.src = nextUrl;
+            updatePhotoCounter(currentImageIndex + 1);
         }
     }
 </script>
