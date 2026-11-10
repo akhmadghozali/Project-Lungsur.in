@@ -732,27 +732,14 @@
 
                 <section class="ld-card ld-spec-card">
                     <h2 class="ld-card-heading">
-                        <span>Spesifikasi Meja</span>
-                        <span class="ld-heading-note">Verifikasi Lapangan Malang</span>
+                        <button id="btnIngatkanLelang" class="ld-btn ld-btn-primary" style="background-color: #0d6efd; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background-color 0.2s;">
+            🔔 Ingatkan Jika Sudah Ada Jadwal Lelang
+        </button>
+                       <span class="ld-heading-note" style="display: block; margin-bottom: 12px; font-size: 13px; color: #6c757d;">
+            Saat ini barang <strong>belum dijadwalkan</strong> untuk lelang.
+        </span>
                     </h2>
-
                     <div class="ld-spec-grid">
-                        <div class="ld-spec-item">
-                            <span class="ld-spec-label">Dimensi</span>
-                            <strong class="ld-spec-value">60 × 40 cm</strong>
-                        </div>
-                        <div class="ld-spec-item">
-                            <span class="ld-spec-label">Tinggi Kaki</span>
-                            <strong class="ld-spec-value">30 cm (Lesehan)</strong>
-                        </div>
-                        <div class="ld-spec-item">
-                            <span class="ld-spec-label">Bahan Utama</span>
-                            <strong class="ld-spec-value">Kayu Pinus Solid</strong>
-                        </div>
-                        <div class="ld-spec-item">
-                            <span class="ld-spec-label">Beban Maksimal</span>
-                            <strong class="ld-spec-value">15 kg</strong>
-                        </div>
                   </div>
               </section>
             </section>
@@ -846,7 +833,7 @@
 
                             <div class="ld-seller-contact mt-2">
                                 <div>📞 {{ $listing->user->phone ?? '08123456789' }}</div>
-                                <div>📍 {{ $listing->location }}</div>
+                                <div>📍 {{ $listing->location ?? 'Lokasi Tak Terlihat' }}</div>
                             </div>
                         </div>
 
@@ -861,7 +848,7 @@
                     </p>
 
                     <div class="ld-benefits">
-                        <div class="ld-benefit">♧ &nbsp;COD Pos Satpam Kampus</div>
+                        <div class="ld-benefit">♧ &nbsp;COD | Delevery Instan</div>
                         <div class="ld-benefit">⌁ &nbsp;Bebas Biaya Perantara</div>
                     </div>
                 </section>
