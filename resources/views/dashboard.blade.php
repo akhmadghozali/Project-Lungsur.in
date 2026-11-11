@@ -342,12 +342,29 @@
                                         <div class="absolute top-2.5 left-2.5 z-10">
                                             @if ($listing->status === 'available')
                                                 <span class="bg-emerald-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs">Tersedia</span>
+                                            @elseif ($listing->status === 'lelang')
+                                                <span class="bg-teal-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs">🔨 Lelang</span>
                                             @elseif ($listing->status === 'sold')
                                                 <span class="bg-slate-700 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs">Terjual</span>
                                             @else
                                                 <span class="bg-amber-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs">{{ $listing->status }}</span>
                                             @endif
                                         </div>
+
+                                        {{-- Badge Boost --}}
+                                        @if ($listing->isCurrentlyBoosted())
+                                            <div class="absolute top-2.5 right-2.5 z-10">
+                                                <span class="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1">
+                                                    ⚡ Boost Aktif
+                                                </span>
+                                            </div>
+                                        @elseif ($listing->latestBoostPayment && $listing->latestBoostPayment->isPending())
+                                            <div class="absolute top-2.5 right-2.5 z-10">
+                                                <span class="bg-amber-100 text-amber-800 text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-xs border border-amber-300">
+                                                    ⏳ Verifikasi Boost
+                                                </span>
+                                            </div>
+                                        @endif
                                     </div>
 
                                     {{-- Body --}}
@@ -362,21 +379,78 @@
                                         <p class="text-base font-black text-blue-600">
                                             Rp {{ number_format($listing->price, 0, ',', '.') }}
                                         </p>
+
+                                        {{-- Tombol / Indikator Boost & Buka Lelang --}}
+                                        <div class="pt-2 space-y-1.5">
+                                            @if ($listing->isCurrentlyBoosted())
+                                                <div class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1.5 rounded-xl border border-amber-200/80 flex items-center justify-between">
+                                                    <span class="flex items-center gap-1">⚡ <span>Aktif s.d.</span></span>
+                                                    <span class="font-black text-amber-800">{{ $listing->boosted_until ? $listing->boosted_until->translatedFormat('d M Y') : '30 Hari' }}</span>
+                                                </div>
+                                            @elseif ($listing->latestBoostPayment && $listing->latestBoostPayment->isPending())
+                                                <div class="text-[11px] font-bold text-amber-800 bg-amber-50/80 px-2.5 py-1.5 rounded-xl border border-amber-200 flex items-center gap-1.5 justify-center">
+                                                    <span class="animate-pulse">⏳</span>
+                                                    <span>Boost sedang diverifikasi Admin</span>
+                                                </div>
+                                            @elseif ($listing->status === 'available')
+                                                <a href="{{ route('boost.create', $listing->id) }}" 
+                                                   class="w-full py-1.5 px-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                                    <span>⚡ Boost Iklan (Rp5.000 / 30 Hari)</span>
+                                                </a>
+                                            @endif
+
+                                            {{-- Status / Tombol Pembukaan Sesi Lelang (Rp5.000) --}}
+                                            @if ($listing->auction && $listing->auction->status === 'active')
+                                                <a href="{{ route('auctions.show', $listing->auction->id) }}"
+                                                   class="w-full py-1.5 px-2.5 rounded-xl text-[11px] font-black bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition flex items-center justify-between">
+                                                    <span>🔨 Sesi Lelang Aktif</span>
+                                                    <span>Lihat &rarr;</span>
+                                                </a>
+                                            @elseif ($listing->auction && ($listing->auction->status === 'pending_approval' || ($listing->auction->latestPayment && $listing->auction->latestPayment->isPending())))
+                                                <div class="text-[11px] font-bold text-emerald-800 bg-emerald-50/80 px-2.5 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5 justify-center">
+                                                    <span class="animate-pulse">⏳</span>
+                                                    <span>Lelang menunggu verifikasi Admin</span>
+                                                </div>
+                                            @elseif ($listing->auction && $listing->auction->status === 'closed')
+                                                <a href="{{ route('auctions.show', $listing->auction->id) }}"
+                                                   class="w-full py-1.5 px-2.5 rounded-xl text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition flex items-center justify-between">
+                                                    <span>🔨 Sesi Lelang Selesai</span>
+                                                    <span>Lihat &rarr;</span>
+                                                </a>
+                                            @elseif ($listing->status === 'available')
+                                                <a href="{{ route('auctions.payment.create', $listing->id) }}"
+                                                   class="w-full py-1.5 px-2.5 rounded-xl text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                                    <span>🔨 Buka Lelang (Rp5.000)</span>
+                                                </a>
+                                                @if ($listing->auction && $listing->auction->latestPayment && $listing->auction->latestPayment->isRejected())
+                                                    <p class="text-[10px] text-rose-600 font-semibold text-center">
+                                                        Pembayaran lelang sebelumnya ditolak &mdash; klik untuk ajukan ulang
+                                                    </p>
+                                                @endif
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
 
                                 {{-- Aksi Penjual --}}
                                 <div class="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between gap-2">
-                                    {{-- Toggle Status Terjual / Tersedia --}}
-                                    <form method="POST" action="{{ route('dashboard.listings.status', $listing->id) }}#listing-{{ $listing->id }}" class="flex-1">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input type="hidden" name="status" value="{{ $listing->status === 'available' ? 'sold' : 'available' }}">
-                                        <button type="submit" 
-                                                class="w-full py-1.5 px-2 rounded-lg text-xs font-bold transition text-center {{ $listing->status === 'available' ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200' }}">
-                                            {{ $listing->status === 'available' ? 'Tandai Terjual' : 'Jadikan Tersedia' }}
-                                        </button>
-                                    </form>
+                                    @if ($listing->status === 'lelang' && $listing->auction)
+                                        <a href="{{ route('auctions.show', $listing->auction->id) }}"
+                                           class="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200">
+                                            Pantau Lelang &rarr;
+                                        </a>
+                                    @else
+                                        {{-- Toggle Status Terjual / Tersedia --}}
+                                        <form method="POST" action="{{ route('dashboard.listings.status', $listing->id) }}#listing-{{ $listing->id }}" class="flex-1">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="{{ $listing->status === 'available' ? 'sold' : 'available' }}">
+                                            <button type="submit" 
+                                                    class="w-full py-1.5 px-2 rounded-lg text-xs font-bold transition text-center {{ $listing->status === 'available' ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200' }}">
+                                                {{ $listing->status === 'available' ? 'Tandai Terjual' : 'Jadikan Tersedia' }}
+                                            </button>
+                                        </form>
+                                    @endif
 
                                     {{-- Tombol Edit --}}
                                     <a href="{{ route('iklan.edit', $listing->id) }}"

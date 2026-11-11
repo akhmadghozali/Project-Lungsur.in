@@ -84,6 +84,16 @@ class User extends Authenticatable
         return $this->hasMany(WantedAd::class);
     }
 
+    public function boostPayments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(BoostPayment::class);
+    }
+
+    public function auctionPayments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(AuctionPayment::class);
+    }
+
     public function getActiveMode(): string
     {
         return session('user_mode', $this->role === 'seller' ? 'seller' : 'buyer');

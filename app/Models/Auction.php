@@ -54,6 +54,16 @@ class Auction extends Model
         return $this->hasOne(AuctionBid::class)->ofMany('bid_amount', 'max');
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(AuctionPayment::class);
+    }
+
+    public function latestPayment(): HasOne
+    {
+        return $this->hasOne(AuctionPayment::class)->latestOfMany();
+    }
+
     /**
      * Scope untuk mengambil hanya lelang yang berstatus aktif.
      */

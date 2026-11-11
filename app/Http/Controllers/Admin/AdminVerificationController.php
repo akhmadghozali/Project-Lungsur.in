@@ -10,12 +10,25 @@ class AdminVerificationController extends Controller
 {
     public function index(Request $request)
     {
-        $pendingQuery = fn () => User::where('verification_status', 'pending');
+        $search = trim((string) $request->query('q', ''));
 
-        // Pendaftar yang sedang dibuka (?user=ID), default: antrean paling lama
+        $pendingQuery = function () use ($search) {
+            $query = User::where('verification_status', 'pending');
+            if ($search !== '') {
+                $query->where(function ($sub) use ($search) {
+                    $sub->where('name', 'ilike', "%{$search}%")
+                        ->orWhere('nim', 'ilike', "%{$search}%")
+                        ->orWhere('email', 'ilike', "%{$search}%")
+                        ->orWhere('campus', 'ilike', "%{$search}%");
+                });
+            }
+            return $query;
+        };
+
+        // Pendaftar yang sedang dibuka (?user=ID), default: antrean pertama dari hasil query
         $selected = null;
         if ($request->filled('user')) {
-            $selected = $pendingQuery()->find($request->query('user'));
+            $selected = User::where('verification_status', 'pending')->find($request->query('user'));
         }
         $selected ??= $pendingQuery()->oldest()->first();
 
@@ -27,7 +40,7 @@ class AdminVerificationController extends Controller
             ->get();
 
         $stats = [
-            'pending' => $pendingQuery()->count(),
+            'pending' => User::where('verification_status', 'pending')->count(),
             'approved_today' => User::where('verification_status', 'active')
                 ->whereNotNull('verified_by')
                 ->whereDate('verified_at', today())
@@ -40,13 +53,23 @@ class AdminVerificationController extends Controller
                 ->count(),
         ];
 
-        $recent = User::whereIn('verification_status', ['active', 'rejected'])
-            ->whereNotNull('verified_at')
-            ->latest('verified_at')
+        $recentQuery = User::whereIn('verification_status', ['active', 'rejected'])
+            ->whereNotNull('verified_at');
+
+        if ($search !== '') {
+            $recentQuery->where(function ($sub) use ($search) {
+                $sub->where('name', 'ilike', "%{$search}%")
+                    ->orWhere('nim', 'ilike', "%{$search}%")
+                    ->orWhere('email', 'ilike', "%{$search}%")
+                    ->orWhere('campus', 'ilike', "%{$search}%");
+            });
+        }
+
+        $recent = $recentQuery->latest('verified_at')
             ->limit(6)
             ->get();
 
-        return view('admin.verifications.index', compact('selected', 'queue', 'stats', 'recent'));
+        return view('admin.verifications.index', compact('selected', 'queue', 'stats', 'recent', 'search'));
     }
 
     public function approve(Request $request, User $user)
