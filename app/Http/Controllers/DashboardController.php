@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AuctionBid;
 use App\Models\Listing;
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,6 +45,13 @@ class DashboardController extends Controller
             ->paginate(8)
             ->withQueryString();
 
+        $buyers = User::whereHas('buyerConversations', function ($query) use ($user) {
+            $query->where('seller_id', $user->id);
+          })
+            ->where('id', '!=', $user->id)
+            ->orderBy('name')
+            ->get();
+
         // 3. Riwayat Lelang yang Diikuti (untuk Mode Pembeli)
         $myBids = AuctionBid::with(['auction.listing.images', 'auction.highestBid'])
             ->where('user_id', $user->id)
@@ -60,7 +68,34 @@ class DashboardController extends Controller
             'myBidsCount',
             'unreadMessagesCount',
             'myListings',
-            'myBids'
+            'myBids',
+            'buyers'
+        ));
+    }
+
+    /**
+     * Tampilkan riwayat transaksi pengguna.
+     */
+    public function history(): View
+    {
+        $user = Auth::user();
+
+        // Riwayat barang yang dibeli
+        $purchasedListings = $user->purchasedListings()
+            ->with(['user', 'category', 'images'])
+            ->latest()
+            ->get();
+
+        // Riwayat lelang yang dimenangkan
+        $wonAuctions = $user->wonAuctions()
+            ->with(['listing.category', 'listing.images', 'highestBid'])
+            ->latest()
+            ->get();
+
+        return view('dashboard.history', compact(
+            'user',
+            'purchasedListings',
+            'wonAuctions'
         ));
     }
 
@@ -88,36 +123,65 @@ class DashboardController extends Controller
     /**
      * Perbarui status iklan (misal: tandai 'sold' atau 'available').
      */
+
     public function updateListingStatus(Request $request, Listing $listing): RedirectResponse
     {
-        abort_if($listing->user_id !== Auth::id(), 403, 'Anda tidak memiliki hak untuk mengelola iklan ini.');
+        abort_if(
+            $listing->user_id !== Auth::id(),
+            403,
+            'Anda tidak memiliki hak untuk mengelola iklan ini.'
+        );
 
-        $targetUrl = strtok(url()->previous(), '#') . '#listing-' . $listing->id;
+    $targetUrl = strtok(url()->previous(), '#') . '#listing-' . $listing->id;
 
-        try {
-            $validated = $request->validate([
-                'status' => ['required', 'in:available,sold,booked,archived'],
-            ], [
-                'status.required' => 'Status iklan wajib diisi.',
-                'status.in'       => 'Pilihan status iklan tidak valid.',
-            ]);
+    try {
+        $validated = $request->validate([
+            'status' => ['required', 'in:available,sold,booked,archived'],
+            'buyer_id' => ['nullable', 'required_if:status,sold', 'integer', 'exists:users,id'],
+        ], [
+            'status.required' => 'Status iklan wajib diisi.',
+            'status.in' => 'Pilihan status iklan tidak valid.',
+            'buyer_id.required_if' => 'Pilih pembeli terlebih dahulu.',
+            'buyer_id.exists' => 'Data pembeli tidak ditemukan.',
+        ]);
 
-            $listing->update(['status' => $validated['status']]);
 
-            $statusLabel = [
-                'available' => 'Tersedia',
-                'sold'      => 'Terjual',
-                'booked'    => 'Dibooking',
-                'archived'  => 'Diarsipkan',
-            ][$validated['status']] ?? $validated['status'];
 
-            return redirect()->to($targetUrl)
-                ->with('success', "Status iklan '{$listing->title}' berhasil diubah menjadi {$statusLabel}.");
+        if ($validated['status'] === 'sold') {
+            $validBuyer = $listing->conversations()
+                ->where('buyer_id', $validated['buyer_id'])
+                ->exists();
+
+            if (! $validBuyer || (int) $validated['buyer_id'] === (int) $listing->user_id) {
+                return redirect()->to($targetUrl)
+                    ->with('error', 'Pembeli harus merupakan pengguna yang pernah menghubungi iklan ini.');
+            }
+        }
+
+        $listing->update([
+            'status' => $validated['status'],
+            'buyer_id' => $validated['status'] === 'sold'
+                ? $validated['buyer_id']
+                : null,
+        ]);
+
+        $statusLabel = [
+            'available' => 'Tersedia',
+            'sold' => 'Terjual',
+            'booked' => 'Dibooking',
+            'archived' => 'Diarsipkan',
+        ][$validated['status']];
+
+        return redirect()->to($targetUrl)
+            ->with('success', "Status iklan '{$listing->title}' berhasil diubah menjadi {$statusLabel}.");
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->to($targetUrl)
                 ->withErrors($e->validator)
-                ->with('error', $e->validator->errors()->first('status') ?? 'Status iklan tidak valid.');
+                ->with('error', $e->validator->errors()->first() ?? 'Data tidak valid.');
         } catch (\Throwable $e) {
+            report($e);
+
             return redirect()->to($targetUrl)
                 ->with('error', 'Terjadi kesalahan saat memperbarui status iklan. Silakan coba lagi.');
         }

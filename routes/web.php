@@ -39,6 +39,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 // Dashboard Mahasiswa (Khusus Pengguna Login yang Berstatus Aktif & Terverifikasi)
 Route::middleware(['auth', 'verified_student'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/history', [DashboardController::class, 'history'])
+    ->name('dashboard.history');
     Route::post('/switch-mode', [DashboardController::class, 'switchMode'])->name('user.switch_mode');
     Route::patch('/dashboard/listings/{listing}/status', [DashboardController::class, 'updateListingStatus'])->name('dashboard.listings.status');
     Route::delete('/dashboard/listings/{listing}', [DashboardController::class, 'destroyListing'])->name('dashboard.listings.destroy');
