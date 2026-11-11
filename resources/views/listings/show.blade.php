@@ -837,8 +837,10 @@
                             </div>
                         </div>
 
-                        <a href="#" onclick="alert('Fitur chat sedang dalam tahap pengembangan.'); return false;" class="ld-contact-action btn-primary text-center" style="display: block; background: #2563eb; color: #fff; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 600;">
-                            <span>💬 Hubungi Penjual (Chat)</span>
+<a href="{{ route('chat.index', ['listing_id' => $listing->id]) }}" class="ld-contact-action btn-primary text-center" style="...">
+    <span>💬 Hubungi Penjual (Chat)</span>
+    <a>
+</a>                            <span>💬 Hubungi Penjual (Chat)</span>
                         </a>
                     @endguest
 
