@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminVerificationController;
+use App\Http\Controllers\Admin\AdminBoostPaymentController;
+use App\Http\Controllers\Admin\AdminAuctionPaymentController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AuctionPaymentController;
+use App\Http\Controllers\BoostPaymentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuctionController;
@@ -54,11 +58,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications.index');
     Route::post('/verifications/{user}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
     Route::post('/verifications/{user}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
+
     // Reports & Moderation
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
     Route::post('/reports/{report}/ignore', [ReportController::class, 'ignore'])->name('reports.ignore');
     Route::post('/reports/{report}/take-down', [ReportController::class, 'takeDown'])->name('reports.take_down');
+
+    // Monetisasi: Verifikasi Pembayaran Boost Iklan (Sprint 3)
+    Route::get('/pembayaran-boost', [AdminBoostPaymentController::class, 'index'])->name('payments.boost');
+    Route::post('/pembayaran-boost/{boostPayment}/approve', [AdminBoostPaymentController::class, 'approve'])->name('payments.boost.approve');
+    Route::post('/pembayaran-boost/{boostPayment}/reject', [AdminBoostPaymentController::class, 'reject'])->name('payments.boost.reject');
+
+    // Monetisasi: Verifikasi Pembayaran Pembukaan Lelang (Sprint 3)
+    Route::get('/pembayaran-lelang', [AdminAuctionPaymentController::class, 'index'])->name('payments.auction');
+    Route::post('/pembayaran-lelang/{auctionPayment}/approve', [AdminAuctionPaymentController::class, 'approve'])->name('payments.auction.approve');
+    Route::post('/pembayaran-lelang/{auctionPayment}/reject', [AdminAuctionPaymentController::class, 'reject'])->name('payments.auction.reject');
 });
 
 /*
@@ -85,6 +100,15 @@ Route::middleware(['auth', 'verified_student'])->group(function () {
 
     // PUT/PATCH handler — perbarui iklan milik penjual
     Route::match(['put', 'patch'], '/katalog/{listing}', [IklanController::class, 'update'])->name('iklan.update');
+
+    // Monetisasi: Pembayaran & Pengajuan Boost Iklan (Sprint 3)
+    Route::get('/katalog/{listing}/boost', [BoostPaymentController::class, 'create'])->name('boost.create');
+    Route::post('/katalog/{listing}/boost', [BoostPaymentController::class, 'store'])->name('boost.store');
+
+    // Monetisasi: Pembukaan Sesi Lelang & Biaya Rp5.000
+    Route::get('/lelang/buka', [AuctionPaymentController::class, 'selectListing'])->name('auctions.create');
+    Route::get('/katalog/{listing}/lelang', [AuctionPaymentController::class, 'create'])->name('auctions.payment.create');
+    Route::post('/katalog/{listing}/lelang', [AuctionPaymentController::class, 'store'])->name('auctions.payment.store');
 });
 
 // Stub halaman detail barang (agar tombol "Lihat Detail" di beranda tidak 404)
@@ -143,10 +167,4 @@ Route::get('/chat/start/{listing}', function ($listing) {
 
 // Rute sementara/dummy untuk chat.start
 
-Route::get('/chat', function (Request $request) {
-    $listingId = $request->query('listing_id');
-    $selectedListing = $listingId ? Listing::find($listingId) : null;
-
-    return view('chat.index', compact('selectedListing'));
-})->name('chat.index');
 Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');

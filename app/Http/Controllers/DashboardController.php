@@ -40,7 +40,7 @@ class DashboardController extends Controller
 
         // 2. Daftar Iklan Milik User (untuk Mode Penjual)
         $myListings = $user->listings()
-            ->with(['category', 'images'])
+            ->with(['category', 'images', 'latestBoostPayment', 'auction.latestPayment'])
             ->latest()
             ->paginate(8)
             ->withQueryString();
@@ -133,6 +133,11 @@ class DashboardController extends Controller
         );
 
     $targetUrl = strtok(url()->previous(), '#') . '#listing-' . $listing->id;
+
+    if ($listing->status === 'lelang' && $listing->auction && $listing->auction->status === 'active') {
+        return redirect()->to($targetUrl)
+            ->with('warning', "Iklan '{$listing->title}' sedang dalam sesi lelang aktif sehingga statusnya tidak dapat diubah langsung.");
+    }
 
     try {
         $validated = $request->validate([

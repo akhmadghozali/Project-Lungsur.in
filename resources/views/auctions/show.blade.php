@@ -7,14 +7,15 @@
         $listing = $auction->listing;
         $highestBid = $auction->highestBid;
 
+        $isPendingVerification = in_array($auction->status, ['pending_payment', 'pending_approval'], true);
         $isExpired = $auction->isExpired();
-        $isClosed = $auction->status !== 'active' || $isExpired || ! $auction->end_time;
+        $isClosed = $isPendingVerification || $auction->status !== 'active' || $isExpired || ! $auction->end_time;
 
         $isNotStarted = $auction->status === 'active'
             && $auction->start_time
             && now()->lt($auction->start_time);
 
-        $canBid = ! $isClosed && ! $isNotStarted;
+        $canBid = ! $isPendingVerification && ! $isClosed && ! $isNotStarted;
 
         $remaining = $canBid
             ? $auction->timeRemainingSeconds()
@@ -107,9 +108,9 @@
 
                     <span
                         id="auction-status-badge"
-                        class="absolute left-4 top-4 rounded-full px-3 py-1.5 text-xs font-bold {{ $isClosed ? 'bg-slate-800/90 text-white' : ($isNotStarted ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700') }}"
+                        class="absolute left-4 top-4 rounded-full px-3 py-1.5 text-xs font-bold {{ $isPendingVerification ? 'bg-amber-100 text-amber-800' : ($isClosed ? 'bg-slate-800/90 text-white' : ($isNotStarted ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700')) }}"
                     >
-                        {{ $isClosed ? 'Lelang Ditutup' : ($isNotStarted ? 'Belum Dimulai' : 'Sedang Berlangsung') }}
+                        {{ $isPendingVerification ? '⏳ Menunggu Verifikasi Admin' : ($isClosed ? 'Lelang Ditutup' : ($isNotStarted ? 'Belum Dimulai' : 'Sedang Berlangsung')) }}
                     </span>
                 </div>
 
@@ -337,7 +338,7 @@
                             <button
                                 id="open-bid-modal"
                                 type="button"
-                                class="w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-700"
+                                class="w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-700 cursor-pointer"
                             >
                                 Tawar Sekarang
                             </button>
@@ -676,7 +677,6 @@
                         renderCountdown();
                     }, 1000);
                 }
-            } 
             }
 
             openButton?.addEventListener('click', openModal);

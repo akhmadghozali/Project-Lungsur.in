@@ -364,26 +364,36 @@
                 <!-- Judul & Subtitle -->
                 <div>
                     <div class="flex items-center gap-2">
-                        <div class="w-5 h-5 rounded-full {{ !empty($search) ? 'bg-blue-100 text-blue-600' : (($isBoostedOnly ?? false) ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600') }} flex items-center justify-center text-xs font-bold">
-                            {{ ($isBoostedOnly ?? false) ? '⚡' : 'i' }}
-                        </div>
-                        <h2 class="text-xl font-black text-slate-900 tracking-tight">
-                            @if (!empty($search))
-                                Hasil Pencarian
-                            @elseif ($isBoostedOnly ?? false)
-                                Iklan Unggulan (Boost)
-                            @else
-                                Daftar Iklan Terbaru
-                            @endif
-                        </h2>
+                        @if (!($isCatalog ?? false) && empty($search))
+                            <div class="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold">
+                                ⚡
+                            </div>
+                            <h2 class="text-xl font-black text-slate-900 tracking-tight">
+                                Iklan Unggulan Pilihan
+                            </h2>
+                        @else
+                            <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
+                                {{ !empty($search) ? '🔍' : '📦' }}
+                            </div>
+                            <h2 class="text-xl font-black text-slate-900 tracking-tight">
+                                @if (!empty($search))
+                                    Hasil Pencarian
+                                @else
+                                    Katalog Produk Mahasiswa
+                                @endif
+                            </h2>
+                        @endif
                     </div>
                     <p class="text-xs sm:text-sm text-slate-500 mt-1">
                         @if (!empty($search))
                             Menampilkan barang yang cocok dengan kata kunci "{{ $search }}".
-                        @elseif ($isBoostedOnly ?? false)
-                            Menampilkan iklan prioritas pilihan mahasiswa yang sedang aktif di-boost.
+                        @elseif (!($isCatalog ?? false))
+                            Menampilkan produk pilihan mahasiswa yang sedang aktif di-boost.
+                            <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" class="font-bold text-blue-600 hover:underline ml-1">
+                                Lihat semua di Katalog &rarr;
+                            </a>
                         @else
-                            Temukan barang dan kebutuhan menarik dari sesama mahasiswa.
+                            Iklan unggulan ditampilkan terpisah di bagian atas, disusul produk reguler di bagian bawah.
                         @endif
                     </p>
                 </div>
@@ -471,7 +481,7 @@
 
             <!-- Bilah Filter Multi-Kriteria (Sesuai Proposal & Sprint 2) -->
             <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-xs">
-                <form action="{{ request()->is('katalog*') ? route('listings.index') : route('home') }}" method="GET" class="space-y-4">
+                <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" class="space-y-4">
                     @if (!empty($search))
                         <input type="hidden" name="q" value="{{ $search }}">
                     @endif
@@ -562,7 +572,7 @@
 
                         <div class="flex items-center gap-2 self-end sm:self-auto">
                             @if ($hasFilter ?? false)
-                                <a href="{{ request()->is('katalog*') ? route('listings.index') : url('/') }}" class="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline px-2.5 py-1.5 transition">
+                                <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" class="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline px-2.5 py-1.5 transition">
                                     Reset Filter
                                 </a>
                             @endif
@@ -578,15 +588,28 @@
             </div>
 
         <div id="listing-content">
+            @php
+                $isCatalogPage = $isCatalog ?? request()->is('katalog*');
+                $regularTotal = $listings instanceof \Illuminate\Pagination\LengthAwarePaginator
+                    ? $listings->total()
+                    : $listings->count();
+                $boostedCollection = $boostedListings ?? collect();
+                $boostedTotal = $isCatalogPage ? $boostedCollection->count() : 0;
+                $totalFound = $regularTotal + $boostedTotal;
+                $resetUrl = $isCatalogPage
+                    ? (Route::has('listings.index') ? route('listings.index') : url('/katalog'))
+                    : url('/');
+            @endphp
+
             @if ($hasFilter ?? false)
                 <div class="mt-4 flex items-center justify-between bg-blue-50/70 border border-blue-100 rounded-2xl px-4 py-3 text-xs text-blue-900">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
-                        <span>Menampilkan hasil filter spesifik (<strong>{{ $listings instanceof \Illuminate\Pagination\LengthAwarePaginator ? $listings->total() : $listings->count() }}</strong> barang ditemukan)</span>
+                        <span>Menampilkan hasil filter spesifik (<strong>{{ $totalFound }}</strong> barang ditemukan)</span>
                     </div>
-                    <a href="{{ url('/') }}" class="font-bold text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1 shrink-0">
+                    <a href="{{ $resetUrl }}" class="font-bold text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1 shrink-0">
                         <span>Reset Semua</span>
                         <span>&times;</span>
                     </a>
@@ -597,170 +620,145 @@
                         <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
-                        <span>Hasil pencarian untuk: <strong class="font-bold text-blue-700">"{{ $search }}"</strong> ({{ $listings instanceof \Illuminate\Pagination\LengthAwarePaginator ? $listings->total() : $listings->count() }} barang ditemukan)</span>
+                        <span>Hasil pencarian untuk: <strong class="font-bold text-blue-700">"{{ $search }}"</strong> ({{ $totalFound }} barang ditemukan)</span>
                     </div>
-                    <a href="{{ url('/') }}" class="font-bold text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1 shrink-0">
+                    <a href="{{ $resetUrl }}" class="font-bold text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1 shrink-0">
                         <span>Reset Pencarian</span>
                         <span>&times;</span>
                     </a>
                 </div>
-            @elseif ($isBoostedOnly ?? false)
-                <div class="mt-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold px-3.5 py-1.5 rounded-xl shadow-2xs">
-                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                    <span>Menampilkan iklan unggulan yang sedang aktif di-boost ⚡</span>
-                </div>
             @endif
 
-            <!-- Kartu Produk (Listing Cards) dari database -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-6">
-                @forelse ($listings as $listing)
-                    <div class="bg-white rounded-2xl border border-slate-100 shadow-2xs hover:shadow-md transition overflow-hidden flex flex-col group relative">
-                        <!-- Foto Barang - Slider / Carousel -->
-                        <div class="aspect-[4/3] bg-slate-100 overflow-hidden relative group/img"
-                             @if ($listing->images->count() > 1)
-                                 x-data="{ current: 0, total: {{ $listing->images->count() }} }"
-                             @endif
-                        >
-                            @if ($listing->is_boosted && ($listing->boosted_until === null || $listing->boosted_until->isFuture()))
-                                <div class="absolute top-2.5 left-2.5 bg-amber-500/95 backdrop-blur-xs text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg shadow-sm flex items-center gap-1 z-10">
-                                    <svg class="w-3 h-3 text-white fill-current" viewBox="0 0 20 20">
-                                        <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/>
-                                    </svg>
-                                    <span>Unggulan</span>
-                                </div>
-                            @endif
-
-                            @if ($listing->images->count() > 0)
-                                @foreach ($listing->images as $imgIdx => $img)
-                                    @php
-                                        $imgSrc = Str::startsWith($img->image_url, ['http://', 'https://']) ? $img->image_url : asset('storage/' . ltrim($img->image_url, '/'));
-                                    @endphp
-                                    <div
-                                        @if ($listing->images->count() > 1)
-                                            x-show="current === {{ $imgIdx }}"
-                                            x-transition.opacity.duration.200ms
-                                        @endif
-                                        class="w-full h-full absolute inset-0"
-                                    >
-                                        <img src="{{ $imgSrc }}"
-                                             alt="{{ $listing->title }}"
-                                             loading="lazy"
-                                             class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                                    </div>
-                                @endforeach
-
-                                @if ($listing->images->count() > 1)
-                                    {{-- Tombol Navigasi Kiri --}}
-                                    <button
-                                        type="button"
-                                        @click.stop.prevent="current = (current === 0) ? total - 1 : current - 1"
-                                        class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white flex items-center justify-center backdrop-blur-xs transition opacity-0 group-hover/img:opacity-100 z-10 shadow-sm cursor-pointer"
-                                        aria-label="Foto sebelumnya"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
-                                    </button>
-
-                                    {{-- Tombol Navigasi Kanan --}}
-                                    <button
-                                        type="button"
-                                        @click.stop.prevent="current = (current === total - 1) ? 0 : current + 1"
-                                        class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white flex items-center justify-center backdrop-blur-xs transition opacity-0 group-hover/img:opacity-100 z-10 shadow-sm cursor-pointer"
-                                        aria-label="Foto berikutnya"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                                    </button>
-
-                                    {{-- Titik Indikator Dots --}}
-                                    <div class="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-1 z-10 pointer-events-none">
-                                        @for ($d = 0; $d < $listing->images->count(); $d++)
-                                            <span class="h-1 rounded-full transition-all duration-200" :class="current === {{ $d }} ? 'w-3.5 bg-white' : 'w-1 bg-white/60'"></span>
-                                        @endfor
-                                    </div>
-
-                                    {{-- Badge Counter --}}
-                                    <div class="absolute top-2.5 right-2.5 bg-slate-900/70 backdrop-blur-xs text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md z-10">
-                                        <span x-text="(current + 1) + '/' + total"></span>
-                                    </div>
-                                @endif
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-[11px] font-medium text-slate-400">
-                                    Belum ada foto
-                                </div>
-                            @endif
-                        </div>
-
-                        <!-- Card Body -->
-                        <div class="p-3.5 sm:p-4 flex-1 flex flex-col justify-between space-y-3">
-                            <div>
-                                <!-- Tag Kategori & Waktu Unggah -->
-                                <div class="flex items-center justify-between text-[11px] mb-2">
-                                    <span class="font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md truncate max-w-[110px]">
-                                        {{ $listing->category->name ?? 'Lainnya' }}
-                                    </span>
-                                    <span class="text-slate-400 shrink-0">
-                                        {{ $listing->created_at->diffForHumans() }}
-                                    </span>
-                                </div>
-
-                                <div class="flex items-center gap-1.5 flex-wrap mb-1.5">
-                                    @if (!empty($listing->condition_checklist['kondisi']))
-                                        <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md {{ $listing->condition_checklist['kondisi'] === 'baru' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                                            {{ ucfirst(str_replace('_', ' ', $listing->condition_checklist['kondisi'])) }}
-                                        </span>
-                                    @endif
-
-                                    @if (!empty($listing->user?->campus))
-                                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 rounded-md truncate max-w-[140px]" title="{{ $listing->user->campus }}">
-                                            <svg class="w-2.5 h-2.5 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                            </svg>
-                                            <span class="truncate">{{ $listing->user->campus }}</span>
-                                        </span>
-                                    @endif
-                                </div>
-
-                                <!-- Judul Barang -->
-                                <h3 class="font-bold text-xs sm:text-sm text-slate-800 line-clamp-2 leading-snug group-hover:text-blue-600 transition">
-                                    {{ $listing->title }}
-                                </h3>
-
-                                <!-- Harga Biru Tebal -->
-                                <div class="mt-2 flex items-baseline gap-2">
-                                    <span class="text-base sm:text-lg font-black text-blue-600 tracking-tight">
-                                        Rp {{ number_format($listing->price, 0, ',', '.') }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Tombol Full-Width "Lihat Detail ->" Sesuai Figma -->
-                            <a href="{{ Route::has('listings.show') ? route('listings.show', $listing->id) : url('/katalog/'.$listing->id) }}"
-                               class="w-full text-center py-2.5 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs">
-                                <span>Lihat Detail</span>
-                                <span>&rarr;</span>
-                            </a>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+            @if ($isCatalogPage)
+                {{-- ===================================================== --}}
+                {{-- HALAMAN KATALOG: KOTAK BOOST (ATAS) & REGULER (BAWAH) --}}
+                {{-- ===================================================== --}}
+                @if ($boostedCollection->isEmpty() && $listings->isEmpty())
+                    <div class="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
                         <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                         </div>
                         <p class="text-sm font-bold text-slate-800">
-                            {{ !empty($search) ? 'Barang tidak ditemukan' : 'Belum ada barang' }}
+                            {{ ($hasFilter ?? false) || !empty($search) ? 'Barang tidak ditemukan' : 'Belum ada barang' }}
                         </p>
                         <p class="mt-1 text-xs text-slate-500">
-                            {{ !empty($search) ? 'Coba cari dengan kata kunci lain atau periksa ejaanmu.' : 'Jadilah yang pertama memasang iklan di Lungsur.in.' }}
+                            {{ ($hasFilter ?? false) || !empty($search) ? 'Coba ubah filter atau kata kunci pencarianmu.' : 'Jadilah yang pertama memasang iklan di Lungsur.in.' }}
                         </p>
-                        @if (!empty($search))
-                            <a href="{{ url('/') }}" class="inline-block mt-4 text-xs font-bold text-blue-600 hover:underline">
+                        @if (($hasFilter ?? false) || !empty($search))
+                            <a href="{{ $resetUrl }}" class="inline-block mt-4 text-xs font-bold text-blue-600 hover:underline">
                                 &larr; Lihat Semua Barang
                             </a>
                         @endif
                     </div>
-                @endforelse
-            </div>
+                @else
+                    {{-- KOTAK 1 (ATAS): PRODUK BOOST / UNGGULAN --}}
+                    @if ($boostedCollection->isNotEmpty())
+                        <div class="mt-6 rounded-3xl border border-amber-200/90 bg-gradient-to-br from-amber-50/70 via-amber-50/30 to-orange-50/40 p-5 sm:p-6 shadow-xs">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-amber-200/60">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center text-sm font-black shadow-xs shrink-0">
+                                        ⚡
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base font-black text-slate-900 tracking-tight">Iklan Unggulan (Boost)</h3>
+                                        <p class="text-[11px] text-amber-800/80 font-medium">Produk pilihan mahasiswa yang sedang aktif dipromosikan</p>
+                                    </div>
+                                </div>
+                                <span class="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold border border-amber-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                    {{ $boostedCollection->count() }} Produk Unggulan
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-5">
+                                @foreach ($boostedCollection as $listing)
+                                    <x-listing-card :listing="$listing" />
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- KOTAK 2 (BAWAH): PRODUK TIDAK DI-BOOST / REGULER --}}
+                    <div class="{{ $boostedCollection->isNotEmpty() ? 'mt-8' : 'mt-6' }} rounded-3xl border border-slate-200/80 bg-slate-50/70 p-5 sm:p-6 shadow-xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-200/70">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-xs shrink-0">
+                                    📦
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-black text-slate-900 tracking-tight">Produk Katalog Lainnya</h3>
+                                    <p class="text-[11px] text-slate-500 font-medium">Daftar barang reguler dari mahasiswa di Lungsur.in</p>
+                                </div>
+                            </div>
+                            <span class="self-start sm:self-auto inline-flex items-center px-3 py-1 rounded-full bg-white text-slate-700 text-[11px] font-bold border border-slate-200">
+                                {{ $regularTotal }} Produk
+                            </span>
+                        </div>
+
+                        @if ($listings->isNotEmpty())
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-5">
+                                @foreach ($listings as $listing)
+                                    <x-listing-card :listing="$listing" />
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="py-10 text-center text-xs text-slate-500 font-medium">
+                                Belum ada produk reguler yang sesuai dengan kriteria ini.
+                            </div>
+                        @endif
+                    </div>
+                @endif
+            @else
+                {{-- ===================================================== --}}
+                {{-- HALAMAN BERANDA: HANYA TAMPILKAN PRODUK YANG DI-BOOST --}}
+                {{-- ===================================================== --}}
+                @if ($listings->isNotEmpty())
+                    <div class="mt-4 flex flex-wrap items-center justify-between gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold px-4 py-2 rounded-xl shadow-2xs">
+                        <div class="inline-flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span>Halaman Beranda menampilkan produk yang sedang aktif di-boost ⚡</span>
+                        </div>
+                        <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" class="font-bold text-amber-900 hover:underline">
+                            Buka Semua Katalog &rarr;
+                        </a>
+                    </div>
+                @endif
+
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-6">
+                    @forelse ($listings as $listing)
+                        <x-listing-card :listing="$listing" />
+                    @empty
+                        <div class="col-span-full rounded-2xl border border-dashed border-amber-300/80 bg-amber-50/30 px-6 py-14 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+                                ⚡
+                            </div>
+                            <p class="text-sm font-bold text-slate-800">
+                                Belum ada iklan unggulan saat ini
+                            </p>
+                            <p class="mt-1 text-xs text-slate-500 max-w-md mx-auto">
+                                Produk yang sedang aktif di-boost oleh mahasiswa akan tampil di beranda. Kamu tetap bisa melihat seluruh barang yang dijual di Katalog.
+                            </p>
+                            <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}"
+                               class="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition">
+                                <span>Lihat Semua Produk di Katalog</span>
+                                <span>&rarr;</span>
+                            </a>
+                        </div>
+                    @endforelse
+                </div>
+
+                @if ($listings->isNotEmpty())
+                    <div class="mt-8 text-center">
+                        <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}"
+                           class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-slate-100 hover:bg-blue-600 text-slate-700 hover:text-white font-bold text-xs sm:text-sm transition shadow-2xs">
+                            <span>Jelajahi Semua Produk di Katalog</span>
+                            <span>&rarr;</span>
+                        </a>
+                    </div>
+                @endif
+            @endif
 
             <div id="listing-results">
                 @if ($listings instanceof \Illuminate\Pagination\LengthAwarePaginator)

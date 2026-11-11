@@ -78,7 +78,7 @@
             <!-- Bagian Kanan: Search Bar Mini + Notifikasi + Profil/Auth -->
             <div class="flex items-center gap-4">
                 <!-- Search Box di Navbar -->
-                <form action="{{ url('/') }}" method="GET" class="hidden md:flex relative w-64 lg:w-72">
+                <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" class="hidden md:flex relative w-64 lg:w-72">
                     <input type="text" 
                            name="q"
                            value="{{ request('q') }}"
@@ -242,7 +242,7 @@
     <!-- Mobile Navigation Drawer -->
     <div x-show="mobileMenuOpen" x-cloak class="xl:hidden border-t border-slate-100 bg-white px-4 pt-3 pb-6 space-y-2.5">
         <!-- Mobile Search Form -->
-        <form action="{{ url('/') }}" method="GET" class="relative pb-1">
+        <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" class="relative pb-1">
             <input type="text" 
                    name="q"
                    value="{{ request('q') }}"

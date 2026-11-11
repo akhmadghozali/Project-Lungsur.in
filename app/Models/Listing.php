@@ -53,6 +53,18 @@ class Listing extends Model
             });
     }
 
+    public function scopeNotBoosted($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('is_boosted', false)
+              ->orWhereNull('is_boosted')
+              ->orWhere(function ($sub) {
+                  $sub->whereNotNull('boosted_until')
+                      ->where('boosted_until', '<=', now());
+              });
+        });
+    }
+
     public function isCurrentlyBoosted(): bool
     {
         return (bool) ($this->is_boosted && ($this->boosted_until === null || $this->boosted_until->isFuture()));
@@ -103,5 +115,15 @@ class Listing extends Model
     public function conversations(): HasMany
     {
         return $this->hasMany(Conversation::class);
+    }
+
+    public function boostPayments(): HasMany
+    {
+        return $this->hasMany(BoostPayment::class);
+    }
+
+    public function latestBoostPayment(): HasOne
+    {
+        return $this->hasOne(BoostPayment::class)->latestOfMany();
     }
 }

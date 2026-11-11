@@ -493,6 +493,17 @@ class AuctionController extends Controller
             'winner',
         ])->findOrFail($id);
 
+        abort_unless($auction->listing, 404);
+
+        if (in_array($auction->status, ['pending_payment', 'pending_approval', 'canceled'], true)) {
+            $user = auth()->user();
+            $isAllowed = $user && (
+                $user->role === 'admin'
+                || (int) $user->id === (int) $auction->listing->user_id
+            );
+            abort_unless($isAllowed, 404);
+        }
+
         // Tutup lelang jika waktunya sudah habis.
         if (
             $auction->status === 'active' &&
@@ -509,8 +520,6 @@ class AuctionController extends Controller
                 'winner',
             ]);
         }
-
-        abort_unless($auction->listing, 404);
 
         return view('auctions.show', compact('auction'));
     }

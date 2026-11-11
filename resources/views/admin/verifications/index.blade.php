@@ -31,9 +31,6 @@
 
         <div class="px-6 pb-2 pt-4 text-[10px] font-bold tracking-widest text-slate-500">PORTAL MODERASI</div>
         <nav class="space-y-1 px-3 text-sm">
-            <a href="{{ route('admin.verifications.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5">
-                <span>▦</span> Dashboard
-            </a>
             <a href="{{ route('admin.verifications.index') }}"
                class="flex items-center justify-between rounded-xl bg-blue-600 px-3 py-2.5 font-semibold text-white">
                 <span class="flex items-center gap-3"><span>🛡</span> User Verification</span>
@@ -41,6 +38,38 @@
                     <span class="rounded-full bg-red-500 px-2 py-0.5 text-[11px]">{{ $stats['pending'] }}</span>
                 @endif
             </a>
+
+            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-500">MONETISASI</div>
+
+            {{-- Menu Verifikasi Boost Iklan (Rp5.000 / 30 Hari) --}}
+            <a href="{{ route('admin.payments.boost') }}"
+               class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
+                <span class="flex items-center gap-3">
+                    <span class="text-amber-400">⚡</span> Verifikasi Boost Iklan
+                </span>
+                @php
+                    $pendingBoostCount = \App\Models\BoostPayment::where('status', 'pending')->count();
+                @endphp
+                @if ($pendingBoostCount > 0)
+                    <span class="rounded-full bg-amber-500 text-slate-950 font-bold px-2 py-0.5 text-[11px]">{{ $pendingBoostCount }}</span>
+                @endif
+            </a>
+
+            {{-- Menu Verifikasi Pembukaan Sesi Lelang (Rp5.000) --}}
+            <a href="{{ route('admin.payments.auction') }}"
+               class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
+                <span class="flex items-center gap-3">
+                    <span class="text-emerald-400">🔨</span> Verifikasi Biaya Lelang
+                </span>
+                @php
+                    $pendingAuctionCount = \App\Models\AuctionPayment::where('status', 'pending')->count();
+                @endphp
+                @if ($pendingAuctionCount > 0)
+                    <span class="rounded-full bg-emerald-500 text-white font-bold px-2 py-0.5 text-[11px]">{{ $pendingAuctionCount }}</span>
+                @endif
+            </a>
+
+            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-500">SISTEM & ADUAN</div>
             <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>▤</span> Content Moderation</a>
             <a href="{{ route('admin.reports.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>⚑</span> Reported Items</a>
             <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>☰</span> System Logs</a>
@@ -78,19 +107,32 @@
 
         {{-- Topbar --}}
         <header class="flex items-center justify-between gap-4 border-b bg-white px-6 py-3">
-            <div class="w-full max-w-md rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-400">
-                Cari nama, NIM, atau email mahasiswa...
-            </div>
+            <form method="GET" action="{{ route('admin.verifications.index') }}" class="w-full max-w-md">
+                <div class="relative flex items-center">
+                    <svg class="pointer-events-none absolute left-3.5 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text"
+                           name="q"
+                           value="{{ $search ?? '' }}"
+                           placeholder="Cari nama, NIM, atau email mahasiswa..."
+                           class="w-full rounded-full bg-slate-100 pl-10 pr-10 py-2 text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 border border-transparent focus:border-blue-500 transition">
+                    @if (!empty($search))
+                        <a href="{{ route('admin.verifications.index') }}"
+                           class="absolute right-3.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                           title="Hapus pencarian">✕</a>
+                    @endif
+                </div>
+            </form>
 
             {{-- Profil admin (dropdown) --}}
             <div class="relative" @click.outside="profileOpen = false" @keydown.escape.window="profileOpen = false">
                 <button type="button" @click="profileOpen = !profileOpen"
-                        class="flex items-center gap-3 rounded-full py-1 pl-3 pr-1 text-right transition hover:bg-slate-100">
+                        class="flex items-center gap-3 rounded-full py-1 pl-3 pr-1 text-right transition hover:bg-slate-100 cursor-pointer">
                     <div class="hidden leading-tight sm:block">
-                        <div class="text-sm font-semibold">{{ $admin->name }}</div>
-                        <div class="text-[11px] font-medium text-blue-600">Campus Trust &amp; Safety</div>
+                        <div class="text-sm font-semibold text-slate-800">{{ $admin->name }}</div>
                     </div>
-                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white shadow-xs">
                         {{ $adminInitial }}
                     </div>
                 </button>
@@ -127,6 +169,12 @@
                         KTM pendaftar yang memakai email non-kampus agar hanya mahasiswa asli
                         yang bisa berjualan dan bertransaksi di Lungsur.in.
                     </p>
+                    @if (!empty($search))
+                        <div class="mt-3 inline-flex items-center gap-2 rounded-xl bg-blue-50 px-3.5 py-1.5 text-xs text-blue-700 border border-blue-200">
+                            <span>Menampilkan hasil pencarian untuk: <strong>"{{ $search }}"</strong></span>
+                            <a href="{{ route('admin.verifications.index') }}" class="font-bold text-blue-600 hover:text-blue-800 ml-1">✕ Reset Pencarian</a>
+                        </div>
+                    @endif
                 </div>
                 <a href="{{ route('admin.verifications.index') }}"
                    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
@@ -288,9 +336,19 @@
                         </section>
                     @else
                         <section class="rounded-2xl border bg-white p-12 text-center">
-                            <div class="text-4xl">🎉</div>
-                            <div class="mt-2 text-lg font-bold">Antrean kosong</div>
-                            <p class="text-sm text-slate-500">Tidak ada pendaftar yang menunggu verifikasi KTM.</p>
+                            @if (!empty($search))
+                                <div class="text-4xl">🔍</div>
+                                <div class="mt-2 text-lg font-bold">Tidak ada hasil pencarian</div>
+                                <p class="text-sm text-slate-500">Tidak ada pendaftar pending yang cocok dengan kata kunci "{{ $search }}".</p>
+                                <a href="{{ route('admin.verifications.index') }}"
+                                   class="mt-4 inline-block rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700">
+                                    Reset Pencarian
+                                </a>
+                            @else
+                                <div class="text-4xl">🎉</div>
+                                <div class="mt-2 text-lg font-bold">Antrean kosong</div>
+                                <p class="text-sm text-slate-500">Tidak ada pendaftar yang menunggu verifikasi KTM.</p>
+                            @endif
                         </section>
                     @endif
 
@@ -305,7 +363,7 @@
                             </div>
                             <div class="grid gap-3 sm:grid-cols-2">
                                 @foreach ($queue as $u)
-                                    <a href="{{ route('admin.verifications.index', ['user' => $u->id]) }}"
+                                    <a href="{{ route('admin.verifications.index', array_filter(['user' => $u->id, 'q' => $search ?? null])) }}"
                                        class="rounded-2xl border bg-white p-4 transition hover:border-blue-400 hover:shadow">
                                         <div class="font-semibold">{{ $u->name }}</div>
                                         <div class="text-xs text-slate-500">NIM {{ $u->nim ?? '-' }} · {{ $u->campus ?? '-' }}</div>

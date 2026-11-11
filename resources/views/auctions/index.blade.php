@@ -20,11 +20,29 @@
                     </p>
                 </div>
 
-                <div class="rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm text-slate-600 shadow-sm">
-                    <span class="font-bold text-blue-700">
-                        {{ $auctions->total() + ($spotlight ? 1 : 0) }}
-                    </span>
-                    sesi lelang
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm text-slate-600 shadow-sm">
+                        <span class="font-bold text-blue-700">
+                            {{ $auctions->total() + ($spotlight ? 1 : 0) }}
+                        </span>
+                        sesi lelang
+                    </div>
+
+                    @if (auth()->check() && !auth()->user()->isSeller())
+                        <form method="POST" action="{{ route('user.switch_mode') }}">
+                            @csrf
+                            <input type="hidden" name="mode" value="seller">
+                            <button type="submit"
+                                    class="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-600/20 transition cursor-pointer">
+                                <span>🔨 Mode Penjual untuk Buka Lelang</span>
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('auctions.create') }}"
+                           class="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-600/20 transition">
+                            <span>🔨 + Buka Lelang (Rp5.000)</span>
+                        </a>
+                    @endif
                 </div>
             </div>
         </section>
