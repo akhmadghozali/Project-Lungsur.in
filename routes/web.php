@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\IklanController;
 use App\Http\Controllers\WantedAdController;
+use App\Http\Controllers\Admin\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -47,6 +48,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications.index');
     Route::post('/verifications/{user}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
     Route::post('/verifications/{user}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
+    // Reports & Moderation
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
+    Route::post('/reports/{report}/ignore', [ReportController::class, 'ignore'])->name('reports.ignore');
+    Route::post('/reports/{report}/take-down', [ReportController::class, 'takeDown'])->name('reports.take_down');
 });
 
 /*
@@ -59,6 +65,10 @@ Route::get('/katalog', [HomeController::class, 'index'])->name('listings.index')
 
 Route::middleware(['auth', 'verified_student'])->group(function () {
     // Halaman form pasang iklan — hanya user terverifikasi
+    // Melaporkan iklan
+    Route::post('/katalog/{listing}/report', [ReportController::class, 'store'])
+        ->name('reports.store');
+
     Route::get('/katalog/pasang', [IklanController::class, 'create'])->name('katalog.pasang');
 
     // POST handler — simpan iklan via IklanController
