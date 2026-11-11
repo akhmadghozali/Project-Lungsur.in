@@ -646,6 +646,22 @@
 @endphp
 
 <main class="listing-detail-page">
+    
+     {{-- NOTIFIKASI LAPORAN --}}
+    <div class="ld-container mb-4">
+        @if (session('success'))
+            <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                {{ session('error') }}
+            </div>
+        @endif
+    </div>
+
     <div class="ld-container">
         <nav class="ld-breadcrumb" aria-label="Breadcrumb">
             <a href="{{ url('/') }}" class="ld-back-link">
@@ -860,6 +876,84 @@
                     Utamakan COD di area kampus seperti Gazebo UB, Kantin Polinema,
                     atau gerbang utama demi keamanan bersama.
                 </div>
+
+                {{-- TOMBOL LAPORKAN BARANG --}}
+                @auth
+                    @if (auth()->id() !== $listing->user_id)
+                        <button type="button"
+                                onclick="openReportModal()"
+                                class="flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50">
+                            <span>⚑</span>
+                            Laporkan Barang
+                        </button>
+
+                        {{-- MODAL LAPORAN --}}
+                        <div id="reportModal"
+                            class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+
+                            <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+                                <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+                                    <div>
+                                        <h2 class="text-xl font-bold text-slate-800">Laporkan Barang</h2>
+                                        <p class="mt-1 text-sm text-slate-500">
+                                            Bantu kami menjaga keamanan komunitas Lungsur.in.
+                                        </p>
+                                    </div>
+
+                                    <button type="button" onclick="closeReportModal()"
+                                            class="rounded-lg px-2 py-1 text-2xl leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                                        &times;
+                                    </button>
+                                </div>
+
+                                <form method="POST"
+                                    action="{{ route('reports.store', $listing->id) }}"
+                                    class="mt-5">
+                                    @csrf
+
+                                    <label for="reportReason" class="mb-2 block text-sm font-semibold text-slate-700">
+                                        Pilih alasan laporan <span class="text-red-500">*</span>
+                                    </label>
+
+                                    <select id="reportReason" name="reason" required
+                                            class="w-full rounded-lg border border-slate-300 px-3 py-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                        <option value="">-- Pilih alasan --</option>
+                                        <option value="Indikasi penipuan">Indikasi penipuan</option>
+                                        <option value="Foto tidak pantas / bukan barang asli">Foto tidak pantas / bukan barang asli</option>
+                                        <option value="Harga tidak wajar">Harga tidak wajar</option>
+                                        <option value="Spam / iklan ganda">Spam / iklan ganda</option>
+                                        <option value="Barang terlarang">Barang terlarang</option>
+                                        <option value="Lainnya">Lainnya</option>
+                                    </select>
+
+                                    <label for="reportDetails" class="mb-2 mt-5 block text-sm font-semibold text-slate-700">
+                                        Detail tambahan <span class="font-normal text-slate-400">(Opsional)</span>
+                                    </label>
+
+                                    <textarea id="reportDetails" name="details" rows="4" maxlength="1000"
+                                            placeholder="Jelaskan alasan kamu melaporkan barang ini..."
+                                            class="w-full resize-none rounded-lg border border-slate-300 px-3 py-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"></textarea>
+
+                                    <p class="mt-2 text-xs text-slate-400">
+                                        Laporan akan ditinjau oleh admin Lungsur.in.
+                                    </p>
+
+                                    <div class="mt-6 flex justify-end gap-3">
+                                        <button type="button" onclick="closeReportModal()"
+                                                class="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">
+                                            Batal
+                                        </button>
+
+                                        <button type="submit"
+                                                class="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+                                            Kirim Laporan
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
+                @endauth
             </aside>
         </div>
     </div>
@@ -932,5 +1026,31 @@
             updatePhotoCounter(currentImageIndex + 1);
         }
     }
+    function openReportModal() {
+        const modal = document.getElementById('reportModal');
+
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+        }
+    }
+
+    function closeReportModal() {
+        const modal = document.getElementById('reportModal');
+
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        }
+    }
+
+    // Tutup modal ketika area luar diklik
+    document.getElementById('reportModal')?.addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeReportModal();
+        }
+    });
 </script>
 @endpush

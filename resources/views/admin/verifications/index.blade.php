@@ -42,7 +42,7 @@
                 @endif
             </a>
             <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>▤</span> Content Moderation</a>
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>⚑</span> Reported Items</a>
+            <a href="{{ route('admin.reports.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>⚑</span> Reported Items</a>
             <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>☰</span> System Logs</a>
             <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>⚙</span> Admin Settings</a>
         </nav>
