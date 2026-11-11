@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\ChatSent;
+use App\Events\MessageSent;
 use App\Models\Conversation;
 use App\Models\Listing;
 use App\Models\Message;
@@ -178,7 +178,7 @@ class ChatController extends Controller
             $msg->load('sender:id,name,campus');
 
             try {
-                broadcast(new ChatSent($msg))->toOthers();
+                broadcast(new MessageSent($msg))->toOthers();
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -288,7 +288,7 @@ class ChatController extends Controller
     }
 
     /**
-     * Mengirim pesan baru ke percakapan dan menyiarkan event Pusher ChatSent.
+     * Mengirim pesan baru ke percakapan dan menyiarkan event Pusher MessageSent.
      */
     public function sendMessage(Request $request, $id): JsonResponse
     {
@@ -355,7 +355,7 @@ class ChatController extends Controller
         $message->load('sender:id,name,campus');
 
         try {
-            broadcast(new ChatSent($message))->toOthers();
+            broadcast(new MessageSent($message))->toOthers();
         } catch (\Throwable $e) {
             report($e);
         }
