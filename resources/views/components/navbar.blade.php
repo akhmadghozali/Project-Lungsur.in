@@ -181,6 +181,10 @@
                             </div>
 
                             <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium">Dashboard Saya</a>
+                            <a href="{{ route('dashboard.history') }}"
+                            class="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium">
+                                Riwayat Transaksi
+                            </a>
                             @if(auth()->user()->isSeller())
                                 <a href="{{ route('katalog.pasang') }}" class="block px-4 py-2 text-blue-600 hover:bg-blue-50 font-bold">+ Pasang Iklan Baru</a>
                             @endif

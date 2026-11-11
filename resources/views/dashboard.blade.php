@@ -40,7 +40,7 @@
                     <form method="POST" action="{{ route('user.switch_mode') }}">
                         @csrf
                         <input type="hidden" name="mode" value="{{ $mode === 'seller' ? 'buyer' : 'seller' }}">
-                        <button type="submit" 
+                        <button type="submit"
                                 class="px-5 py-3 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm transition border border-white/20 flex items-center gap-2 cursor-pointer shadow-xs">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
@@ -50,15 +50,12 @@
                     </form>
 
                     @if ($mode === 'seller')
-                        <a href="{{ route('katalog.pasang') }}" 
-                           class="px-5 py-3 rounded-2xl bg-white text-emerald-800 hover:bg-emerald-50 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                            </svg>
-                            <span>Pasang Iklan Baru</span>
-                        </a>
+                        <a href="{{ route('katalog.pasang') }}"
+                            class="px-5 py-3 rounded-2xl bg-white text-emerald-800 hover:bg-emerald-50 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+                                <span>Pasang Iklan Baru</span>
+                         </a>
                     @else
-                        <a href="{{ url('/') }}" 
+                        <a href="{{ url('/') }}"
                            class="px-5 py-3 rounded-2xl bg-white text-blue-600 hover:bg-blue-50 font-bold text-xs sm:text-sm shadow-md transition">
                             Jelajahi Beranda &rarr;
                         </a>
@@ -263,12 +260,12 @@
                         <p class="text-xs text-slate-500 mt-0.5">Daftar barang yang kamu iklankan di marketplace Lungsur.in</p>
                     </div>
 
-                    <a href="{{ route('katalog.pasang') }}" 
+                    <a href="{{ route('katalog.pasang') }}"
                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition self-start sm:self-auto">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                         </svg>
-                        <span>+ Pasang Iklan Baru</span>
+                        <span> Pasang Iklan Baru</span>
                     </a>
                 </div>
 
@@ -367,21 +364,48 @@
 
                                 {{-- Aksi Penjual --}}
                                 <div class="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between gap-2">
+
                                     {{-- Toggle Status Terjual / Tersedia --}}
-                                    <form method="POST" action="{{ route('dashboard.listings.status', $listing->id) }}#listing-{{ $listing->id }}" class="flex-1">
+                                    <form method="POST"
+                                        action="{{ route('dashboard.listings.status', $listing->id) }}#listing-{{ $listing->id }}"
+                                        class="flex-1">
                                         @csrf
                                         @method('PATCH')
-                                        <input type="hidden" name="status" value="{{ $listing->status === 'available' ? 'sold' : 'available' }}">
-                                        <button type="submit" 
-                                                class="w-full py-1.5 px-2 rounded-lg text-xs font-bold transition text-center {{ $listing->status === 'available' ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200' }}">
-                                            {{ $listing->status === 'available' ? 'Tandai Terjual' : 'Jadikan Tersedia' }}
-                                        </button>
+
+                                        @if ($listing->status === 'available')
+                                            <input type="hidden" name="status" value="sold">
+
+                                            <select name="buyer_id"
+                                                    required
+                                                    class="w-full mb-2 py-1.5 px-2 rounded-lg text-xs border border-slate-300">
+                                                <option value="">Pilih pembeli</option>
+                                                @foreach ($listing->conversations->unique('buyer_id') as $conversation)
+                                                    @if ($conversation->buyer && $conversation->buyer_id !== $listing->user_id)
+                                                        <option value="{{ $conversation->buyer_id }}">
+                                                            {{ $conversation->buyer->name }}
+                                                        </option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+
+                                            <button type="submit"
+                                                    class="w-full py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200">
+                                                Tandai Terjual
+                                            </button>
+                                        @elseif ($listing->status === 'sold')
+                                            <input type="hidden" name="status" value="available">
+
+                                            <button type="submit"
+                                                    class="w-full py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200">
+                                                Jadikan Tersedia
+                                            </button>
+                                        @endif
                                     </form>
 
                                     {{-- Tombol Edit --}}
                                     <a href="{{ route('iklan.edit', $listing->id) }}"
-                                       class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 border border-blue-200 transition"
-                                       title="Edit Iklan">
+                                    class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 border border-blue-200 transition"
+                                    title="Edit Iklan">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
@@ -406,6 +430,7 @@
                         {{ $myListings->links() }}
                     </div>
                 @else
+
                     <div class="rounded-2xl border border-dashed border-slate-200 py-12 text-center space-y-3">
                         <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -532,7 +557,7 @@
                         <p class="text-xs text-slate-500 mt-0.5">Pantau status penawaran harga pada lelang perabot kos mahasiswa</p>
                     </div>
 
-                    <a href="{{ route('home') }}" 
+                    <a href="{{ route('home') }}"
                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
                         <span>Jelajahi Katalog Belanja &rarr;</span>
                     </a>

@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Listing;
 
 #[Fillable([
     'name',
@@ -52,6 +54,11 @@ class User extends Authenticatable
     public function listings(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Listing::class);
+    }
+
+   public function purchasedListings(): HasMany
+    {
+        return $this->hasMany(Listing::class, 'buyer_id');
     }
 
     public function bids(): \Illuminate\Database\Eloquent\Relations\HasMany
