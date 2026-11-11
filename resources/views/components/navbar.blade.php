@@ -120,6 +120,20 @@
                         @endif
                     </form>
 
+                    <!-- ===== MENU CHAT (Tepat di sebelah kiri Notifikasi & Avatar) ===== -->
+                    <a href="{{ Route::has('chat.index') ? route('chat.index') : url('/chat') }}" 
+                       class="relative p-2 rounded-full transition {{ request()->routeIs('chat.*') || request()->is('chat*') ? 'text-blue-600 bg-blue-50' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }}" 
+                       title="Obrolan Pesan">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+<!-- Badge Lencana Jumlah Pesan Belum Dibaca -->
+    <span id="navbar-unread-badge" 
+          class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full ring-2 ring-white flex items-center justify-center d-none">
+          0
+    </span>
+</a>                    </a>
+
                     <!-- Tombol Cepat Pasang Iklan Khusus Mode Penjual -->
                     @if(auth()->user()->isSeller())
                         <a href="{{ route('katalog.pasang') }}" 
@@ -127,6 +141,7 @@
                             <span>+ Iklan Baru</span>
                         </a>
                     @endif
+                    
 
                     <!-- Bell Notifikasi -->
                     <button type="button" class="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-full transition" aria-label="Notifikasi">

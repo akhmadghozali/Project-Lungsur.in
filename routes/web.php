@@ -8,7 +8,10 @@ use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\IklanController;
 use App\Http\Controllers\WantedAdController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ChatController; // Sesuaikan nanti jika controller chat sudah ada
+use App\Http\Controllers\ChatController;
+use Illuminate\Http\Request;
+use App\Models\Listing; 
+// Sesuaikan nanti jika controller chat sudah ada
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -127,6 +130,11 @@ Route::get('/chat/start/{listing}', function ($listing) {
 })->name('chat.start')->middleware('auth');
 
 // Rute sementara/dummy untuk chat.start
-Route::get('/chat/start/{listing}', function ($listing) {
-    return redirect()->back()->with('info', 'Fitur chat sedang dalam tahap pengembangan.');
-})->name('chat.start')->middleware('auth');
+
+Route::get('/chat', function (Request $request) {
+    $listingId = $request->query('listing_id');
+    $selectedListing = $listingId ? Listing::find($listingId) : null;
+
+    return view('chat.index', compact('selectedListing'));
+})->name('chat.index');
+Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');

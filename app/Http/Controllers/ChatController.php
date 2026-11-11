@@ -29,67 +29,77 @@ class ChatController extends Controller
     /**
      * Mendapatkan daftar percakapan aktif yang melibatkan pengguna saat ini.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
+        $listingId = $request->query('listing_id');
+        $selectedListing = $listingId ? Listing::find($listingId) : null;
+
         $user = $this->resolveUser($request);
-        if (!$user) {
+
+        // Jika request mengharapkan JSON (API)
+        if ($request->expectsJson() || $request->is('api/*')) {
+            if (!$user) {
+                return response()->json([
+                    'status' => 'unauthenticated',
+                    'message' => 'Silakan masuk (login) terlebih dahulu.',
+                ], 401);
+            }
+
+            $conversations = Conversation::with([
+                'listing:id,title,price,status',
+                'buyer:id,name,campus',
+                'seller:id,name,campus',
+                'latestMessage.sender:id,name',
+            ])
+            ->where(function ($query) use ($user) {
+                $query->where('buyer_id', $user->id)
+                      ->orWhere('seller_id', $user->id);
+            })
+            ->orderByDesc('last_message_at')
+            ->orderByDesc('created_at')
+            ->get();
+
+            $data = $conversations->map(function ($conversation) use ($user) {
+                $otherParticipant = $conversation->getOtherParticipant($user->id);
+                $unreadCount = Message::where('conversation_id', $conversation->id)
+                    ->where('sender_id', '!=', $user->id)
+                    ->where('is_read', false)
+                    ->count();
+
+                return [
+                    'id' => $conversation->id,
+                    'listing' => [
+                        'id' => $conversation->listing->id,
+                        'title' => $conversation->listing->title,
+                        'price' => (float) $conversation->listing->price,
+                        'status' => $conversation->listing->status,
+                    ],
+                    'interlocutor' => $otherParticipant ? [
+                        'id' => $otherParticipant->id,
+                        'name' => $otherParticipant->name,
+                        'campus' => $otherParticipant->campus,
+                    ] : null,
+                    'latest_message' => $conversation->latestMessage ? [
+                        'id' => $conversation->latestMessage->id,
+                        'sender_id' => $conversation->latestMessage->sender_id,
+                        'sender_name' => $conversation->latestMessage->sender?->name,
+                        'message_text' => $conversation->latestMessage->message_text,
+                        'is_read' => $conversation->latestMessage->is_read,
+                        'created_at' => $conversation->latestMessage->created_at?->toISOString(),
+                    ] : null,
+                    'unread_count' => $unreadCount,
+                    'last_message_at' => $conversation->last_message_at?->toISOString() ?? $conversation->created_at?->toISOString(),
+                ];
+            });
+
             return response()->json([
-                'status' => 'unauthenticated',
-                'message' => 'Silakan masuk (login) terlebih dahulu.',
-            ], 401);
+                'status' => 'success',
+                'data' => $data,
+            ]);
         }
 
-        $conversations = Conversation::with([
-            'listing:id,title,price,status',
-            'buyer:id,name,campus',
-            'seller:id,name,campus',
-            'latestMessage.sender:id,name',
-        ])
-        ->where(function ($query) use ($user) {
-            $query->where('buyer_id', $user->id)
-                  ->orWhere('seller_id', $user->id);
-        })
-        ->orderByDesc('last_message_at')
-        ->orderByDesc('created_at')
-        ->get();
-
-        $data = $conversations->map(function ($conversation) use ($user) {
-            $otherParticipant = $conversation->getOtherParticipant($user->id);
-            $unreadCount = Message::where('conversation_id', $conversation->id)
-                ->where('sender_id', '!=', $user->id)
-                ->where('is_read', false)
-                ->count();
-
-            return [
-                'id' => $conversation->id,
-                'listing' => [
-                    'id' => $conversation->listing->id,
-                    'title' => $conversation->listing->title,
-                    'price' => (float) $conversation->listing->price,
-                    'status' => $conversation->listing->status,
-                ],
-                'interlocutor' => $otherParticipant ? [
-                    'id' => $otherParticipant->id,
-                    'name' => $otherParticipant->name,
-                    'campus' => $otherParticipant->campus,
-                ] : null,
-                'latest_message' => $conversation->latestMessage ? [
-                    'id' => $conversation->latestMessage->id,
-                    'sender_id' => $conversation->latestMessage->sender_id,
-                    'sender_name' => $conversation->latestMessage->sender?->name,
-                    'message_text' => $conversation->latestMessage->message_text,
-                    'is_read' => $conversation->latestMessage->is_read,
-                    'created_at' => $conversation->latestMessage->created_at?->toISOString(),
-                ] : null,
-                'unread_count' => $unreadCount,
-                'last_message_at' => $conversation->last_message_at?->toISOString() ?? $conversation->created_at?->toISOString(),
-            ];
-        });
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $data,
-        ]);
+        // Tampilan Web biasa (Blade View)
+        return view('chat.index', compact('selectedListing'));
     }
 
     /**
@@ -138,7 +148,6 @@ class ChatController extends Controller
 
         $listing = Listing::with('user:id,name,campus')->findOrFail($request->listing_id);
 
-        // Penjual tidak dapat chat dengan dirinya sendiri
         if ((int) $listing->user_id === (int) $user->id) {
             return response()->json([
                 'status' => 'error',
@@ -146,7 +155,6 @@ class ChatController extends Controller
             ], 422);
         }
 
-        // Cari atau buat percakapan
         $conversation = Conversation::firstOrCreate(
             [
                 'listing_id' => $listing->id,
@@ -228,7 +236,6 @@ class ChatController extends Controller
             ], 404);
         }
 
-        // Pastikan hanya peserta percakapan yang dapat membaca pesan
         if (!$conversation->isParticipant($user->id)) {
             return response()->json([
                 'status' => 'forbidden',
@@ -236,7 +243,6 @@ class ChatController extends Controller
             ], 403);
         }
 
-        // Tandai pesan dari lawan bicara sebagai terbaca
         Message::where('conversation_id', $conversation->id)
             ->where('sender_id', '!=', $user->id)
             ->where('is_read', false)
@@ -331,7 +337,6 @@ class ChatController extends Controller
             ], 404);
         }
 
-        // Otorisasi peserta percakapan
         if (!$conversation->isParticipant($user->id)) {
             return response()->json([
                 'status' => 'forbidden',
@@ -339,7 +344,6 @@ class ChatController extends Controller
             ], 403);
         }
 
-        // Simpan pesan
         $message = Message::create([
             'conversation_id' => $conversation->id,
             'sender_id' => $user->id,
@@ -347,12 +351,9 @@ class ChatController extends Controller
             'is_read' => false,
         ]);
 
-        // Perbarui waktu percakapan
         $conversation->update(['last_message_at' => now()]);
-
         $message->load('sender:id,name,campus');
 
-        // Siarkan event Pusher realtime
         try {
             broadcast(new ChatSent($message))->toOthers();
         } catch (\Throwable $e) {
