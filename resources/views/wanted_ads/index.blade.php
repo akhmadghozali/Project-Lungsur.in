@@ -54,7 +54,7 @@
                      alert('Silakan pilih salah satu postingan barang dagangan Anda terlebih dahulu.');
                      return;
                  }
-                 this.chatUnavailable = true;
+                 window.location.href = `/chat?listing_id=${this.selectedListingId}`;
              }
          }">
 
@@ -69,7 +69,7 @@
                         <!-- Seller Mode Active Pill -->
                         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-amber-100/90 text-amber-900 border border-amber-300/80 shadow-2xs">
                             <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                            <span>🏷️ Mode Penjual Aktif</span>
+                            <span>Mode Penjual Aktif</span>
                             <span class="text-amber-500">|</span>
                             <span>Papan Kebutuhan Pembeli</span>
                         </div>
@@ -159,8 +159,8 @@
                 <div class="lg:col-span-4 hidden lg:flex justify-end">
                     <div class="bg-white/90 backdrop-blur-xs p-5 rounded-3xl border border-indigo-100 shadow-sm space-y-3.5 max-w-xs">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg shrink-0">
-                                📢
+                            <div class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
                             </div>
                             <div class="text-xs">
                                 <div class="font-bold text-slate-900">Publikasi Terbuka</div>
@@ -168,8 +168,8 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg shrink-0">
-                                💬
+                            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                             </div>
                             <div class="text-xs">
                                 <div class="font-bold text-slate-900">Terhubung ke Chat</div>
@@ -177,8 +177,8 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg shrink-0">
-                                💰
+                            <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
                             <div class="text-xs">
                                 <div class="font-bold text-slate-900">Budget Maksimal Jelas</div>
@@ -324,7 +324,10 @@
                                 </div>
 
                                 <div class="text-right text-[10px] text-slate-400 shrink-0 max-w-[120px]" title="{{ $ad->addresses }}">
-                                    📍 <span class="truncate block">{{ $ad->addresses }}</span>
+                                    <span class="inline-flex items-center gap-1 truncate">
+                                        <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                        <span class="truncate block">{{ $ad->addresses }}</span>
+                                    </span>
                                 </div>
                             </div>
 
@@ -372,8 +375,8 @@
                     </article>
                 @empty
                     <div class="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center space-y-3">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto text-xl font-bold">
-                            📦
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                         </div>
                         <h3 class="text-base font-bold text-slate-800">Belum Ada Permintaan Barang</h3>
                         <p class="text-xs text-slate-500 max-w-md mx-auto">
@@ -454,10 +457,10 @@
 
                         <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-500 gap-2 pt-1">
                             <div>
-                                👤 Calon Pembeli: <span class="font-bold text-slate-800" x-text="selectedAd.buyer_name"></span> (<span x-text="selectedAd.buyer_campus"></span>)
+                                Calon Pembeli: <span class="font-bold text-slate-800" x-text="selectedAd.buyer_name"></span> (<span x-text="selectedAd.buyer_campus"></span>)
                             </div>
                             <div>
-                                📍 Lokasi Serah Terima: <span class="font-medium text-slate-700" x-text="selectedAd.addresses"></span>
+                                Lokasi Serah Terima: <span class="font-medium text-slate-700" x-text="selectedAd.addresses"></span>
                             </div>
                         </div>
                     </div>
@@ -503,8 +506,8 @@
                                                 <img :src="item.photo_url" :alt="item.title" class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0">
                                             </template>
                                             <template x-if="!item.photo_url">
-                                                <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center font-bold text-xs shrink-0">
-                                                    📦
+                                                <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">
+                                                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                                                 </div>
                                             </template>
 
@@ -535,21 +538,6 @@
                         </template>
                     </div>
 
-                    <!-- Alert Notifikasi Fitur Chat Belum Tersedia -->
-                    <div x-show="chatUnavailable" 
-                         x-cloak 
-                         x-transition 
-                         class="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 flex items-start gap-3 shadow-xs">
-                        <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                        <div class="space-y-0.5 text-xs sm:text-sm">
-                            <div class="font-bold text-amber-950">Fitur chat saat ini masih belum tersedia</div>
-                            <div class="text-amber-800 text-xs">
-                                Antarmuka obrolan (chat) internal sedang dalam tahap pengerjaan. Postingan dagangan yang Anda pilih telah tersimpan dan siap disambungkan begitu fitur chat dirilis!
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Footer / Action Buttons -->
                     <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
@@ -596,7 +584,7 @@
 
                     <div class="mb-5">
                         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 mb-2">
-                            <span>📢 Wanted Ads Mahasiswa</span>
+                            <span>Wanted Ads Mahasiswa</span>
                         </div>
                         <h3 class="text-xl font-black text-slate-900 tracking-tight">Pasang Iklan Kebutuhan Barang</h3>
                         <p class="text-xs text-slate-500 mt-1">

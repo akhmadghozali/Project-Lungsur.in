@@ -848,16 +848,16 @@
                             </div>
 
                             <div class="ld-seller-contact mt-2">
-                                <div>📞 {{ $listing->user->phone ?? '08123456789' }}</div>
-                                <div>📍 {{ $listing->location ?? 'Lokasi Tak Terlihat' }}</div>
+                                <div>📍 {{ $listing->location ?? 'Lokasi Kampus Malang' }}</div>
                             </div>
                         </div>
 
-<a href="{{ route('chat.index', ['listing_id' => $listing->id]) }}" class="ld-contact-action btn-primary text-center" style="...">
-    <span>💬 Hubungi Penjual (Chat)</span>
-    <a>
-</a>                            <span>💬 Hubungi Penjual (Chat)</span>
-                        </a>
+                        <div class="mt-4">
+                            <a href="{{ route('chat.index', ['listing_id' => $listing->id]) }}" class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                <span>Hubungi Penjual (Chat)</span>
+                            </a>
+                        </div>
                     @endguest
 
                     <p class="ld-campus-domains mt-3">

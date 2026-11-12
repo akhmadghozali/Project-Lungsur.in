@@ -45,7 +45,7 @@ class AuctionController extends Controller
     public function show(Request $request, $id): JsonResponse
     {
         $auction = Auction::with([
-            'listing.user:id,name,campus,phone',
+            'listing.user:id,name,campus',
             'listing.category:id,name,slug',
             'winner:id,name,campus',
             'bids.user:id,name,campus',

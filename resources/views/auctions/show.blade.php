@@ -43,11 +43,15 @@
             && $highestBid
             && (int) $highestBid->user_id === (int) auth()->id();
 
+        $isSeller = auth()->check()
+            && auth()->user()->isSeller();
+
         $showBidModal = $canBid
             && auth()->check()
             && $isVerified
             && ! $isAdmin
             && ! $isOwner
+            && ! $isSeller
             && ! $isHighestBidder;
 
         $bidCap = (float) $auction->bid_cap;
@@ -332,6 +336,20 @@
                         @elseif ($isHighestBidder)
                             <div class="rounded-xl bg-blue-50 px-4 py-3 text-center text-sm font-semibold text-blue-800">
                                 Kamu sedang menjadi penawar tertinggi. Tunggu penawaran peserta lain.
+                            </div>
+
+                        @elseif ($isSeller)
+                            <div class="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-center space-y-2.5">
+                                <p class="text-xs font-semibold text-amber-900 leading-relaxed">
+                                    Kamu sedang dalam <span class="font-bold">Mode Penjual</span>. Beralih ke <span class="font-bold">Mode Pembeli</span> untuk mengajukan penawaran lelang ini.
+                                </p>
+                                <form method="POST" action="{{ route('user.switch_mode') }}">
+                                    @csrf
+                                    <input type="hidden" name="mode" value="buyer">
+                                    <button type="submit" class="w-full py-2 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition cursor-pointer">
+                                        Beralih ke Mode Pembeli &amp; Tawar
+                                    </button>
+                                </form>
                             </div>
 
                         @else

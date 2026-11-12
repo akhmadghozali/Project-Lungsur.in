@@ -14,9 +14,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->api(prepend: [
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+        ]);
+
         $middleware->alias([
             'verified_student' => \App\Http\Middleware\EnsureAccountIsVerified::class,
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'active_mode' => \App\Http\Middleware\EnsureActiveMode::class,
         ]);
 
         // Tujuan redirect kalau user yang sudah login membuka /login atau /register

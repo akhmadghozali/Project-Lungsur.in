@@ -291,7 +291,6 @@
                                             <div class="flex justify-between gap-3"><dt class="text-slate-500">Email</dt><dd class="font-semibold text-right break-all">{{ $selected->email }}</dd></div>
                                             <div class="flex justify-between gap-3"><dt class="text-slate-500">Tipe email</dt><dd class="font-semibold text-right capitalize">{{ $selected->email_type }}</dd></div>
                                             <div class="flex justify-between gap-3"><dt class="text-slate-500">Kampus</dt><dd class="font-semibold text-right">{{ $selected->campus ?? '-' }}</dd></div>
-                                            <div class="flex justify-between gap-3"><dt class="text-slate-500">No. HP</dt><dd class="font-semibold text-right">{{ $selected->phone ?? '-' }}</dd></div>
                                         </dl>
                                     </div>
 

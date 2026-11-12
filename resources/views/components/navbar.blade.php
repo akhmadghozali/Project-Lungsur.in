@@ -24,7 +24,7 @@
                     </span>
                 </a>
 
-                <!-- Desktop Navigation Links dengan Ikon Sesuai Figma -->
+                <!-- Desktop Navigation Links Dinamis Berdasarkan Mode -->
                 <div class="hidden xl:flex items-center gap-1 font-medium text-sm text-slate-600">
                     <!-- Beranda -->
                     <a href="{{ url('/') }}" 
@@ -45,33 +45,69 @@
                     </a>
 
                     @auth
-                        <!-- Iklan Saya -->
-                        <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" 
-                           class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('dashboard*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
-                            <svg class="w-4 h-4 {{ request()->routeIs('dashboard*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        @if(auth()->user()->isSeller())
+                            <!-- MODE PENJUAL: Dagangan Saya -->
+                            <a href="{{ route('dashboard', ['tab' => 'dagangan']) }}" 
+                               class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab', 'dagangan') === 'dagangan' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                                <span>Dagangan Saya</span>
+                            </a>
+
+                            <!-- MODE PENJUAL: Lelang Saya -->
+                            <a href="{{ route('dashboard', ['tab' => 'lelang']) }}" 
+                               class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab') === 'lelang' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                                <span>Lelang Saya</span>
+                            </a>
+
+                            <!-- MODE PENJUAL: Peluang Wanted Ads -->
+                            <a href="{{ route('dashboard', ['tab' => 'peluang']) }}" 
+                               class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab') === 'peluang' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                <span>Peluang Wanted Ads</span>
+                            </a>
+                        @else
+                            <!-- MODE PEMBELI: Lelang Terbuka -->
+                            <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" 
+                               class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                                <svg class="w-4 h-4 {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                                <span>Lelang</span>
+                            </a>
+
+                            <!-- MODE PEMBELI: Wanted Ads -->
+                            <a href="{{ route('wanted-ads.index') }}" 
+                               class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                                <svg class="w-4 h-4 {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>Wanted Ads</span>
+                            </a>
+                        @endif
+                    @else
+                        <!-- GUEST LINKS -->
+                        <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" 
+                           class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
-                            <span>Iklan Saya</span>
+                            <span>Lelang</span>
+                        </a>
+                        <a href="{{ route('wanted-ads.index') }}" 
+                           class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>Kebutuhan</span>
                         </a>
                     @endauth
-
-                    <!-- Lelang -->
-                    <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" 
-                       class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
-                        <svg class="w-4 h-4 {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                        <span>Lelang</span>
-                    </a>
-
-                    <!-- Kebutuhan (Wanted Ads) -->
-                    <a href="{{ route('wanted-ads.index') }}" 
-                       class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
-                        <svg class="w-4 h-4 {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span>Kebutuhan</span>
-                    </a>
                 </div>
             </div>
 
@@ -120,19 +156,19 @@
                         @endif
                     </form>
 
-                    <!-- ===== MENU CHAT (Tepat di sebelah kiri Notifikasi & Avatar) ===== -->
+                    <!-- ===== MENU CHAT ===== -->
                     <a href="{{ Route::has('chat.index') ? route('chat.index') : url('/chat') }}" 
                        class="relative p-2 rounded-full transition {{ request()->routeIs('chat.*') || request()->is('chat*') ? 'text-blue-600 bg-blue-50' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }}" 
                        title="Obrolan Pesan">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                         </svg>
-<!-- Badge Lencana Jumlah Pesan Belum Dibaca -->
-    <span id="navbar-unread-badge" 
-          class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full ring-2 ring-white flex items-center justify-center d-none">
-          0
-    </span>
-</a>                    </a>
+                        <!-- Badge Lencana Jumlah Pesan Belum Dibaca -->
+                        <span id="navbar-unread-badge" 
+                              class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full ring-2 ring-white flex items-center justify-center hidden">
+                              0
+                        </span>
+                    </a>
 
                     <!-- Tombol Cepat Pasang Iklan Khusus Mode Penjual -->
                     @if(auth()->user()->isSeller())
@@ -263,30 +299,42 @@
                 <div>
                     <span class="text-[11px] text-slate-500 font-medium">Mode Anda:</span>
                     <strong class="text-xs font-bold block {{ auth()->user()->isSeller() ? 'text-emerald-700' : 'text-blue-700' }}">
-                        {{ auth()->user()->isSeller() ? '🏷️ Mode Penjual' : '🛒 Mode Pembeli' }}
+                        {{ auth()->user()->isSeller() ? 'Mode Penjual' : 'Mode Pembeli' }}
                     </strong>
                 </div>
                 <form method="POST" action="{{ route('user.switch_mode') }}">
                     @csrf
                     <input type="hidden" name="mode" value="{{ auth()->user()->isSeller() ? 'buyer' : 'seller' }}">
                     <button type="submit" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 shadow-2xs hover:bg-slate-50 cursor-pointer">
-                        Ganti Mode
+                        Ganti ke {{ auth()->user()->isSeller() ? 'Pembeli' : 'Penjual' }}
                     </button>
                 </form>
             </div>
 
-            <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('dashboard*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Iklan Saya</a>
+            @if(auth()->user()->isSeller())
+                <a href="{{ route('dashboard', ['tab' => 'dagangan']) }}" class="block py-2 text-sm font-semibold text-emerald-700">Dagangan Saya</a>
+                <a href="{{ route('dashboard', ['tab' => 'lelang']) }}" class="block py-2 text-sm font-semibold text-emerald-700">Lelang Saya</a>
+                <a href="{{ route('dashboard', ['tab' => 'peluang']) }}" class="block py-2 text-sm font-semibold text-emerald-700">Peluang Wanted Ads</a>
+            @else
+                <a href="{{ route('dashboard', ['tab' => 'lelang']) }}" class="block py-2 text-sm font-semibold text-blue-600">Bidding Lelang Saya</a>
+                <a href="{{ route('dashboard', ['tab' => 'wanted']) }}" class="block py-2 text-sm font-semibold text-blue-600">Wanted Ads Saya</a>
+                <a href="{{ route('dashboard', ['tab' => 'riwayat']) }}" class="block py-2 text-sm font-semibold text-blue-600">Riwayat Pembelian</a>
+                <a href="{{ route('wanted-ads.index') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Papan Wanted Ads</a>
+            @endif
         @endauth
         <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Lelang Terbuka</a>
-        <a href="{{ route('wanted-ads.index') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Kebutuhan Mahasiswa</a>
         <div class="pt-2 border-t border-slate-100">
-            @if (auth()->check() && !auth()->user()->isSeller())
-                <a href="{{ route('wanted-ads.index') }}" class="block text-center py-2.5 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-sm">
-                    + Pasang Kebutuhan Baru
+            @if (auth()->check() && auth()->user()->isSeller())
+                <a href="{{ route('katalog.pasang') }}" class="block text-center py-2.5 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm">
+                    + Pasang Iklan Baru
+                </a>
+            @elseif (auth()->check() && auth()->user()->isBuyer())
+                <a href="{{ route('wanted-ads.index') }}" class="block text-center py-2.5 text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm">
+                    + Pasang Wanted Ad (Cari Barang)
                 </a>
             @else
-                <a href="{{ Route::has('listings.create') ? route('listings.create') : url('/katalog/pasang') }}" class="block text-center py-2.5 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-sm">
-                    + Pasang Iklan Sekarang
+                <a href="{{ route('login') }}" class="block text-center py-2.5 text-sm font-bold bg-blue-600 text-white rounded-xl shadow-sm">
+                    Masuk Akun Mahasiswa
                 </a>
             @endif
         </div>

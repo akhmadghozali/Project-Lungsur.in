@@ -26,7 +26,6 @@ use App\Models\Listing;
     'password',
     'role',
     'campus',
-    'phone',
     'status',
     'google_id',
     'avatar'
