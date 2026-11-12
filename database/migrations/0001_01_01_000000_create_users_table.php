@@ -26,7 +26,6 @@ return new class extends Migration
             $table->string('password');
             $table->string('role', 30)->default('buyer'); // 'seller' | 'buyer' | 'admin'
             $table->string('campus', 150)->nullable();
-            $table->string('phone', 25)->nullable();
             $table->string('status', 30)->default('active'); // 'active' | 'suspended' | 'banned'
             $table->rememberToken();
             $table->timestamps();

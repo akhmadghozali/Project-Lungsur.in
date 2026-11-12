@@ -38,38 +38,86 @@ class DashboardController extends Controller
             })
             ->count();
 
-        // 2. Daftar Iklan Milik User (untuk Mode Penjual)
+        // 2. Data Khusus MODE PENJUAL
         $myListings = $user->listings()
             ->with(['category', 'images', 'latestBoostPayment', 'auction.latestPayment'])
             ->latest()
             ->paginate(8)
             ->withQueryString();
 
+        $myAuctions = $user->listings()
+            ->whereHas('auction')
+            ->with(['auction.highestBid.user', 'auction.bids', 'images', 'category'])
+            ->latest()
+            ->get();
+        $myAuctionsCount = $myAuctions->count();
+
+        $wantedOpportunities = \App\Models\WantedAd::active()
+            ->where('user_id', '!=', $user->id)
+            ->with(['user', 'category'])
+            ->latest()
+            ->take(12)
+            ->get();
+
+        $myActiveListings = $user->listings()
+            ->where('status', 'available')
+            ->orderBy('title')
+            ->get();
+
         $buyers = User::whereHas('buyerConversations', function ($query) use ($user) {
             $query->where('seller_id', $user->id);
-          })
+        })
             ->where('id', '!=', $user->id)
             ->orderBy('name')
             ->get();
 
-        // 3. Riwayat Lelang yang Diikuti (untuk Mode Pembeli)
+        // 3. Data Khusus MODE PEMBELI
         $myBids = AuctionBid::with(['auction.listing.images', 'auction.highestBid'])
             ->where('user_id', $user->id)
+            ->latest()
+            ->take(12)
+            ->get();
+
+        $myWantedAds = $user->wantedAds()
+            ->with('category')
+            ->latest()
+            ->get();
+        $myWantedAdsCount = $myWantedAds->count();
+
+        $purchasedListings = $user->purchasedListings()
+            ->with(['user', 'category', 'images'])
             ->latest()
             ->take(6)
             ->get();
 
+        $wonAuctions = $user->wonAuctions()
+            ->with(['listing.category', 'listing.images', 'highestBid'])
+            ->latest()
+            ->take(6)
+            ->get();
+
+        $activeTab = $request->query('tab', $mode === 'seller' ? 'dagangan' : 'lelang');
+
         return view('dashboard', compact(
             'user',
             'mode',
+            'activeTab',
             'myListingsCount',
             'activeListingsCount',
             'soldListingsCount',
+            'myAuctionsCount',
+            'myAuctions',
+            'wantedOpportunities',
             'myBidsCount',
             'unreadMessagesCount',
             'myListings',
             'myBids',
-            'buyers'
+            'buyers',
+            'myActiveListings',
+            'myWantedAds',
+            'myWantedAdsCount',
+            'purchasedListings',
+            'wonAuctions'
         ));
     }
 
@@ -113,11 +161,20 @@ class DashboardController extends Controller
         }
 
         session(['user_mode' => $targetMode]);
-        $user->update(['role' => $targetMode]);
+        if ($user->role !== 'admin') {
+            $user->update(['role' => $targetMode]);
+        }
 
         $label = $targetMode === 'seller' ? 'Mode Penjual' : 'Mode Pembeli';
 
-        return back()->with('success', "Berhasil beralih ke {$label}.");
+        // Alihkan langsung ke dashboard mode tujuan agar batasan mode langsung terasa
+        if ($targetMode === 'seller') {
+            return redirect()->route('dashboard', ['tab' => 'dagangan'])
+                ->with('success', "Berhasil beralih ke {$label}. Selamat mengelola dagangan Anda!");
+        }
+
+        return redirect()->route('dashboard', ['tab' => 'lelang'])
+            ->with('success', "Berhasil beralih ke {$label}. Selamat menjelajahi barang mahasiswa!");
     }
 
     /**

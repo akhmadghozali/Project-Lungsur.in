@@ -61,20 +61,5 @@
     <!-- JavaScript khusus setiap halaman -->
     @stack('scripts')
 
-    <!-- Contoh Navbar Item dengan Lencana Lonceng / Notifikasi Real-Time -->
-<li class="nav-item position-relative me-3">
-    <a class="nav-link text-dark fs-5" href="{{ route('chat.index') }}">
-        <i class="bi bi-bell-fill"></i> <!-- Ikon Lonceng / Pesan -->
-        
-        <!-- Lencana Merah Penghitung (Unread Counter Badge) -->
-        <span id="navbar-unread-badge" 
-              class="position-absolute top-25 start-75 translate-middle badge rounded-pill bg-danger d-none" 
-              style="font-size: 0.65rem;">
-              0
-        </span>
-    </a>
-</li>
-
 </body>
 </html>
-```

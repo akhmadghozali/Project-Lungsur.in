@@ -161,7 +161,6 @@ class AuthController extends Controller
             'email' => ['required', 'string', 'email:filter', 'max:150', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'campus' => ['required', 'string', 'max:150'],
-            'phone' => ['required', 'string', 'max:25', 'unique:users,phone'],
             'ktm_file' => ['nullable', 'image', 'mimes:jpeg,jpg,png', 'max:2048'],
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
@@ -171,8 +170,6 @@ class AuthController extends Controller
             'password.min' => 'Kata sandi minimal 8 karakter.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
             'campus.required' => 'Asal kampus wajib dipilih/diisi.',
-            'phone.required' => 'Nomor WhatsApp wajib diisi.',
-            'phone.unique' => 'Nomor WhatsApp ini sudah terdaftar sebelumnya.',
             'ktm_file.image' => 'Berkas KTM harus berupa gambar (JPG/PNG).',
             'ktm_file.max' => 'Ukuran berkas KTM maksimal 2 MB.',
         ]);
@@ -276,7 +273,6 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => 'buyer',
             'campus' => $validated['campus'],
-            'phone' => $validated['phone'],
             'status' => 'active',
             'otp' => $otp,
             'attempts' => 0,
@@ -301,14 +297,6 @@ class AuthController extends Controller
             'email_type' => $emailType,
             'resend_cooldown' => 60,
         ];
-
-        // Jika di lingkungan lokal / testing atau jika SMTP gagal kirim, sertakan dev_otp agar tester tidak buntu
-        if (app()->environment('local', 'testing') || !$mailSent) {
-            $responsePayload['dev_otp'] = $otp;
-            if (!$mailSent) {
-                $responsePayload['message'] .= " (Catatan Server: Pengiriman email gagal, gunakan kode OTP tes: {$otp})";
-            }
-        }
 
         if ($request->wantsJson()) {
             return response()->json($responsePayload, 200);
@@ -340,6 +328,34 @@ class AuthController extends Controller
         $cached = Cache::get($cacheKey);
 
         if (!$cached) {
+            // Cek apakah akun ini sudah terdaftar dan terverifikasi (mencegah false error jika ada duplikasi request/race condition)
+            $alreadyRegisteredUser = User::where('email', strtolower($validated['email']))->first();
+            if ($alreadyRegisteredUser && $alreadyRegisteredUser->email_verified_at) {
+                if ($alreadyRegisteredUser->email_type === 'campus') {
+                    Auth::login($alreadyRegisteredUser);
+                    if ($request->wantsJson()) {
+                        return response()->json([
+                            'status' => 'success',
+                            'message' => 'Verifikasi email berhasil! Selamat datang di Lungsur.in, ' . $alreadyRegisteredUser->name . '.',
+                            'redirect' => route('dashboard'),
+                            'user' => $alreadyRegisteredUser,
+                        ], 200);
+                    }
+                    return redirect()->intended(route('dashboard'))
+                        ->with('success', 'Verifikasi email berhasil! Akun kampus Anda telah aktif.');
+                } else {
+                    if ($request->wantsJson()) {
+                        return response()->json([
+                            'status' => 'pending_verification',
+                            'message' => 'Verifikasi email berhasil! Berkas KTM Anda sedang dalam antrean verifikasi administrator.',
+                            'redirect' => route('login'),
+                            'user' => $alreadyRegisteredUser,
+                        ], 200);
+                    }
+                    return redirect()->route('login')->with('info', 'Verifikasi email berhasil! Akun Anda sedang dalam antrean verifikasi berkas KTM oleh administrator (maksimal 1x24 jam).');
+                }
+            }
+
             $errorMsg = 'Sesi verifikasi OTP telah kedaluwarsa atau tidak ditemukan. Silakan kirim ulang OTP atau lakukan pendaftaran kembali.';
             if ($request->wantsJson()) {
                 return response()->json(['status' => 'error', 'message' => $errorMsg], 422);
@@ -380,7 +396,6 @@ class AuthController extends Controller
             'password' => $cached['password'],
             'role' => $cached['role'],
             'campus' => $cached['campus'],
-            'phone' => $cached['phone'],
             'status' => $cached['status'],
             'email_verified_at' => now(),
         ]);
@@ -510,7 +525,7 @@ class AuthController extends Controller
         }
 
         try {
-            return Socialite::driver('google')->redirect();
+            return Socialite::driver('google')->stateless()->redirect();
         } catch (\Throwable $e) {
             report($e);
             return redirect()->route('login')->with('error', 'Gagal menghubungkan ke layanan Google: ' . $e->getMessage());
@@ -527,10 +542,10 @@ class AuthController extends Controller
         }
 
         try {
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')->stateless()->user();
         } catch (\Throwable $e) {
             report($e);
-            return redirect()->route('login')->with('error', 'Gagal mengautentikasi akun Google. Silakan coba kembali.');
+            return redirect()->route('login')->with('error', 'Gagal mengautentikasi akun Google: ' . $e->getMessage());
         }
 
         $email = strtolower(trim($googleUser->getEmail()));
@@ -564,6 +579,10 @@ class AuthController extends Controller
             }
             if (empty($user->email_type)) {
                 $user->email_type = $emailType;
+                $dirty = true;
+            }
+            if (empty($user->email_verified_at)) {
+                $user->email_verified_at = now();
                 $dirty = true;
             }
             if ($dirty) {
@@ -692,13 +711,10 @@ class AuthController extends Controller
         $validated = $request->validate([
             'campus' => ['required', 'string', 'max:150'],
             'nim' => ['required', 'string', 'max:30'],
-            'phone' => ['required', 'string', 'max:25', Rule::unique('users', 'phone')->ignore($user->id)],
             'ktm_file' => ['required', 'image', 'mimes:jpeg,jpg,png', 'max:2048'],
         ], [
             'campus.required' => 'Asal perguruan tinggi / kampus wajib dipilih.',
             'nim.required' => 'Nomor Induk Mahasiswa (NIM) wajib diisi.',
-            'phone.required' => 'Nomor WhatsApp wajib diisi.',
-            'phone.unique' => 'Nomor WhatsApp ini sudah terdaftar sebelumnya.',
             'ktm_file.required' => 'Foto Kartu Tanda Mahasiswa (KTM) wajib dilampirkan.',
             'ktm_file.image' => 'Berkas KTM harus berupa gambar (JPG atau PNG).',
             'ktm_file.max' => 'Ukuran berkas KTM maksimal 2 MB.',
@@ -709,7 +725,6 @@ class AuthController extends Controller
         $user->update([
             'campus' => $validated['campus'],
             'nim' => $validated['nim'],
-            'phone' => $validated['phone'],
             'ktm_image_path' => $ktmPath,
             'verification_status' => 'pending',
         ]);

@@ -21,11 +21,10 @@
         <!-- ============================================================== -->
         <!-- SISI KIRI (BRANDING PANEL BERGANTI HALUS TANPA RELOAD)         -->
         <!-- ============================================================== -->
-        <div class="lg:col-span-5 relative overflow-hidden transition-colors duration-500 min-h-[520px]"
-             :class="mode === 'register' ? 'bg-slate-900' : (mode === 'forgot_password' || mode === 'reset_password' ? 'bg-indigo-950' : 'bg-blue-600')">
+        <div class="lg:col-span-5 relative overflow-hidden transition-colors duration-500 min-h-[520px] bg-slate-950">
             
             <div class="grid grid-cols-1 items-stretch h-full">
-                <!-- PANEL KIRI VERSI LOGIN (GAMBAR 5: BLUE STRIPED CARD) -->
+                <!-- PANEL KIRI VERSI LOGIN (GAMBAR KOS MALAM AESTHETIC) -->
                 <div x-show="mode === 'login'" 
                      x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0 translate-x-4"
@@ -33,237 +32,187 @@
                      x-transition:leave="transition ease-in duration-200"
                      x-transition:leave-start="opacity-100 translate-x-0"
                      x-transition:leave-end="opacity-0 -translate-x-4"
-                     class="col-start-1 row-start-1 h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative">
+                     class="col-start-1 row-start-1 h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative overflow-hidden">
                 
-                <!-- Diagonal Pinstripe Texture Sesuai Gambar 5 -->
-                <div class="absolute inset-0 pointer-events-none opacity-40"
-                     style="background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0, rgba(255, 255, 255, 0.12) 14px, transparent 14px, transparent 28px);">
-                </div>
+                    <!-- Foto Ilustrasi Kamar Kos Malam (Dibuat Agak Transparan) -->
+                    <img src="{{ asset('images/auth/auth-login.jpg') }}" 
+                         alt="Kamar Kos Mahasiswa Malam" 
+                         class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none opacity-75">
 
-                <!-- Top: Logo Lungsur.in -->
-                <div class="relative z-10">
-                    <a href="{{ url('/') }}" class="inline-flex items-center gap-2 bg-white px-3.5 py-2 rounded-2xl shadow-md group transition hover:scale-[1.02]">
-                        <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                                <path d="M3 3v5h5"/>
-                                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-                                <path d="M21 21v-5h-5"/>
-                                <path d="M12 9l5 2.5-5 2.5-5-2.5 5-2.5z" fill="#FBBF24" stroke="#FBBF24" stroke-width="1.5"/>
-                                <path d="M9.5 13v2.2c0 .8 1.1 1.5 2.5 1.5s2.5-.7 2.5-1.5V13" stroke="#FBBF24" stroke-width="1.5"/>
-                            </svg>
-                        </div>
-                        <span class="text-base font-black text-slate-900 tracking-tight">
-                            Lungsur<span class="text-blue-600">.in</span>
-                        </span>
-                    </a>
-                </div>
+                    <!-- Overlay Bottom Gradient: Hitam Pekat di Bawah, Memudar Transparan ke Tengah & Atas -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 via-35% to-transparent to-70% pointer-events-none"></div>
 
-                <!-- Middle: Headline & Deskripsi -->
-                <div class="relative z-10 my-8 sm:my-12">
-                    <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-[1.2]">
-                        Selamat datang kembali.
-                    </h2>
-                    <p class="mt-3 text-sm text-blue-100 font-medium leading-relaxed">
-                        Masuk untuk mengakses bursa perabot kos, papan lelang mahasiswa, dan transaksi aman di Malang.
-                    </p>
-                </div>
-
-                <!-- Bottom: Statistik Komunitas -->
-                <div class="relative z-10 pt-6 border-t border-white/20 flex items-center gap-8">
-                    <div>
-                        <div class="text-2xl font-black text-white tracking-tight">2.3k+</div>
-                        <div class="text-[11px] text-blue-100 font-semibold mt-0.5">Iklan aktif</div>
+                    <!-- Top: Logo Lungsur.in Terkunci di Sudut Kiri Atas -->
+                    <div class="relative z-10">
+                        <a href="{{ url('/') }}" class="inline-flex items-center gap-2 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-lg shadow-black/20 group transition hover:scale-[1.02] border border-white/20">
+                            <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                    <path d="M3 3v5h5"/>
+                                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                                    <path d="M21 21v-5h-5"/>
+                                    <path d="M12 9l5 2.5-5 2.5-5-2.5 5-2.5z" fill="#FBBF24" stroke="#FBBF24" stroke-width="1.5"/>
+                                    <path d="M9.5 13v2.2c0 .8 1.1 1.5 2.5 1.5s2.5-.7 2.5-1.5V13" stroke="#FBBF24" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                            <span class="text-base font-black text-slate-900 tracking-tight">
+                                Lungsur<span class="text-blue-600">.in</span>
+                            </span>
+                        </a>
                     </div>
-                    <div>
-                        <div class="text-2xl font-black text-white tracking-tight">1.9k+</div>
-                        <div class="text-[11px] text-blue-100 font-semibold mt-0.5">Mahasiswa</div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-black text-white tracking-tight">14</div>
-                        <div class="text-[11px] text-blue-100 font-semibold mt-0.5">Kampus Malang</div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- PANEL KIRI VERSI REGISTER (GAMBAR 4: DARK BENEFITS CARD) -->
-            <div x-show="mode === 'register'" 
-                 x-cloak
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 -translate-x-4"
-                 x-transition:enter-end="opacity-100 translate-x-0"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 translate-x-0"
-                 x-transition:leave-end="opacity-0 translate-x-4"
-                 class="col-start-1 row-start-1 h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative">
-                
-                <!-- Background Soft Glow -->
-                <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-blue-600/25 blur-3xl pointer-events-none"></div>
-                <div class="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-indigo-600/25 blur-3xl pointer-events-none"></div>
-
-                <!-- Top: Logo Lungsur.in -->
-                <div class="relative z-10">
-                    <a href="{{ url('/') }}" class="inline-flex items-center gap-2 bg-white px-3.5 py-2 rounded-2xl shadow-md group transition hover:scale-[1.02]">
-                        <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                                <path d="M3 3v5h5"/>
-                                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-                                <path d="M21 21v-5h-5"/>
-                                <path d="M12 9l5 2.5-5 2.5-5-2.5 5-2.5z" fill="#FBBF24" stroke="#FBBF24" stroke-width="1.5"/>
-                                <path d="M9.5 13v2.2c0 .8 1.1 1.5 2.5 1.5s2.5-.7 2.5-1.5V13" stroke="#FBBF24" stroke-width="1.5"/>
-                            </svg>
-                        </div>
-                        <span class="text-base font-black text-slate-900 tracking-tight">
-                            Lungsur<span class="text-blue-600">.in</span>
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Middle: Headline & 4 Keuntungan Bergambar 4 -->
-                <div class="relative z-10 my-8 sm:my-10 space-y-5">
-                    <div>
-                        <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-[1.2]">
-                            Gabung komunitas.
+                    <!-- Bottom: Headline & Deskripsi (Rapat di Bagian Bawah) -->
+                    <div class="relative z-10 space-y-2">
+                        <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight drop-shadow-md text-white">
+                            Masuk ke Lungsur.in.
                         </h2>
-                        <p class="mt-2 text-xs sm:text-sm text-slate-400 font-medium leading-relaxed">
-                            Akun gratis untuk seluruh mahasiswa Malang. Lungsurkan perabot kos, ikuti lelang hemat, atau cari barang kosmu.
+                        <p class="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed drop-shadow-sm max-w-sm">
+                            Cek iklan barang kos terbaru, pasang wanted ads saat lagi butuh barang, atau pantau lelang yang kamu ikuti sesama mahasiswa Malang.
                         </p>
                     </div>
-
-                    <div class="space-y-3 pt-1">
-                        <div class="flex items-center gap-3">
-                            <div class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 text-xs shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <span class="text-xs sm:text-sm font-semibold text-slate-200">
-                                Khusus mahasiswa perguruan tinggi di Malang
-                            </span>
-                        </div>
-
-                        <div class="flex items-center gap-3">
-                            <div class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 text-xs shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <span class="text-xs sm:text-sm font-semibold text-slate-200">
-                                Verifikasi instan via domain email kampus resmi
-                            </span>
-                        </div>
-
-                        <div class="flex items-center gap-3">
-                            <div class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 text-xs shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <span class="text-xs sm:text-sm font-semibold text-slate-200">
-                                Jalur foto KTM aktif bagi pemilik email umum
-                            </span>
-                        </div>
-
-                        <div class="flex items-center gap-3">
-                            <div class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 text-xs shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <span class="text-xs sm:text-sm font-semibold text-slate-200">
-                                Lelang adil & transaksi COD aman di kampus
-                            </span>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Bottom Footer Info -->
-                <div class="relative z-10 pt-4 border-t border-slate-800 text-[11px] text-slate-400">
-                    &copy; {{ date('Y') }} Lungsur.in &bull; Pasar Mahasiswa Malang
-                </div>
-            </div>
-
-            <!-- PANEL KIRI VERSI LUPA / RESET PASSWORD -->
-            <div x-show="mode === 'forgot_password' || mode === 'reset_password'" 
-                 x-cloak
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 translate-x-4"
-                 x-transition:enter-end="opacity-100 translate-x-0"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 translate-x-0"
-                 x-transition:leave-end="opacity-0 -translate-x-4"
-                 class="col-start-1 row-start-1 h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative">
+                <!-- PANEL KIRI VERSI REGISTER (GAMBAR KOS HUJAN & KUCING AESTHETIC) -->
+                <div x-show="mode === 'register'" 
+                     x-cloak
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 -translate-x-4"
+                     x-transition:enter-end="opacity-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 translate-x-4"
+                     class="col-start-1 row-start-1 h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative overflow-hidden">
                 
-                <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"></div>
-                <div class="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none"></div>
+                    <!-- Foto Ilustrasi Kamar Kos Hujan (Dibuat Agak Transparan) -->
+                    <img src="{{ asset('images/auth/auth-register.jpg') }}" 
+                         alt="Kamar Kos Mahasiswa Suasana Hujan" 
+                         class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none opacity-75">
 
-                <!-- Top: Logo Lungsur.in -->
-                <div class="relative z-10">
-                    <a href="{{ url('/') }}" class="inline-flex items-center gap-2 bg-white px-3.5 py-2 rounded-2xl shadow-md group transition hover:scale-[1.02]">
-                        <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                                <path d="M3 3v5h5"/>
-                                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-                                <path d="M21 21v-5h-5"/>
-                                <path d="M12 9l5 2.5-5 2.5-5-2.5 5-2.5z" fill="#FBBF24" stroke="#FBBF24" stroke-width="1.5"/>
-                                <path d="M9.5 13v2.2c0 .8 1.1 1.5 2.5 1.5s2.5-.7 2.5-1.5V13" stroke="#FBBF24" stroke-width="1.5"/>
+                    <!-- Overlay Bottom Gradient: Hitam Pekat di Bawah, Memudar Transparan ke Tengah & Atas -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 via-35% to-transparent to-70% pointer-events-none"></div>
+
+                    <!-- Top: Logo Lungsur.in Terkunci di Sudut Kiri Atas -->
+                    <div class="relative z-10">
+                        <a href="{{ url('/') }}" class="inline-flex items-center gap-2 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-lg shadow-black/20 group transition hover:scale-[1.02] border border-white/20">
+                            <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                    <path d="M3 3v5h5"/>
+                                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                                    <path d="M21 21v-5h-5"/>
+                                    <path d="M12 9l5 2.5-5 2.5-5-2.5 5-2.5z" fill="#FBBF24" stroke="#FBBF24" stroke-width="1.5"/>
+                                    <path d="M9.5 13v2.2c0 .8 1.1 1.5 2.5 1.5s2.5-.7 2.5-1.5V13" stroke="#FBBF24" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                            <span class="text-base font-black text-slate-900 tracking-tight">
+                                Lungsur<span class="text-blue-600">.in</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Bottom: Headline, Subheadline & 2 Poin Ringkas Tanpa Kotak Background -->
+                    <div class="relative z-10 space-y-2.5">
+                        <div>
+                            <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight drop-shadow-md text-white">
+                                Gabung sekarang.
+                            </h2>
+                            <p class="mt-1.5 text-xs sm:text-sm text-slate-200 font-medium leading-relaxed drop-shadow-sm max-w-sm">
+                                Pasang iklan, wanted ads, dan lelang barang kos khusus mahasiswa Malang.
+                            </p>
+                        </div>
+
+                        <div class="space-y-1.5 pt-0.5 text-xs text-slate-200">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-400 shrink-0 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span class="font-medium drop-shadow-sm">
+                                    Khusus mahasiswa Malang (verifikasi email kampus / KTM)
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-400 shrink-0 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span class="font-medium drop-shadow-sm">
+                                    Pasang iklan, wanted ads &amp; lelang barang-barang milikmu
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL KIRI VERSI LUPA / RESET PASSWORD -->
+                <div x-show="mode === 'forgot_password' || mode === 'reset_password'" 
+                     x-cloak
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-x-4"
+                     x-transition:enter-end="opacity-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 -translate-x-4"
+                     class="col-start-1 row-start-1 h-full flex flex-col justify-between p-8 sm:p-10 lg:p-12 text-white relative overflow-hidden">
+                
+                    <!-- Foto Ilustrasi Kamar Kos Malam (Background Soft) -->
+                    <img src="{{ asset('images/auth/auth-login.jpg') }}" 
+                         alt="Kamar Kos Mahasiswa" 
+                         class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none opacity-60">
+
+                    <!-- Overlay Bottom Gradient: Hitam Pekat di Bawah, Memudar Transparan ke Tengah & Atas -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-indigo-950 via-indigo-950/70 via-35% to-transparent to-70% pointer-events-none"></div>
+
+                    <!-- Top: Logo Lungsur.in Terkunci di Sudut Kiri Atas -->
+                    <div class="relative z-10">
+                        <a href="{{ url('/') }}" class="inline-flex items-center gap-2 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-lg shadow-black/20 group transition hover:scale-[1.02] border border-white/20">
+                            <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                    <path d="M3 3v5h5"/>
+                                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                                    <path d="M21 21v-5h-5"/>
+                                    <path d="M12 9l5 2.5-5 2.5-5-2.5 5-2.5z" fill="#FBBF24" stroke="#FBBF24" stroke-width="1.5"/>
+                                    <path d="M9.5 13v2.2c0 .8 1.1 1.5 2.5 1.5s2.5-.7 2.5-1.5V13" stroke="#FBBF24" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                            <span class="text-base font-black text-slate-900 tracking-tight">
+                                Lungsur<span class="text-blue-600">.in</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Bottom: Headline & Points -->
+                    <div class="relative z-10 space-y-3">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold mb-2">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                             </svg>
+                            Pemulihan Akun
                         </div>
-                        <span class="text-base font-black text-slate-900 tracking-tight">
-                            Lungsur<span class="text-blue-600">.in</span>
-                        </span>
-                    </a>
-                </div>
+                        <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight text-white">
+                            Akses Akun Terlindungi.
+                        </h2>
+                        <p class="text-xs sm:text-sm text-indigo-100 font-medium leading-relaxed max-w-sm">
+                            Lupa kata sandi? Kami akan mengirimkan kode verifikasi 6 digit ke alamat email kampus atau umum terdaftar Anda untuk mengatur ulang kata sandi dengan aman.
+                        </p>
 
-                <!-- Middle: Headline & Points -->
-                <div class="relative z-10 my-8 sm:my-12">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold mb-4">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                        </svg>
-                        Pemulihan Akun
-                    </div>
-                    <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-[1.2]">
-                        Akses Akun Terlindungi.
-                    </h2>
-                    <p class="mt-3 text-sm text-indigo-100 font-medium leading-relaxed">
-                        Lupa kata sandi? Kami akan mengirimkan kode verifikasi 6 digit ke alamat email kampus atau umum terdaftar Anda untuk mengatur ulang kata sandi dengan aman.
-                    </p>
-
-                    <div class="mt-6 space-y-3 pt-2 border-t border-white/10">
-                        <div class="flex items-center gap-3">
-                            <div class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 text-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                        <div class="space-y-1.5 pt-1 text-xs text-slate-200">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                                 </svg>
+                                <span>Kode OTP berlaku 15 menit</span>
                             </div>
-                            <span class="text-xs font-semibold text-slate-200">
-                                Kode OTP berlaku 15 menit
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 text-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                                 </svg>
+                                <span>Enkripsi sandi standar industri</span>
                             </div>
-                            <span class="text-xs font-semibold text-slate-200">
-                                Enkripsi bcrypt standar industri
-                            </span>
                         </div>
                     </div>
                 </div>
-
-                <!-- Bottom Footer Info -->
-                <div class="relative z-10 pt-4 border-t border-white/10 text-[11px] text-indigo-300">
-                    &copy; {{ date('Y') }} Lungsur.in &bull; Keamanan Akun Mahasiswa
-                </div>
             </div>
-
-            </div>
-
         </div>
 
         <!-- ============================================================== -->
@@ -310,22 +259,6 @@
                     </div>
                 @endif
 
-                @if (isset($errors) && $errors->any())
-                    <div class="mb-4 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-medium space-y-1">
-                        <div class="font-bold flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Mohon periksa kesalahan berikut:
-                        </div>
-                        <ul class="list-disc list-inside pl-1 space-y-0.5">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
                 <!-- FORMS GRID STACK: Menjaga posisi form tetap halus dan tidak melompat saat transisi -->
                 <div class="grid grid-cols-1 items-start w-full">
 
@@ -354,6 +287,23 @@
                             </button>
                         </p>
                     </div>
+
+                    <!-- Notifikasi Error Khusus Login -->
+                    @if (old('mode', 'login') === 'login' && isset($errors) && $errors->any())
+                        <div class="mb-4 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-medium space-y-1">
+                            <div class="font-bold flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Mohon periksa kesalahan berikut:
+                            </div>
+                            <ul class="list-disc list-inside pl-1 space-y-0.5">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
                     <form action="{{ route('login') }}" method="POST" class="space-y-4">
                         @csrf
@@ -438,7 +388,7 @@
                             </span>
                         </div>
 
-                        <!-- Tombol Login dengan Google -->
+                        <!-- Tombol Masuk dengan Google -->
                         <a href="{{ route('auth.google') }}" 
                            class="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-sm flex items-center justify-center gap-3 transition shadow-2xs cursor-pointer">
                             <svg class="w-4 h-4" viewBox="0 0 24 24">
@@ -447,7 +397,7 @@
                                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                             </svg>
-                            <span>Login dengan Google</span>
+                            <span>Masuk dengan Google</span>
                         </a>
                     </form>
                 </div>
@@ -478,6 +428,23 @@
                             </button>
                         </p>
                     </div>
+
+                    <!-- Alert Error Registrasi (Server-Side) -->
+                    @if (old('mode') === 'register' && isset($errors) && $errors->any())
+                        <div class="mb-4 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-medium space-y-1">
+                            <div class="font-bold flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Mohon periksa kesalahan berikut:
+                            </div>
+                            <ul class="list-disc list-inside pl-1 space-y-0.5">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
                     <!-- Alert Error Registrasi (AJAX / Real-Time) -->
                     <div x-show="registerError" x-cloak class="mb-4 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-medium flex items-start gap-2 shadow-2xs">
@@ -763,24 +730,6 @@
                             </div>
                         </div>
 
-                        <!-- WhatsApp (Tanpa Placeholder) -->
-                        <div>
-                            <label for="reg_phone" class="block text-xs font-bold text-slate-700 mb-1">
-                                Nomor WhatsApp
-                            </label>
-                            <div class="relative flex rounded-2xl shadow-2xs">
-                                <span class="inline-flex items-center px-3.5 rounded-l-2xl border border-r-0 border-slate-200 bg-slate-50 text-slate-600 font-bold text-xs sm:text-sm">
-                                    +62
-                                </span>
-                                <input type="tel" 
-                                       name="phone" 
-                                       id="reg_phone" 
-                                       value="{{ old('mode') === 'register' ? old('phone') : '' }}" 
-                                       required 
-                                       class="flex-1 min-w-0 block w-full px-4 py-2.5 rounded-none rounded-r-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition">
-                            </div>
-                        </div>
-
                         <!-- Checkbox Syarat & Ketentuan -->
                         <div class="flex items-start pt-1">
                             <div class="flex items-center h-5">
@@ -829,15 +778,8 @@
                                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                                 </svg>
-                                <span>Daftar dengan Google</span>
+                                <span>Masuk dengan Google</span>
                             </a>
-                        </div>
-
-                        <div class="pt-2 text-center">
-                            <span class="inline-flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                Langkah 1 dari 2 &mdash; berikutnya: lengkapi profil kos
-                            </span>
                         </div>
                     </form>
                 </div>
@@ -872,6 +814,16 @@
                         </p>
                     </div>
 
+                    @if (old('mode') === 'forgot_password' && isset($errors) && $errors->any())
+                        <div class="mb-4 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-medium space-y-1">
+                            <ul class="list-disc list-inside pl-1 space-y-0.5">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form action="{{ route('password.email') }}" method="POST" class="space-y-4">
                         @csrf
                         
@@ -893,17 +845,6 @@
                                     class="w-full py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm tracking-wide shadow-md shadow-blue-500/20 focus:outline-none focus:ring-4 focus:ring-blue-100 transition cursor-pointer">
                                 Kirim Kode OTP Reset
                             </button>
-                        </div>
-
-                        <div class="pt-2 text-center">
-                            <p class="text-xs font-medium text-slate-500">
-                                Sudah memiliki kode OTP? 
-                                <button type="button" 
-                                        @click="switchMode('reset_password')" 
-                                        class="font-bold text-blue-600 hover:underline cursor-pointer">
-                                    Masukkan kode di sini
-                                </button>
-                            </p>
                         </div>
                     </form>
                 </div>
@@ -937,6 +878,16 @@
                                 Masukkan kode OTP yang dikirimkan ke email Anda dan buat kata sandi baru.
                             </p>
                         </div>
+
+                        @if (old('mode') === 'reset_password' && isset($errors) && $errors->any())
+                            <div class="mb-4 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-medium space-y-1">
+                                <ul class="list-disc list-inside pl-1 space-y-0.5">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
                         <form action="{{ route('password.update') }}" method="POST" class="space-y-4">
                             @csrf
@@ -1099,7 +1050,8 @@
             <div class="my-6">
                 <div class="flex justify-center items-center gap-2 sm:gap-2.5" 
                      x-ref="otpContainer" 
-                     @paste="handleOtpPaste($event)">
+                     @paste="handleOtpPaste($event)"
+                     @keydown.enter.prevent="if (otpDigits.every(d => d !== '')) submitVerifyOtp()">
                     
                     <input type="text"
                            inputmode="numeric"
@@ -1111,7 +1063,6 @@
                            @input="handleOtpInput($event, 0)"
                            @keydown="handleOtpKeydown($event, 0)"
                            @focus="$event.target.select()"
-                           @paste="handleOtpPaste($event)"
                            aria-label="Digit OTP ke-1"
                            :class="otpDigits[0] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
                            class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
@@ -1126,7 +1077,6 @@
                            @input="handleOtpInput($event, 1)"
                            @keydown="handleOtpKeydown($event, 1)"
                            @focus="$event.target.select()"
-                           @paste="handleOtpPaste($event)"
                            aria-label="Digit OTP ke-2"
                            :class="otpDigits[1] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
                            class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
@@ -1141,7 +1091,6 @@
                            @input="handleOtpInput($event, 2)"
                            @keydown="handleOtpKeydown($event, 2)"
                            @focus="$event.target.select()"
-                           @paste="handleOtpPaste($event)"
                            aria-label="Digit OTP ke-3"
                            :class="otpDigits[2] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
                            class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
@@ -1156,7 +1105,6 @@
                            @input="handleOtpInput($event, 3)"
                            @keydown="handleOtpKeydown($event, 3)"
                            @focus="$event.target.select()"
-                           @paste="handleOtpPaste($event)"
                            aria-label="Digit OTP ke-4"
                            :class="otpDigits[3] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
                            class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
@@ -1171,7 +1119,6 @@
                            @input="handleOtpInput($event, 4)"
                            @keydown="handleOtpKeydown($event, 4)"
                            @focus="$event.target.select()"
-                           @paste="handleOtpPaste($event)"
                            aria-label="Digit OTP ke-5"
                            :class="otpDigits[4] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
                            class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
@@ -1186,7 +1133,6 @@
                            @input="handleOtpInput($event, 5)"
                            @keydown="handleOtpKeydown($event, 5)"
                            @focus="$event.target.select()"
-                           @paste="handleOtpPaste($event)"
                            aria-label="Digit OTP ke-6"
                            :class="otpDigits[5] ? 'border-blue-600 bg-blue-50/25 text-blue-700 ring-2 ring-blue-100 font-black' : 'border-slate-300 bg-slate-50/60 text-slate-900'"
                            class="w-10 h-13 sm:w-12 sm:h-14 text-center font-mono text-2xl font-black rounded-xl border focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-150 shadow-2xs select-all">
@@ -1340,6 +1286,7 @@
                 switchMode(target) {
                     if (this.mode === target) return;
                     this.mode = target;
+                    this.registerError = '';
 
                     const urlMap = {
                         'register': '{{ route('register') }}',
@@ -1566,16 +1513,16 @@
 
                     // Jika user paste atau ketik lebih dari 1 digit sekaligus di kotak ini
                     if (digits.length > 1) {
-                        const splitDigits = digits.split('');
-                        for (let i = 0; i < splitDigits.length; i++) {
-                            if (index + i < 6) {
-                                this.otpDigits[index + i] = splitDigits[i];
-                            }
+                        const splitDigits = digits.slice(0, 6).split('');
+                        for (let i = 0; i < 6; i++) {
+                            this.otpDigits[i] = splitDigits[i] || '';
                         }
-                        const nextIndex = Math.min(index + splitDigits.length, 5);
+                        const nextIndex = Math.min(splitDigits.length - 1, 5);
                         this.focusOtpInput(nextIndex);
                         if (this.otpDigits.every(d => d !== '')) {
-                            this.submitVerifyOtp();
+                            this.$nextTick(() => {
+                                this.submitVerifyOtp();
+                            });
                         }
                         return;
                     }
@@ -1589,11 +1536,21 @@
 
                     // Otomatis verifikasi jika 6 digit sudah lengkap
                     if (this.otpDigits.every(d => d !== '')) {
-                        this.submitVerifyOtp();
+                        this.$nextTick(() => {
+                            this.submitVerifyOtp();
+                        });
                     }
                 },
 
                 handleOtpKeydown(event, index) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        if (this.otpDigits.every(d => d !== '')) {
+                            this.submitVerifyOtp();
+                        }
+                        return;
+                    }
+
                     if (event.key === 'Backspace') {
                         // Jika kotak saat ini kosong dan bukan kotak pertama, mundur dan hapus kotak sebelumnya
                         if (!this.otpDigits[index] && index > 0) {
@@ -1616,17 +1573,25 @@
 
                 handleOtpPaste(event) {
                     event.preventDefault();
-                    const pasted = (event.clipboardData || window.clipboardData).getData('text').trim().replace(/[^0-9]/g, '');
-                    if (pasted.length > 0) {
+                    event.stopPropagation();
+                    const rawText = (event.clipboardData || window.clipboardData).getData('text') || '';
+                    const pasted = rawText.trim().replace(/[^0-9]/g, '');
+
+                    if (pasted.length >= 6) {
                         const digits = pasted.slice(0, 6).split('');
+                        for (let i = 0; i < 6; i++) {
+                            this.otpDigits[i] = digits[i];
+                        }
+                        this.focusOtpInput(5);
+                        this.$nextTick(() => {
+                            this.submitVerifyOtp();
+                        });
+                    } else if (pasted.length > 0) {
+                        const digits = pasted.split('');
                         for (let i = 0; i < 6; i++) {
                             this.otpDigits[i] = digits[i] || '';
                         }
-                        const targetFocus = Math.min(digits.length, 5);
-                        this.focusOtpInput(targetFocus);
-                        if (this.otpDigits.every(d => d !== '')) {
-                            this.submitVerifyOtp();
-                        }
+                        this.focusOtpInput(Math.min(digits.length, 5));
                     }
                 },
 
@@ -1655,9 +1620,7 @@
                             this.otpEmail = data.email;
                             this.otpDigits = ['', '', '', '', '', ''];
                             this.otpError = '';
-                            this.otpSuccessMessage = data.dev_otp 
-                                ? 'Kode OTP Anda: ' + data.dev_otp 
-                                : '';
+                            this.otpSuccessMessage = '';
                             this.showOtpModal = true;
                             this.startOtpCountdown(data.resend_cooldown || 60);
                             this.focusOtpInput(0);
@@ -1680,7 +1643,9 @@
                 },
 
                 async submitVerifyOtp() {
-                    const otpCode = this.otpDigits.join('');
+                    if (this.otpLoading) return;
+
+                    const otpCode = this.otpDigits.join('').trim();
                     if (otpCode.length < 6) {
                         this.otpError = 'Harap lengkapi 6 digit kode OTP.';
                         return;
@@ -1688,7 +1653,6 @@
 
                     this.otpLoading = true;
                     this.otpError = '';
-                    this.otpSuccessMessage = '';
 
                     try {
                         const response = await fetch('{{ route('register.verify_otp') }}', {
@@ -1727,7 +1691,6 @@
 
                     this.otpLoading = true;
                     this.otpError = '';
-                    this.otpSuccessMessage = '';
 
                     try {
                         const response = await fetch('{{ route('register.resend_otp') }}', {
@@ -1746,9 +1709,7 @@
                         const data = await response.json();
 
                         if (response.ok) {
-                            this.otpSuccessMessage = data.dev_otp 
-                                ? data.message + ' [Kode: ' + data.dev_otp + ']'
-                                : (data.message || 'Kode OTP baru telah berhasil dikirimkan.');
+                            this.otpSuccessMessage = data.message || 'Kode OTP baru telah berhasil dikirimkan ke email Anda.';
                             this.otpDigits = ['', '', '', '', '', ''];
                             this.startOtpCountdown(data.resend_cooldown || 60);
                             this.focusOtpInput(0);

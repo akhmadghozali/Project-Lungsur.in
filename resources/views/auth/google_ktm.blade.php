@@ -99,33 +99,18 @@
                 </select>
             </div>
 
-            <!-- Grid NIM & WhatsApp -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                    <label for="nim" class="block text-xs font-bold text-slate-700 mb-1">
-                        Nomor Induk Mahasiswa (NIM) <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" 
-                           name="nim" 
-                           id="nim" 
-                           value="{{ old('nim', $user->nim) }}" 
-                           placeholder="Contoh: 244107060059" 
-                           required 
-                           class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
-                </div>
-
-                <div>
-                    <label for="phone" class="block text-xs font-bold text-slate-700 mb-1">
-                        Nomor WhatsApp (COD) <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" 
-                           name="phone" 
-                           id="phone" 
-                           value="{{ old('phone', $user->phone) }}" 
-                           placeholder="Contoh: 081234567890" 
-                           required 
-                           class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
-                </div>
+            <!-- NIM -->
+            <div>
+                <label for="nim" class="block text-xs font-bold text-slate-700 mb-1">
+                    Nomor Induk Mahasiswa (NIM) <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       name="nim" 
+                       id="nim" 
+                       value="{{ old('nim', $user->nim) }}" 
+                       placeholder="Contoh: 244107060059" 
+                       required 
+                       class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
             </div>
 
             <!-- Upload Foto KTM -->

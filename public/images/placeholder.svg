@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="600" height="450" fill="none">
+    <rect width="600" height="450" fill="#f8fafc"/>
+    <g transform="translate(240, 150)" opacity="0.35">
+        <rect x="0" y="0" width="120" height="90" rx="16" fill="#94a3b8"/>
+        <circle cx="36" cy="30" r="12" fill="#f8fafc"/>
+        <path d="M12 76l32-34 22 24 24-28 18 38H12z" fill="#f8fafc"/>
+    </g>
+    <text x="300" y="275" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#94a3b8" text-anchor="middle" letter-spacing="0.05em">LUNGSUR.IN</text>
+    <text x="300" y="295" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#cbd5e1" text-anchor="middle">Foto Tidak Tersedia</text>
+</svg>

@@ -45,3 +45,16 @@ php artisan boost:install
 
 Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
 </laravel-boost-guidelines>
+
+<!-- antislop:start -->
+## antislop
+For UI, copy, people, mobile layout, or code comments work, antislop (https://github.com/miqdadbadjuber/anti-slop) is ALWAYS active and loaded:
+- Core filter (always on): `C:\Users\Muhammad\.gemini\config\plugins\anti-slop\skills\antislop\SKILL.md`
+- UI / visual: `C:\Users\Muhammad\.gemini\config\plugins\anti-slop\skills\antislop-ui\SKILL.md`
+- Copy & text: `C:\Users\Muhammad\.gemini\config\plugins\anti-slop\skills\antislop-copywriting\SKILL.md`
+- People: `C:\Users\Muhammad\.gemini\config\plugins\anti-slop\skills\antislop-human\SKILL.md`
+- Mobile / responsive: `C:\Users\Muhammad\.gemini\config\plugins\anti-slop\skills\antislop-layoutmobile\SKILL.md`
+- Code comments: `C:\Users\Muhammad\.gemini\config\plugins\anti-slop\skills\antislop-code\SKILL.md`
+
+Usage mode: **DURING** (applied during work/coding to eliminate generic AI slop, clichés, and non-functional decorations from the start).
+<!-- antislop:end -->

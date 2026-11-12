@@ -37,7 +37,7 @@ class ChatController extends Controller
         $user = $this->resolveUser($request);
 
         // Jika request mengharapkan JSON (API)
-        if ($request->expectsJson() || $request->is('api/*')) {
+        if ($request->expectsJson() || $request->is('api/*') || $request->is('chat/api/*')) {
             if (!$user) {
                 return response()->json([
                     'status' => 'unauthenticated',
@@ -201,6 +201,11 @@ class ChatController extends Controller
                     'price' => (float) $listing->price,
                 ],
                 'seller' => [
+                    'id' => $listing->user->id,
+                    'name' => $listing->user->name,
+                    'campus' => $listing->user->campus,
+                ],
+                'interlocutor' => [
                     'id' => $listing->user->id,
                     'name' => $listing->user->name,
                     'campus' => $listing->user->campus,

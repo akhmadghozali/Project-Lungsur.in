@@ -2,6 +2,24 @@
 
 @php
     $isBoosted = $listing->is_boosted && ($listing->boosted_until === null || $listing->boosted_until->isFuture());
+
+    // Format timestamp bahasa Indonesia ringkas
+    $diffText = $listing->created_at ? $listing->created_at->locale('id')->diffForHumans() : '';
+    $diffFormatted = str_ireplace([' yang lalu', 'yang lalu'], ' lalu', $diffText);
+
+    // Singkatan nama kampus populer di Malang agar tidak terpotong di tengah kata
+    $rawCampus = $listing->user?->campus ?? '';
+    $campusShort = match(true) {
+        str_contains(strtolower($rawCampus), 'polinema') || str_contains(strtolower($rawCampus), 'politeknik negeri malang') => 'Polinema',
+        str_contains(strtolower($rawCampus), 'brawijaya') || str_contains(strtolower($rawCampus), 'ub') => 'UB',
+        str_contains(strtolower($rawCampus), 'negeri malang') || str_contains(strtolower($rawCampus), 'um') => 'UM',
+        str_contains(strtolower($rawCampus), 'muhammadiyah') || str_contains(strtolower($rawCampus), 'umm') => 'UMM',
+        str_contains(strtolower($rawCampus), 'maliki') || str_contains(strtolower($rawCampus), 'uin') => 'UIN Maliki',
+        str_contains(strtolower($rawCampus), 'itn') => 'ITN Malang',
+        str_contains(strtolower($rawCampus), 'unisma') => 'Unisma',
+        str_contains(strtolower($rawCampus), 'machung') => 'Ma Chung',
+        default => $rawCampus,
+    };
 @endphp
 
 <div class="bg-white rounded-2xl border border-slate-100 shadow-2xs hover:shadow-md transition overflow-hidden flex flex-col group relative">
@@ -12,11 +30,11 @@
          @endif
     >
         @if ($isBoosted)
-            <div class="absolute top-2.5 left-2.5 bg-amber-500/95 backdrop-blur-xs text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg shadow-sm flex items-center gap-1 z-10">
-                <svg class="w-3 h-3 text-white fill-current" viewBox="0 0 20 20">
+            <div class="absolute top-2.5 left-2.5 bg-amber-500/95 backdrop-blur-xs text-slate-950 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg shadow-sm flex items-center gap-1 z-10">
+                <svg class="w-3 h-3 text-slate-950 fill-current" viewBox="0 0 20 20">
                     <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/>
                 </svg>
-                <span>Unggulan</span>
+                <span>BOOST</span>
             </div>
         @endif
 
@@ -37,6 +55,7 @@
                     <img src="{{ $imgSrc }}"
                          alt="{{ $listing->title }}"
                          loading="lazy"
+                         onerror="this.onerror=null; this.src='{{ asset('images/placeholder.svg') }}';"
                          class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                 </div>
             @endforeach
@@ -76,7 +95,7 @@
             @endif
         @else
             <div class="w-full h-full flex items-center justify-center text-[11px] font-medium text-slate-400">
-                Belum ada foto
+                <img src="{{ asset('images/placeholder.svg') }}" alt="Placeholder" class="w-full h-full object-cover">
             </div>
         @endif
     </div>
@@ -90,7 +109,7 @@
                     {{ $listing->category->name ?? 'Lainnya' }}
                 </span>
                 <span class="text-slate-400 shrink-0">
-                    {{ $listing->created_at->diffForHumans() }}
+                    {{ $diffFormatted }}
                 </span>
             </div>
 
@@ -101,12 +120,12 @@
                     </span>
                 @endif
 
-                @if (!empty($listing->user?->campus))
-                    <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 rounded-md truncate max-w-[140px]" title="{{ $listing->user->campus }}">
+                @if (!empty($campusShort))
+                    <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 rounded-md truncate max-w-[130px]" title="{{ $rawCampus }}">
                         <svg class="w-2.5 h-2.5 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                         </svg>
-                        <span class="truncate">{{ $listing->user->campus }}</span>
+                        <span class="truncate">{{ $campusShort }}</span>
                     </span>
                 @endif
             </div>

@@ -9,118 +9,218 @@
         <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
         <!-- ========================================== -->
         @if (!request()->is('katalog*'))
-        <section class="bg-gradient-to-br from-blue-50/90 via-sky-50/50 to-blue-50/70 rounded-3xl border border-blue-100/60 p-6 sm:p-10 lg:p-14 relative overflow-hidden shadow-xs">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+        <section class="bg-[#0b101d] rounded-[2.5rem] border-2 border-slate-700/60 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xl text-center text-white">
+            <!-- Background Radial Glow -->
+            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-950/40 via-transparent to-transparent pointer-events-none"></div>
+
+            <div class="relative z-10 max-w-5xl mx-auto space-y-6 sm:space-y-7">
                 
-                <!-- Teks Hero & Form Pencarian (Kiri) -->
-                <div class="lg:col-span-7 space-y-5">
-                    <!-- Badge Header -->
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-100/70 text-blue-700 border border-blue-200/50">
-                        <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                        </svg>
-                        <span>Platform Marketplace Mahasiswa</span>
+                <!-- Badge Header -->
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-[#facc15] text-slate-950 shadow-sm mx-auto">
+                    <svg class="w-3.5 h-3.5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    <span>Platform Iklan &amp; Lelang Mahasiswa Malang</span>
+                </div>
+
+                <!-- Heading Utama -->
+                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-4xl mx-auto">
+                    Pasang Iklan, <span class="inline-block bg-[#ea580c] text-white px-3 sm:px-4 py-0.5 sm:py-1 rounded-2xl font-black shadow-lg mx-1 border border-orange-400/40 align-middle">Wanted Ads</span>, dan Lelang Barang Mahasiswa
+                </h1>
+
+                <!-- Deskripsi Singkat -->
+                <p class="text-sm sm:text-base text-slate-300/85 leading-relaxed max-w-2xl mx-auto font-normal">
+                    Pasang iklan barang yang mau kamu lungsurkan, buat iklan dicari saat butuh barang, atau ikut lelang terbuka. Nego dan COD langsung sesama mahasiswa Malang.
+                </p>
+
+                <!-- Search Box Pill -->
+                <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" class="max-w-xl mx-auto w-full pt-1">
+                    <div class="bg-[#141d30] p-1.5 sm:p-2 pl-4 sm:pl-5 rounded-full border border-slate-700/80 shadow-inner flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 w-full">
+                            <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <input type="text" 
+                                   name="q" 
+                                   placeholder="Cari iklan barang kos, buku, elektronik, atau cek wanted ads..." 
+                                   class="w-full text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none bg-transparent">
+                        </div>
+                        <button type="submit" 
+                                class="shrink-0 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-md shadow-blue-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <span>Cari</span>
+                        </button>
                     </div>
+                </form>
 
-                    <!-- Heading Utama -->
-                    <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.15]">
-                        Jual, Beli, <span class="text-blue-600">Tukar</span>, dan Lelang dengan Mudah di Lungsur.in
-                    </h1>
-
-                    <!-- Deskripsi Singkat -->
-                    <p class="text-sm sm:text-base text-slate-500 leading-relaxed max-w-xl">
-                        Temukan barang, jasa, dan kebutuhan yang kamu cari atau tawarkan. Semua dalam satu platform untuk mahasiswa kampusmu!
-                    </p>
-
-                    <!-- Large Search Box (Sesuai Figma) -->
-                    <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" class="pt-2">
-                        <div class="bg-white p-2 sm:p-2.5 rounded-2xl sm:rounded-full border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center gap-2 max-w-xl">
-                            <div class="flex items-center gap-3 w-full px-3 py-1">
-                                <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                </svg>
-                                <input type="text" 
-                                       name="q" 
-                                       placeholder="Cari barang, jasa, atau kebutuhan..." 
-                                       class="w-full text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none bg-transparent">
-                            </div>
-                            <button type="submit" 
-                                    class="w-full sm:w-auto shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-xl sm:rounded-full shadow-md shadow-blue-500/25 transition flex items-center justify-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                </svg>
-                                <span>Cari</span>
-                            </button>
+                <!-- 3 Badge Jaminan Kepercayaan -->
+                <div class="pt-1 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs font-semibold text-slate-300">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141d30]/90 border border-slate-700/70 shadow-xs">
+                        <div class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                            </svg>
                         </div>
-                    </form>
-
-                    <!-- 3 Badge Jaminan Kepercayaan -->
-                    <div class="pt-2 flex flex-wrap items-center gap-5 sm:gap-6 text-xs font-semibold text-slate-700">
-                        <div class="flex items-center gap-2">
-                            <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">
-                                ✓
-                            </div>
-                            <span>Aman & Terpercaya</span>
+                        <span>Khusus Mahasiswa Malang</span>
+                    </div>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141d30]/90 border border-slate-700/70 shadow-xs">
+                        <div class="w-4 h-4 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
-                                🎓
-                            </div>
-                            <span>Hanya Mahasiswa</span>
+                        <span>Iklan, Wanted Ads &amp; Lelang</span>
+                    </div>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141d30]/90 border border-slate-700/70 shadow-xs">
+                        <div class="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs">
-                                ⚡
-                            </div>
-                            <span>Mudah Digunakan</span>
-                        </div>
+                        <span>Deal &amp; COD Langsung</span>
                     </div>
                 </div>
 
-                <!-- Visual Kolase Foto Mahasiswa (Kanan) -->
-                <div class="lg:col-span-5 relative flex items-center justify-center mt-6 lg:mt-0">
-                    <div class="relative w-full max-w-sm">
-                        <!-- Foto Utama Mahasiswa Kampus -->
-                        <div class="bg-white p-3 rounded-3xl shadow-xl border border-slate-100 relative z-10 overflow-hidden">
-                            <div class="relative rounded-2xl overflow-hidden aspect-[4/5] bg-slate-100">
-                                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop" 
-                                     alt="Mahasiswa Kampus Lungsur.in" 
-                                     class="w-full h-full object-cover">
-                                
-                                <!-- Floating Pill Tag: "Barang Bekas Jadi Berkah! ✨" -->
-                                <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-xs px-3.5 py-1.5 rounded-full shadow-md text-xs font-bold text-slate-800 border border-slate-100">
-                                    Barang Bekas Jadi Berkah! ✨
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Foto Miniatur Melayang 1 (Atas Kanan - Laptop Kos) -->
-                        <div class="absolute -top-4 -right-4 w-28 h-24 bg-white p-1.5 rounded-2xl shadow-lg border border-slate-100 z-20 hidden sm:block transform rotate-6">
-                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=300&auto=format&fit=crop" 
-                                 alt="Perlengkapan Kos" 
-                                 class="w-full h-full object-cover rounded-xl">
-                        </div>
-
-                        <!-- Foto Miniatur Melayang 2 (Bawah Kiri - Sepatu) -->
-                        <div class="absolute -bottom-4 -left-4 w-28 h-20 bg-white p-1.5 rounded-2xl shadow-lg border border-slate-100 z-20 hidden sm:block transform -rotate-6">
-                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=300&auto=format&fit=crop" 
-                                 alt="Barang Mahasiswa" 
-                                 class="w-full h-full object-cover rounded-xl">
-                        </div>
-
-                        <!-- Badge Ikon Biru Kanan Bawah (Kelinci/Ekonomi Cepat) -->
-                        <div class="absolute -bottom-2 -right-2 w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30 z-30">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                            </svg>
+                <!-- Clothesline & 5 Hanging Cards Section -->
+                <div class="relative w-full pt-8 sm:pt-10">
+                    
+                    <!-- Banner Kuning di Atas Jemuran -->
+                    <div class="relative z-20 text-center mb-6 sm:mb-8">
+                        <div class="inline-block bg-[#facc15] text-slate-950 font-black text-xs sm:text-sm px-5 py-2 rounded-xl shadow-lg border border-amber-300 transform -rotate-1 hover:rotate-0 transition duration-200">
+                            Lungsurkan Barang, Temukan Kebutuhan!
                         </div>
                     </div>
+
+                    <!-- Clothesline Curved Wire SVG -->
+                    <div class="absolute top-[4.5rem] sm:top-[5.25rem] left-0 right-0 h-6 pointer-events-none z-10 hidden sm:block">
+                        <svg class="w-full h-full text-slate-600/80" preserveAspectRatio="none" viewBox="0 0 1000 30" fill="none">
+                            <path d="M 0 10 Q 500 28 1000 10" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+
+                    <!-- 5 Hanging Cards -->
+                    <div class="flex items-end justify-start sm:justify-center gap-3 sm:gap-4 lg:gap-5 overflow-x-auto pb-4 pt-2 no-scrollbar snap-x relative z-20 px-2">
+                        
+                        <!-- Card 1: Sepatu (Olive Brown) -->
+                        <a href="{{ Route::has('listings.index') ? route('listings.index', ['q' => 'sepatu']) : url('/katalog') }}" class="flex flex-col items-center shrink-0 snap-center group">
+                            <!-- Clothespin Wooden Peg -->
+                            <div class="w-3.5 h-6 sm:w-4 sm:h-7 bg-[#d59850] border border-[#a26829] rounded-xs mx-auto -mb-3 sm:-mb-3.5 relative z-30 shadow-xs flex flex-col items-center justify-center">
+                                <div class="w-full h-1 bg-[#8c521b] opacity-80"></div>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="w-36 sm:w-44 lg:w-48 h-48 sm:h-56 lg:h-60 rounded-2xl sm:rounded-3xl bg-[#4a3d16] border border-amber-600/30 p-3 sm:p-4 flex flex-col items-center justify-center shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
+                                <svg class="w-24 h-24 sm:w-28 sm:h-28 filter drop-shadow-md" viewBox="0 0 120 120" fill="none">
+                                    <path d="M22 76C24 64 36 60 48 60L72 58C78 52 86 42 94 40C98 39 104 43 103 49L99 74C98 77 95 78 90 78L22 78Z" fill="#ef4444"/>
+                                    <path d="M22 76C23 68 28 64 36 63L35 78L22 78Z" fill="#f8fafc"/>
+                                    <circle cx="86" cy="58" r="6" fill="#f8fafc"/>
+                                    <path d="M86 54L87.5 57H90.5L88 59L89 62L86 60.5L83 62L84 59L81.5 57H84.5L86 54Z" fill="#dc2626"/>
+                                    <line x1="48" y1="62" x2="56" y2="54" stroke="#f8fafc" stroke-width="2.5" stroke-linecap="round"/>
+                                    <line x1="56" y1="63" x2="65" y2="53" stroke="#f8fafc" stroke-width="2.5" stroke-linecap="round"/>
+                                    <line x1="65" y1="64" x2="74" y2="52" stroke="#f8fafc" stroke-width="2.5" stroke-linecap="round"/>
+                                    <rect x="18" y="77" width="87" height="10" rx="4" fill="#f8fafc"/>
+                                    <line x1="20" y1="82" x2="103" y2="82" stroke="#cbd5e1" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Card 2: Laptop (Dark Blue) -->
+                        <a href="{{ Route::has('listings.index') ? route('listings.index', ['q' => 'laptop']) : url('/katalog') }}" class="flex flex-col items-center shrink-0 snap-center group">
+                            <!-- Clothespin Wooden Peg -->
+                            <div class="w-3.5 h-6 sm:w-4 sm:h-7 bg-[#d59850] border border-[#a26829] rounded-xs mx-auto -mb-3 sm:-mb-3.5 relative z-30 shadow-xs flex flex-col items-center justify-center">
+                                <div class="w-full h-1 bg-[#8c521b] opacity-80"></div>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="w-36 sm:w-44 lg:w-48 h-48 sm:h-56 lg:h-60 rounded-2xl sm:rounded-3xl bg-[#17243c] border border-blue-500/30 p-3 sm:p-4 flex flex-col items-center justify-center shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
+                                <svg class="w-24 h-24 sm:w-28 sm:h-28 filter drop-shadow-md" viewBox="0 0 120 120" fill="none">
+                                    <rect x="25" y="32" width="70" height="46" rx="4" fill="#334155" stroke="#475569" stroke-width="2"/>
+                                    <rect x="29" y="36" width="62" height="38" rx="2" fill="#090d16"/>
+                                    <path d="M44 51L37 55L44 59" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <line x1="56" y1="49" x2="64" y2="61" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+                                    <path d="M76 51L83 55L76 59" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M16 80C16 78.5 17.5 77 19 77H101C102.5 77 104 78.5 104 80L100 84C99.5 85 98 85.5 96 85.5H24C22 85.5 20.5 85 20 84L16 80Z" fill="#475569" stroke="#334155" stroke-width="1.5"/>
+                                    <rect x="52" y="78" width="16" height="2" rx="1" fill="#1e293b"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Card 3: Baju & Hanger (Charcoal Navy) -->
+                        <a href="{{ Route::has('listings.index') ? route('listings.index', ['q' => 'baju']) : url('/katalog') }}" class="flex flex-col items-center shrink-0 snap-center group">
+                            <!-- Clothespin Wooden Peg -->
+                            <div class="w-3.5 h-6 sm:w-4 sm:h-7 bg-[#d59850] border border-[#a26829] rounded-xs mx-auto -mb-3 sm:-mb-3.5 relative z-30 shadow-xs flex flex-col items-center justify-center">
+                                <div class="w-full h-1 bg-[#8c521b] opacity-80"></div>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="w-36 sm:w-44 lg:w-48 h-48 sm:h-56 lg:h-60 rounded-2xl sm:rounded-3xl bg-[#1e2333] border border-slate-600/30 p-3 sm:p-4 flex flex-col items-center justify-center shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
+                                <svg class="w-24 h-24 sm:w-28 sm:h-28 filter drop-shadow-md" viewBox="0 0 120 120" fill="none">
+                                    <path d="M60 38C60 34 63 31 66 31C69 31 71 33 71 35C71 38 68 40 64 42L60 45" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                                    <path d="M60 45L34 56C32 57 32 59 34 60L60 63L86 60C88 59 88 57 86 56L60 45Z" stroke="#cbd5e1" stroke-width="2" fill="none"/>
+                                    <path d="M37 58L22 72L31 80L40 73V92C40 93.5 41.5 95 43 95H77C78.5 95 80 93.5 80 92V73L89 80L98 72L83 58L69 63L60 60L51 63L37 58Z" fill="#2563eb"/>
+                                    <path d="M51 63L60 69L69 63L64 57L60 59L56 57L51 63Z" fill="#bfdbfe"/>
+                                    <line x1="60" y1="69" x2="60" y2="95" stroke="#1d4ed8" stroke-width="2"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Card 4: Buku & Cangkir (Forest Green) -->
+                        <a href="{{ Route::has('listings.index') ? route('listings.index', ['q' => 'buku']) : url('/katalog') }}" class="flex flex-col items-center shrink-0 snap-center group">
+                            <!-- Clothespin Wooden Peg -->
+                            <div class="w-3.5 h-6 sm:w-4 sm:h-7 bg-[#d59850] border border-[#a26829] rounded-xs mx-auto -mb-3 sm:-mb-3.5 relative z-30 shadow-xs flex flex-col items-center justify-center">
+                                <div class="w-full h-1 bg-[#8c521b] opacity-80"></div>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="w-36 sm:w-44 lg:w-48 h-48 sm:h-56 lg:h-60 rounded-2xl sm:rounded-3xl bg-[#102e21] border border-emerald-600/30 p-3 sm:p-4 flex flex-col items-center justify-center shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
+                                <svg class="w-24 h-24 sm:w-28 sm:h-28 filter drop-shadow-md" viewBox="0 0 120 120" fill="none">
+                                    <rect x="70" y="37" width="14" height="15" rx="3" fill="#f8fafc"/>
+                                    <path d="M84 41C87 41 89 43 89 45C89 47 87 49 84 49" stroke="#f8fafc" stroke-width="2.5" fill="none"/>
+                                    <path d="M74 31C73 33 75 34 74 36" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M78 31C77 33 79 34 78 36" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+                                    <rect x="30" y="52" width="60" height="9" rx="2.5" fill="#06b6d4"/>
+                                    <rect x="84" y="53.5" width="4" height="6" fill="#f8fafc"/>
+                                    <rect x="25" y="62" width="70" height="10" rx="2.5" fill="#eab308"/>
+                                    <rect x="88" y="63.5" width="5" height="7" fill="#f8fafc"/>
+                                    <rect x="22" y="73" width="76" height="11" rx="3" fill="#ea580c"/>
+                                    <rect x="91" y="74.5" width="5" height="8" fill="#f8fafc"/>
+                                    <line x1="28" y1="78.5" x2="88" y2="78.5" stroke="#c2410c" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <!-- Card 5: Tas Ransel (Deep Purple) -->
+                        <a href="{{ Route::has('listings.index') ? route('listings.index', ['q' => 'tas']) : url('/katalog') }}" class="flex flex-col items-center shrink-0 snap-center group">
+                            <!-- Clothespin Wooden Peg -->
+                            <div class="w-3.5 h-6 sm:w-4 sm:h-7 bg-[#d59850] border border-[#a26829] rounded-xs mx-auto -mb-3 sm:-mb-3.5 relative z-30 shadow-xs flex flex-col items-center justify-center">
+                                <div class="w-full h-1 bg-[#8c521b] opacity-80"></div>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="w-36 sm:w-44 lg:w-48 h-48 sm:h-56 lg:h-60 rounded-2xl sm:rounded-3xl bg-[#341e4a] border border-purple-500/30 p-3 sm:p-4 flex flex-col items-center justify-center shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
+                                <svg class="w-24 h-24 sm:w-28 sm:h-28 filter drop-shadow-md" viewBox="0 0 120 120" fill="none">
+                                    <path d="M52 35C52 31 55 28 60 28C65 28 68 31 68 35" stroke="#c2410c" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                    <rect x="34" y="35" width="52" height="58" rx="14" fill="#f97316"/>
+                                    <path d="M42 46C42 41 46 38 60 38C74 38 78 41 78 46" stroke="#ea580c" stroke-width="2" fill="none"/>
+                                    <rect x="42" y="58" width="36" height="28" rx="8" fill="#facc15"/>
+                                    <line x1="48" y1="64" x2="72" y2="64" stroke="#d97706" stroke-width="2" stroke-linecap="round"/>
+                                    <rect x="30" y="54" width="4" height="20" rx="2" fill="#c2410c"/>
+                                    <rect x="86" y="54" width="4" height="20" rx="2" fill="#c2410c"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                    </div>
+
+                    <!-- Slider Bar Cue -->
+                    <div class="mt-6 sm:mt-8 flex items-center justify-center">
+                        <div class="w-44 sm:w-56 h-1.5 bg-slate-800 rounded-full flex items-center p-0.5">
+                            <div class="w-14 sm:w-16 h-1 bg-slate-500 rounded-full"></div>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
         </section>
         @endif
-
 
         {{-- Spotlight Lelang Unggulan --}}
         @if ($spotlight && !request()->is('katalog*'))
@@ -132,8 +232,8 @@
             <section class="space-y-5">
                 <div class="flex items-center justify-between gap-3">
                     <div class="flex items-center gap-2.5">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-100 text-lg text-blue-600">
-                            ✦
+                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                         </div>
 
                         <div>
@@ -174,8 +274,9 @@
                             </div>
                         @endif
 
-                        <span class="absolute left-3 top-3 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow">
-                            ✦ SPOTLIGHT
+                        <span class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <span>SPOTLIGHT</span>
                         </span>
 
                         <span class="absolute bottom-3 left-3 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-bold text-slate-700">
@@ -222,8 +323,9 @@
                             </div>
 
                             <div>
-                                <p class="text-xs font-bold text-rose-600">
-                                    ◷ Sisa waktu
+                                <p class="text-xs font-bold text-rose-600 inline-flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Sisa waktu</span>
                                 </p>
 
                                 <div
@@ -323,8 +425,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Punya Barang yang Ingin Dijual?</h3>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Pasang iklanmu sekarang dan jangkau lebih banyak mahasiswa!</p>
+                    <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Ada Barang Kos yang Nggak Kepakai?</h3>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Pasang iklan gratis sekarang, atau pakai Boost biar iklanmu tampil paling atas dan makin cepat dilirik.</p>
                 </div>
             </div>
 
@@ -349,7 +451,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                         </svg>
-                        <span>+ Pasang Iklan</span>
+                        <span>Pasang Iklan</span>
                     </a>
                 @endif
             </div>
@@ -365,19 +467,31 @@
                 <div>
                     <div class="flex items-center gap-2">
                         @if (!($isCatalog ?? false) && empty($search))
-                            <div class="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold">
-                                ⚡
+                            <div class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
                             </div>
                             <h2 class="text-xl font-black text-slate-900 tracking-tight">
                                 Iklan Unggulan Pilihan
                             </h2>
                         @else
                             <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
-                                {{ !empty($search) ? '🔍' : '📦' }}
+                                @if (!empty($search))
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                @else
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                @endif
                             </div>
                             <h2 class="text-xl font-black text-slate-900 tracking-tight">
                                 @if (!empty($search))
                                     Hasil Pencarian
+                                @elseif ($isCatalog ?? false)
+                                    Jelajahi Iklan Mahasiswa
                                 @else
                                     Katalog Produk Mahasiswa
                                 @endif
@@ -393,7 +507,7 @@
                                 Lihat semua di Katalog &rarr;
                             </a>
                         @else
-                            Iklan unggulan ditampilkan terpisah di bagian atas, disusul produk reguler di bagian bawah.
+                            Iklan Boost tampil paling atas biar gampang dilirik, disusul iklan gratis terbaru dari mahasiswa Malang.
                         @endif
                     </p>
                 </div>
@@ -566,7 +680,7 @@
                                     </span>
                                 @endif
                             @else
-                                <span class="text-[11px] text-slate-400">Gunakan filter untuk menyaring perlengkapan kos sesuai kebutuhan dan anggaran Anda.</span>
+                                <span class="text-[11px] text-slate-400">Filter iklan sesuai kampus, kondisi barang, atau budget kamu.</span>
                             @endif
                         </div>
 
@@ -655,45 +769,91 @@
                 @else
                     {{-- KOTAK 1 (ATAS): PRODUK BOOST / UNGGULAN --}}
                     @if ($boostedCollection->isNotEmpty())
-                        <div class="mt-6 rounded-3xl border border-amber-200/90 bg-gradient-to-br from-amber-50/70 via-amber-50/30 to-orange-50/40 p-5 sm:p-6 shadow-xs">
+                        <div class="mt-6 rounded-3xl border border-amber-200/90 bg-gradient-to-br from-amber-50/70 via-amber-50/30 to-orange-50/40 p-5 sm:p-6 shadow-xs overflow-hidden">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-amber-200/60">
                                 <div class="flex items-center gap-2.5">
-                                    <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center text-sm font-black shadow-xs shrink-0">
-                                        ⚡
+                                    <div class="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center shadow-xs shrink-0 font-black">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
                                     </div>
                                     <div>
-                                        <h3 class="text-base font-black text-slate-900 tracking-tight">Iklan Unggulan (Boost)</h3>
-                                        <p class="text-[11px] text-amber-800/80 font-medium">Produk pilihan mahasiswa yang sedang aktif dipromosikan</p>
+                                        <h3 class="text-base font-black text-slate-900 tracking-tight">Iklan Boost</h3>
+                                        <p class="text-[11px] text-amber-900/80 font-medium">Iklan pilihan yang sedang dipromosikan di posisi teratas</p>
                                     </div>
                                 </div>
-                                <span class="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold border border-amber-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                    {{ $boostedCollection->count() }} Produk Unggulan
-                                </span>
+                                <div class="self-start sm:self-auto flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-bold border border-amber-300/80">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                        {{ $boostedCollection->count() }} Iklan Aktif
+                                    </span>
+                                    <a href="{{ auth()->check() ? (auth()->user()->isSeller() ? route('dashboard', ['tab' => 'dagangan']) : route('dashboard')) : route('login') }}" 
+                                       class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 text-[11px] font-bold shadow-xs transition"
+                                       title="Promosikan iklan barangmu agar muncul di posisi teratas">
+                                        <svg class="w-3 h-3 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                        <span>+ Boost Iklanmu</span>
+                                    </a>
+                                </div>
                             </div>
 
-                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-5">
-                                @foreach ($boostedCollection as $listing)
-                                    <x-listing-card :listing="$listing" />
-                                @endforeach
-                            </div>
+                            @if ($boostedCollection->count() <= 3)
+                                {{-- Jika <= 3 item: Tampilkan berjajar statis --}}
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mt-5">
+                                    @foreach ($boostedCollection as $listing)
+                                        <x-listing-card :listing="$listing" />
+                                    @endforeach
+                                </div>
+                            @else
+                                {{-- Jika > 3 item: Continuous horizontal infinite marquee dengan pause-on-hover & touch swipe --}}
+                                <div class="relative overflow-hidden w-full group/marquee mt-5 pt-1 pb-2">
+                                    {{-- Left Gradient Fade --}}
+                                    <div class="pointer-events-none absolute left-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-r from-amber-50/95 via-amber-50/80 to-transparent z-10"></div>
+                                    {{-- Right Gradient Fade --}}
+                                    <div class="pointer-events-none absolute right-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-l from-amber-50/95 via-amber-50/80 to-transparent z-10"></div>
+
+                                    {{-- Horizontal Scrollable for Mobile & Marquee Track --}}
+                                    <div class="overflow-x-auto no-scrollbar py-1">
+                                        <div class="flex gap-4 sm:gap-6 w-max animate-marquee group-hover/marquee:[animation-play-state:paused] hover:[animation-play-state:paused]">
+                                            {{-- Track 1: Original Items --}}
+                                            <div class="flex gap-4 sm:gap-6 shrink-0">
+                                                @foreach ($boostedCollection as $listing)
+                                                    <div class="w-60 sm:w-64 md:w-72 shrink-0">
+                                                        <x-listing-card :listing="$listing" />
+                                                    </div>
+                                                @endforeach
+                                            </div>
+
+                                            {{-- Track 2: Duplicate Items for Seamless Infinite Loop --}}
+                                            <div class="flex gap-4 sm:gap-6 shrink-0" aria-hidden="true">
+                                                @foreach ($boostedCollection as $listing)
+                                                    <div class="w-60 sm:w-64 md:w-72 shrink-0">
+                                                        <x-listing-card :listing="$listing" />
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     @endif
 
-                    {{-- KOTAK 2 (BAWAH): PRODUK TIDAK DI-BOOST / REGULER --}}
+                    {{-- KOTAK 2 (BAWAH): IKLAN GRATIS / REGULER --}}
                     <div class="{{ $boostedCollection->isNotEmpty() ? 'mt-8' : 'mt-6' }} rounded-3xl border border-slate-200/80 bg-slate-50/70 p-5 sm:p-6 shadow-xs">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-200/70">
                             <div class="flex items-center gap-2.5">
-                                <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-xs shrink-0">
-                                    📦
+                                <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
                                 </div>
                                 <div>
-                                    <h3 class="text-base font-black text-slate-900 tracking-tight">Produk Katalog Lainnya</h3>
-                                    <p class="text-[11px] text-slate-500 font-medium">Daftar barang reguler dari mahasiswa di Lungsur.in</p>
+                                    <h3 class="text-base font-black text-slate-900 tracking-tight">Iklan Terbaru</h3>
+                                    <p class="text-[11px] text-slate-500 font-medium">Daftar iklan gratis dari mahasiswa di Malang</p>
                                 </div>
                             </div>
                             <span class="self-start sm:self-auto inline-flex items-center px-3 py-1 rounded-full bg-white text-slate-700 text-[11px] font-bold border border-slate-200">
-                                {{ $regularTotal }} Produk
+                                {{ $regularTotal }} Iklan
                             </span>
                         </div>
 
@@ -705,7 +865,7 @@
                             </div>
                         @else
                             <div class="py-10 text-center text-xs text-slate-500 font-medium">
-                                Belum ada produk reguler yang sesuai dengan kriteria ini.
+                                Belum ada iklan gratis yang sesuai dengan kriteria ini.
                             </div>
                         @endif
                     </div>
@@ -718,7 +878,7 @@
                     <div class="mt-4 flex flex-wrap items-center justify-between gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold px-4 py-2 rounded-xl shadow-2xs">
                         <div class="inline-flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                            <span>Halaman Beranda menampilkan produk yang sedang aktif di-boost ⚡</span>
+                            <span>Halaman Beranda menampilkan produk yang sedang aktif di-boost</span>
                         </div>
                         <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" class="font-bold text-amber-900 hover:underline">
                             Buka Semua Katalog &rarr;
@@ -731,8 +891,10 @@
                         <x-listing-card :listing="$listing" />
                     @empty
                         <div class="col-span-full rounded-2xl border border-dashed border-amber-300/80 bg-amber-50/30 px-6 py-14 text-center">
-                            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 text-xl font-bold">
-                                ⚡
+                            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
                             </div>
                             <p class="text-sm font-bold text-slate-800">
                                 Belum ada iklan unggulan saat ini

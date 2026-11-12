@@ -185,9 +185,9 @@ class WantedAdController extends Controller
 
         $conversation->update(['last_message_at' => now()]);
 
-        return redirect()->route('wanted-ads.index')->with(
+        return redirect()->route('dashboard', ['tab' => 'peluang'])->with(
             'success',
-            "Tawaran postingan '{$listing->title}' berhasil disambungkan ke ruang chat internal pembeli ({$buyerName})!"
+            "Tawaran postingan '{$listing->title}' berhasil disambungkan ke ruang obrolan dengan ({$buyerName})!"
         );
     }
 }

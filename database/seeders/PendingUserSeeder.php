@@ -42,7 +42,6 @@ class PendingUserSeeder extends Seeder
                     'password' => Hash::make('password'),
                     'role' => 'buyer',
                     'campus' => 'Polinema',
-                    'phone' => '08123456789',
                     'status' => 'active',
                 ]
             );
@@ -59,7 +58,6 @@ class PendingUserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role' => 'buyer',
                 'campus' => 'Polinema',
-                'phone' => '08123456780',
                 'status' => 'active',
             ]
         );
