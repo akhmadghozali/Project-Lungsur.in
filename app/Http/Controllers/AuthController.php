@@ -143,7 +143,7 @@ class AuthController extends Controller
                 'user' => $user,
                 'redirect' => $user->role === 'admin'
                     ? route('admin.verifications.index')
-                    : route('dashboard'),
+                    : ($request->session()->pull('url.intended') ?? route('dashboard')),
             ]);
         }
 

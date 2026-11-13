@@ -89,8 +89,9 @@ Route::middleware(['auth', 'verified_student', 'active_mode:buyer'])->group(func
         ->name('auctions.bids.store');
 });
 
-// Stub halaman detail barang (agar tombol "Lihat Detail" di beranda tidak 404)
+// Halaman detail barang (Wajib login untuk melihat detail lengkap dan kontak penjual)
 Route::get('/katalog/{id}', [IklanController::class, 'show'])
+    ->middleware('auth')
     ->name('listings.show');
 
 // Halaman daftar dan detail lelang
@@ -119,7 +120,7 @@ Route::get('/cari-barang', [WantedAdController::class, 'index'])
 Route::get('/wanted-ads', fn () => redirect()->route('wanted-ads.index'));
     
 // Alias rute kompatibilitas untuk detail iklan & lelang
-Route::get('/listings/{id}', [IklanController::class, 'show']);
+Route::get('/listings/{id}', [IklanController::class, 'show'])->middleware('auth');
 Route::get('/auctions/{id}', fn ($id) => redirect()->route('auctions.show', $id));
 
 // Modul Chat Komunitas Mahasiswa

@@ -209,13 +209,21 @@ class IklanController extends Controller
      * Tampilkan halaman detail barang.
      */
 
-    public function show($id): View
+    /**
+     * Tampilkan halaman detail barang.
+     * Wajib login agar hanya mahasiswa terverifikasi yang dapat melihat kontak dan detail transaksi.
+     */
+    public function show($id): View|RedirectResponse
     {
+        if (!Auth::check()) {
+            return redirect()->guest(route('login'))->with(
+                'info',
+                'Silakan masuk atau daftar terlebih dahulu untuk melihat detail barang.'
+            );
+        }
+
         // Mengambil data iklan beserta relasi kategori, gambar, dan user penjualnya
         $listing = Listing::with(['category', 'images', 'user'])->findOrFail($id);
         return view('listings.show', compact('listing'));
-        // Mengambil data listing beserta relasi user (penjual), kategori, dan foto
-        $item = Listing::with(['user', 'category', 'images'])->findOrFail($id);
-        return view('catalog.show', compact('item'));
     }
 }
