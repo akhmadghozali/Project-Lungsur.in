@@ -16,6 +16,7 @@ class Listing extends Model
 
     protected $fillable = [
         'user_id',
+        'buyer_id',
         'category_id',
         'title',
         'description',
@@ -75,6 +76,11 @@ class Listing extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function buyer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'buyer_id');
     }
 
     public function category(): BelongsTo

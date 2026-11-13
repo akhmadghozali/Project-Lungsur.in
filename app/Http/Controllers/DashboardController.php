@@ -212,11 +212,14 @@ class DashboardController extends Controller
         if ($validated['status'] === 'sold') {
             $validBuyer = $listing->conversations()
                 ->where('buyer_id', $validated['buyer_id'])
-                ->exists();
+                ->exists()
+                || \App\Models\Conversation::where('seller_id', Auth::id())
+                    ->where('buyer_id', $validated['buyer_id'])
+                    ->exists();
 
             if (! $validBuyer || (int) $validated['buyer_id'] === (int) $listing->user_id) {
                 return redirect()->to($targetUrl)
-                    ->with('error', 'Pembeli harus merupakan pengguna yang pernah menghubungi iklan ini.');
+                    ->with('error', 'Pembeli harus merupakan pengguna yang pernah menghubungi Anda.');
             }
         }
 

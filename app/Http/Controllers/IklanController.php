@@ -203,11 +203,7 @@ class IklanController extends Controller
 
         return redirect()->route('dashboard')
             ->with('success', 'Iklan "' . $listing->title . '" berhasil diperbarui! 🎉');
-        }
-    
-        /**
-     * Tampilkan halaman detail barang.
-     */
+    }
 
     /**
      * Tampilkan halaman detail barang.

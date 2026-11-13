@@ -282,13 +282,17 @@
                             </div>
 
                             @if ($canContactSeller)
-                                <button
-                                    type="button"
+                                <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-center text-xs font-semibold text-emerald-800">
+                                    🎉 Selamat! Kamu adalah pemenang lelang ini. Silakan hubungi penjual untuk berkoordinasi COD.
+                                </div>
+                                <a
+                                    href="{{ route('chat.index', ['listing_id' => $auction->listing_id]) }}"
                                     id="contact-seller-button"
-                                    class="w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-blue-700"
+                                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-blue-700 shadow-md shadow-blue-500/20"
                                 >
-                                    Hubungi Penjual →
-                                </button>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                    <span>Hubungi Penjual &rarr;</span>
+                                </a>
                             @endif
                         </div>
 
