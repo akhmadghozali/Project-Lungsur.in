@@ -18,10 +18,8 @@
         <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
         <!-- ========================================== -->
         @if (!request()->is('katalog*'))
-        <section class="bg-[#0b101d] rounded-[2.5rem] border-2 border-slate-700/60 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xl text-center text-white">
-            <!-- Background Radial Glow -->
-            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-950/40 via-transparent to-transparent pointer-events-none"></div>
-
+           <section class="bg-white rounded-[2.5rem] border border-slate-200 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-xl shadow-slate-200/60 text-center text-slate-900">
+            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/80 via-white to-white pointer-events-none"></div>
             <div class="relative z-10 max-w-5xl mx-auto space-y-6 sm:space-y-7">
                 
                 <!-- Badge Header -->
@@ -1286,7 +1284,7 @@
                 console.error(error);
             });
         }
-
+@if
         // Klik tombol dropdown
         if (sortButton && sortMenu) {
             sortButton.addEventListener('click', function () {
