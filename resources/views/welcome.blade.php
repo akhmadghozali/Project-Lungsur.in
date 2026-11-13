@@ -1,16 +1,27 @@
 <x-layouts.app>
     <x-slot:title>
-        {{ request()->is('katalog*') ? 'Katalog Barang Mahasiswa - Lungsur.in' : 'Lungsur.in - Platform Marketplace & Lelang Komunitas Mahasiswa Malang' }}
+        {{ request()->is('katalog*') ? 'Katalog Iklan Mahasiswa - Lungsur.in' : 'Lungsur.in - Platform Iklan & Lelang Komunitas Mahasiswa Malang' }}
     </x-slot:title>
 
-    <div class="space-y-12 sm:space-y-16">
+    @if ($isCatalog ?? request()->is('katalog*'))
+        {{-- ======================================================== --}}
+        {{-- 1. TAMPILAN MODERN HALAMAN KATALOG (SESUAI GAMBAR 2, 3 & 4) --}}
+        {{-- ======================================================== --}}
+        @include('katalog.partials.catalog-page')
+    @else
+        {{-- ======================================================== --}}
+        {{-- 2. TAMPILAN HALAMAN BERANDA / LANDING PAGE               --}}
+        {{-- ======================================================== --}}
+        <div class="space-y-12 sm:space-y-16">
 
         <!-- ========================================== -->
         <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
         <!-- ========================================== -->
         @if (!request()->is('katalog*'))
-           <section class="bg-white rounded-[2.5rem] border border-slate-200 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-xl shadow-slate-200/60 text-center text-slate-900">
-            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/80 via-white to-white pointer-events-none"></div>
+        <section class="bg-[#0b101d] rounded-[2.5rem] border-2 border-slate-700/60 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xl text-center text-white">
+            <!-- Background Radial Glow -->
+            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-950/40 via-transparent to-transparent pointer-events-none"></div>
+
             <div class="relative z-10 max-w-5xl mx-auto space-y-6 sm:space-y-7">
                 
                 <!-- Badge Header -->
@@ -333,10 +344,9 @@
 
             </div>
         </section>
-        @endif
 
         {{-- Spotlight Lelang Unggulan --}}
-        @if ($spotlight && !request()->is('katalog*'))
+        @if ($spotlight)
             @php
                 $spotlightListing = $spotlight->listing;
                 $spotlightRemaining = $spotlight->timeRemainingSeconds();
@@ -1332,4 +1342,5 @@
         });
     });
     </script>
+    @endif
 </x-layouts.app>

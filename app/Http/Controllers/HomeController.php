@@ -79,9 +79,7 @@ class HomeController extends Controller
             $regularQuery = Listing::available()->notBoosted()->with(['category', 'images', 'user']);
             $this->applyFilters($regularQuery, $filters);
             $sort = $this->applySorting($regularQuery, $sort);
-            $listings = auth()->check()
-                ? $regularQuery->paginate(12)->withQueryString()
-                : $regularQuery->limit(10)->get();
+            $listings = $regularQuery->paginate(9)->withQueryString();
 
             $hasBoosted = $boostedListings->isNotEmpty();
             $isBoostedOnly = false;
@@ -101,6 +99,12 @@ class HomeController extends Controller
 
         $allCategories = Category::orderBy('name')->get();
         $campusList = CampusDomain::where('is_active', true)->orderBy('campus_name')->get();
+        $categoryCounts = Listing::available()
+            ->selectRaw('category_id, count(*) as count')
+            ->groupBy('category_id')
+            ->pluck('count', 'category_id')
+            ->toArray();
+        $allListingsCount = Listing::available()->count();
 
         return view('welcome', compact(
             'listings',
@@ -114,7 +118,9 @@ class HomeController extends Controller
             'filters',
             'allCategories',
             'campusList',
-            'hasFilter'
+            'hasFilter',
+            'categoryCounts',
+            'allListingsCount'
         ));
     }
 

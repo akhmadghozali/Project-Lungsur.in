@@ -415,4 +415,23 @@ class ChatController extends Controller
             'marked_count' => $updatedCount,
         ]);
     }
+
+    /**
+     * Mendapatkan jumlah total pesan masuk yang belum dibaca pengguna aktif.
+     */
+    public function unreadCount(Request $request): JsonResponse
+    {
+        $user = $this->resolveUser($request);
+        if (!$user) {
+            return response()->json([
+                'status' => 'unauthenticated',
+                'unread_count' => 0,
+            ], 401);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'unread_count' => $user->unreadMessagesCount(),
+        ]);
+    }
 }

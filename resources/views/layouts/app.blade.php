@@ -18,7 +18,7 @@
     @stack('styles')
 </head>
 
-<body class="flex flex-col min-h-full font-sans antialiased text-slate-900 bg-white selection:bg-blue-600 selection:text-white">
+<body class="flex flex-col min-h-full font-sans antialiased text-slate-900 bg-white selection:bg-blue-600 selection:text-white overflow-x-clip">
 
     <!-- Flash Message -->
     <x-flash-message />

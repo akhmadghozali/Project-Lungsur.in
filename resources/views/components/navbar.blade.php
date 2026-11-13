@@ -1,13 +1,13 @@
 <nav x-data="{ mobileMenuOpen: false, userDropdownOpen: false }" class="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-xs">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-20 items-center gap-4">
+    <div class="w-full max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 sm:h-20 items-center gap-2 lg:gap-4">
             
             <!-- Logo Lungsur.in (Sesuai Desain Figma) -->
-            <div class="flex items-center gap-8 shrink-0">
-                <a href="{{ url('/') }}" class="flex items-center gap-2.5 group">
+            <div class="flex items-center gap-3 lg:gap-5 xl:gap-6 min-w-0">
+                <a href="{{ url('/') }}" class="flex items-center gap-2 sm:gap-2.5 group shrink-0">
                     <!-- Icon Logo Biru Panah Sirkular + Toga Mahasiswa -->
-                    <div class="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-500/20 relative overflow-hidden group-hover:bg-blue-700 transition">
-                        <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-500/20 relative overflow-hidden group-hover:bg-blue-700 transition shrink-0">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <!-- Panah Memutar (Thrift/Circular Economy) -->
                             <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
                             <path d="M3 3v5h5"/>
@@ -19,17 +19,17 @@
                         </svg>
                     </div>
                     <!-- Brand Text -->
-                    <span class="text-2xl font-black text-slate-900 tracking-tight">
+                    <span class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                         Lungsur<span class="text-blue-600">.in</span>
                     </span>
                 </a>
 
                 <!-- Desktop Navigation Links Dinamis Berdasarkan Mode -->
-                <div class="hidden xl:flex items-center gap-1 font-medium text-sm text-slate-600">
+                <div class="hidden xl:flex items-center gap-0.5 2xl:gap-1 font-medium text-xs 2xl:text-sm text-slate-600 whitespace-nowrap">
                     <!-- Beranda -->
                     <a href="{{ url('/') }}" 
-                       class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('home') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
-                        <svg class="w-4 h-4 {{ request()->routeIs('home') ? 'text-blue-600' : 'text-slate-400' }}" fill="currentColor" viewBox="0 0 20 20">
+                       class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('home') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                        <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('home') ? 'text-blue-600' : 'text-slate-400' }}" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                         </svg>
                         <span>Beranda</span>
@@ -37,8 +37,8 @@
 
                     <!-- Katalog -->
                     <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" 
-                       class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->is('katalog*') && !request()->is('katalog/pasang') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
-                        <svg class="w-4 h-4 {{ request()->is('katalog*') && !request()->is('katalog/pasang') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->is('katalog*') && !request()->is('katalog/pasang') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                        <svg class="w-4 h-4 shrink-0 {{ request()->is('katalog*') && !request()->is('katalog/pasang') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                         </svg>
                         <span>Katalog</span>
@@ -48,35 +48,35 @@
                         @if(auth()->user()->isSeller())
                             <!-- MODE PENJUAL: Dagangan Saya -->
                             <a href="{{ route('dashboard', ['tab' => 'dagangan']) }}" 
-                               class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab', 'dagangan') === 'dagangan' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab', 'dagangan') === 'dagangan' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
+                                <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                 </svg>
-                                <span>Dagangan Saya</span>
+                                <span>Dagangan<span class="hidden 2xl:inline"> Saya</span></span>
                             </a>
 
                             <!-- MODE PENJUAL: Lelang Saya -->
                             <a href="{{ route('dashboard', ['tab' => 'lelang']) }}" 
-                               class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab') === 'lelang' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab') === 'lelang' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
+                                <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                 </svg>
-                                <span>Lelang Saya</span>
+                                <span>Lelang<span class="hidden 2xl:inline"> Saya</span></span>
                             </a>
 
                             <!-- MODE PENJUAL: Peluang Wanted Ads -->
                             <a href="{{ route('dashboard', ['tab' => 'peluang']) }}" 
-                               class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab') === 'peluang' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab') === 'peluang' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
+                                <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
-                                <span>Peluang Wanted Ads</span>
+                                <span><span class="hidden 2xl:inline">Peluang </span>Wanted Ads</span>
                             </a>
                         @else
                             <!-- MODE PEMBELI: Lelang Terbuka -->
                             <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" 
-                               class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
-                                <svg class="w-4 h-4 {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                                <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                 </svg>
                                 <span>Lelang</span>
@@ -84,8 +84,8 @@
 
                             <!-- MODE PEMBELI: Wanted Ads -->
                             <a href="{{ route('wanted-ads.index') }}" 
-                               class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
-                                <svg class="w-4 h-4 {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                                <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                                 <span>Wanted Ads</span>
@@ -94,15 +94,15 @@
                     @else
                         <!-- GUEST LINKS -->
                         <a href="{{ Route::has('auctions.index') ? route('auctions.index') : url('/lelang') }}" 
-                           class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('auctions.*') || request()->is('lelang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                            <svg class="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
                             <span>Lelang</span>
                         </a>
                         <a href="{{ route('wanted-ads.index') }}" 
-                           class="flex items-center gap-2 px-3 py-2 rounded-xl {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('wanted-ads.*') || request()->is('cari-barang*') ? 'text-blue-600 font-semibold bg-blue-50/60' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }} transition">
+                            <svg class="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             <span>Kebutuhan</span>
@@ -112,44 +112,48 @@
             </div>
 
             <!-- Bagian Kanan: Search Bar Mini + Notifikasi + Profil/Auth -->
-            <div class="flex items-center gap-4">
-                <!-- Search Box di Navbar -->
-                <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" class="hidden md:flex relative w-64 lg:w-72">
+            <div class="flex items-center gap-1.5 sm:gap-2.5 lg:gap-3 shrink-0">
+                <!-- Search Box di Navbar (Fleksibel & Otomatis Memanjang saat Fokus) -->
+                <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" 
+                      class="hidden md:flex relative w-28 sm:w-36 lg:w-44 xl:w-48 2xl:w-60 focus-within:w-44 sm:focus-within:w-52 lg:focus-within:w-60 xl:focus-within:w-64 2xl:focus-within:w-72 transition-all duration-300">
                     <input type="text" 
                            name="q"
                            value="{{ request('q') }}"
-                           placeholder="Cari barang atau kebutuhan..." 
-                           class="w-full pl-9 pr-4 py-2 text-xs rounded-full border border-slate-200 bg-slate-50/70 text-slate-700 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition shadow-2xs">
-                    <button type="submit" class="absolute left-3 top-2.5 text-slate-400 hover:text-blue-600 cursor-pointer" aria-label="Cari">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           placeholder="Cari barang..." 
+                           class="w-full pl-8 pr-3 py-1.5 text-xs rounded-full border border-slate-200 bg-slate-50/70 text-slate-700 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition shadow-2xs">
+                    <button type="submit" class="absolute left-2.5 top-2 text-slate-400 hover:text-blue-600 cursor-pointer" aria-label="Cari">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </button>
                 </form>
 
                 @auth
+                    @php
+                        $unreadChatCount = auth()->user()->unreadMessagesCount();
+                    @endphp
                     <!-- Mode Switcher Pill (Pembeli ⇄ Penjual) -->
-                    <form method="POST" action="{{ route('user.switch_mode') }}" class="hidden sm:inline-flex items-center">
+                    <form method="POST" action="{{ route('user.switch_mode') }}" class="hidden sm:inline-flex items-center shrink-0">
                         @csrf
                         @if(auth()->user()->isSeller())
                             <input type="hidden" name="mode" value="buyer">
                             <button type="submit" 
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition shadow-2xs cursor-pointer group"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition shadow-2xs cursor-pointer group whitespace-nowrap"
                                     title="Klik untuk beralih ke Mode Pembeli">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
                                 <span>Penjual</span>
-                                <svg class="w-3.5 h-3.5 text-emerald-500 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-3.5 h-3.5 text-emerald-500 group-hover:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                                 </svg>
                             </button>
                         @else
                             <input type="hidden" name="mode" value="seller">
                             <button type="submit" 
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition shadow-2xs cursor-pointer group"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-extrabold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition shadow-2xs cursor-pointer group whitespace-nowrap"
                                     title="Klik untuk beralih ke Mode Penjual">
-                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                <span class="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
                                 <span>Pembeli</span>
-                                <svg class="w-3.5 h-3.5 text-blue-500 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-3.5 h-3.5 text-blue-500 group-hover:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                                 </svg>
                             </button>
@@ -158,29 +162,29 @@
 
                     <!-- ===== MENU CHAT ===== -->
                     <a href="{{ Route::has('chat.index') ? route('chat.index') : url('/chat') }}" 
-                       class="relative p-2 rounded-full transition {{ request()->routeIs('chat.*') || request()->is('chat*') ? 'text-blue-600 bg-blue-50' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }}" 
+                       class="relative p-2 rounded-full transition shrink-0 {{ request()->routeIs('chat.*') || request()->is('chat*') ? 'text-blue-600 bg-blue-50' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50' }}" 
                        title="Obrolan Pesan">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                         </svg>
                         <!-- Badge Lencana Jumlah Pesan Belum Dibaca -->
                         <span id="navbar-unread-badge" 
-                              class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full ring-2 ring-white flex items-center justify-center hidden">
-                              0
+                              class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full ring-2 ring-white flex items-center justify-center {{ $unreadChatCount > 0 ? '' : 'hidden' }}">
+                              {{ $unreadChatCount > 99 ? '99+' : $unreadChatCount }}
                         </span>
                     </a>
 
                     <!-- Tombol Cepat Pasang Iklan Khusus Mode Penjual -->
                     @if(auth()->user()->isSeller())
                         <a href="{{ route('katalog.pasang') }}" 
-                           class="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/20 transition">
-                            <span>+ Iklan Baru</span>
+                           class="hidden lg:inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-extrabold bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/20 transition whitespace-nowrap shrink-0">
+                            <span>+ Iklan<span class="hidden 2xl:inline"> Baru</span></span>
                         </a>
                     @endif
                     
 
                     <!-- Bell Notifikasi -->
-                    <button type="button" class="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-full transition" aria-label="Notifikasi">
+                    <button type="button" class="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-full transition shrink-0" aria-label="Notifikasi">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
@@ -188,14 +192,14 @@
                     </button>
 
                     <!-- Avatar Profile Dropdown -->
-                    <div class="relative" @click.outside="userDropdownOpen = false">
+                    <div class="relative shrink-0" @click.outside="userDropdownOpen = false">
                         <button @click="userDropdownOpen = !userDropdownOpen" 
                                 type="button" 
-                                class="flex items-center gap-1.5 p-1 rounded-full hover:bg-slate-100 focus:outline-none transition">
-                            <div class="w-9 h-9 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shadow-xs">
+                                class="flex items-center gap-1 p-1 rounded-full hover:bg-slate-100 focus:outline-none transition cursor-pointer">
+                            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shadow-xs shrink-0">
                                 {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 2)) }}
                             </div>
-                            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </button>
@@ -250,24 +254,24 @@
                     </div>
                 @else
                     <!-- Tampilan untuk Guest (Belum Login) -->
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 shrink-0">
                         <a href="{{ Route::has('login') ? route('login') : url('/login') }}" 
-                           class="text-sm font-bold text-slate-700 hover:text-blue-600 px-3.5 py-2 rounded-xl transition">
+                           class="text-xs sm:text-sm font-bold text-slate-700 hover:text-blue-600 px-3 py-1.5 rounded-xl transition">
                             Masuk
                         </a>
                         <a href="{{ Route::has('register') ? route('register') : url('/register') }}" 
-                           class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-md shadow-blue-500/20 transition">
+                           class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-2 rounded-full shadow-md shadow-blue-500/20 transition whitespace-nowrap">
                             Daftar Akun
                         </a>
                     </div>
                 @endauth
 
-                <!-- Hamburger Button (Mobile) -->
+                <!-- Hamburger Button (Mobile & Tablet) -->
                 <button @click="mobileMenuOpen = !mobileMenuOpen" 
                         type="button" 
-                        class="xl:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100" 
+                        class="xl:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 hover:bg-slate-100 shrink-0 cursor-pointer" 
                         aria-label="Menu navigasi">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
@@ -294,6 +298,19 @@
         <a href="{{ url('/') }}" class="block py-2 text-sm font-semibold {{ request()->routeIs('home') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Beranda</a>
         <a href="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" class="block py-2 text-sm font-semibold {{ request()->is('katalog*') && !request()->is('katalog/pasang') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">Katalog</a>
         @auth
+            <!-- Mobile Chat Link -->
+            <a href="{{ Route::has('chat.index') ? route('chat.index') : url('/chat') }}" class="flex items-center justify-between py-2 text-sm font-semibold {{ request()->routeIs('chat.*') || request()->is('chat*') ? 'text-blue-600 font-bold' : 'text-slate-700' }}">
+                <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    Pesan & Obrolan
+                </span>
+                <span class="navbar-unread-badge-mobile min-w-[18px] h-[18px] px-1.5 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center {{ $unreadChatCount > 0 ? '' : 'hidden' }}">
+                    {{ $unreadChatCount > 99 ? '99+' : $unreadChatCount }}
+                </span>
+            </a>
+
             <!-- Mobile Mode Switcher -->
             <div class="py-2.5 px-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                 <div>
@@ -339,4 +356,46 @@
             @endif
         </div>
     </div>
+
+    @auth
+        <script>
+            (function() {
+                const updateNavbarBadges = (count) => {
+                    const badges = document.querySelectorAll('#navbar-unread-badge, .navbar-unread-badge-mobile');
+                    badges.forEach(b => {
+                        if (count > 0) {
+                            b.textContent = count > 99 ? '99+' : count;
+                            b.classList.remove('hidden');
+                        } else {
+                            b.classList.add('hidden');
+                        }
+                    });
+                };
+
+                // Polling interval 8 detik untuk memperbarui badge notifikasi chat
+                // saat pengguna membuka halaman di luar /chat
+                setInterval(async () => {
+                    if (document.hidden) return;
+                    if (window.location.pathname.startsWith('/chat')) return;
+
+                    try {
+                        const res = await fetch('{{ route('chat.web.unread_count') }}', {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data && data.status === 'success') {
+                                updateNavbarBadges(data.unread_count);
+                            }
+                        }
+                    } catch (e) {
+                        // Ignore transient network errors
+                    }
+                }, 8000);
+            })();
+        </script>
+    @endauth
 </nav>

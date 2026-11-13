@@ -10,7 +10,7 @@
         'is_verified' => $currentUser->verification_status === 'active'
     ] : null;
 @endphp
-<main class="flex-1 max-w-[1600px] w-full mx-auto p-3 sm:p-5 lg:p-6 flex flex-col" 
+<div class="flex-1 w-full flex flex-col min-w-0" 
       x-data="chatApp({{ \Illuminate\Support\Js::from($selectedListing) }}, {{ \Illuminate\Support\Js::from($userData) }})" 
       x-init="initChat()">
     
@@ -365,7 +365,7 @@
         </section>
 
     </div>
-</main>
+</div>
 
 <!-- Alpine.js Interactivity Script -->
 <script>
@@ -728,15 +728,15 @@ function chatApp(initialListing = null, currentUser = null) {
 
         updateNavbarBadge() {
             const totalUnread = this.chatRooms.reduce((sum, room) => sum + (room.unread_count || 0), 0);
-            const badgeEl = document.getElementById('navbar-unread-badge');
-            if (badgeEl) {
+            const badges = document.querySelectorAll('#navbar-unread-badge, .navbar-unread-badge-mobile');
+            badges.forEach(badgeEl => {
                 if (totalUnread > 0) {
-                    badgeEl.innerText = totalUnread;
+                    badgeEl.innerText = totalUnread > 99 ? '99+' : totalUnread;
                     badgeEl.classList.remove('hidden', 'd-none');
                 } else {
                     badgeEl.classList.add('hidden');
                 }
-            }
+            });
         }
     };
 }

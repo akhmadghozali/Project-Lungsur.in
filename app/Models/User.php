@@ -114,4 +114,15 @@ class User extends Authenticatable
     {
         return $this->getActiveMode() === 'buyer';
     }
+
+    public function unreadMessagesCount(): int
+    {
+        return Message::where('sender_id', '!=', $this->id)
+            ->where('is_read', false)
+            ->whereHas('conversation', function ($q) {
+                $q->where('buyer_id', $this->id)
+                  ->orWhere('seller_id', $this->id);
+            })
+            ->count();
+    }
 }
