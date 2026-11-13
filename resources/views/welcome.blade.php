@@ -9,10 +9,8 @@
         <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
         <!-- ========================================== -->
         @if (!request()->is('katalog*'))
-        <section class="bg-[#0b101d] rounded-[2.5rem] border-2 border-slate-700/60 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xl text-center text-white">
-            <!-- Background Radial Glow -->
-            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-950/40 via-transparent to-transparent pointer-events-none"></div>
-
+           <section class="bg-white rounded-[2.5rem] border border-slate-200 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-xl shadow-slate-200/60 text-center text-slate-900">
+            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/80 via-white to-white pointer-events-none"></div>
             <div class="relative z-10 max-w-5xl mx-auto space-y-6 sm:space-y-7">
                 
                 <!-- Badge Header -->
@@ -24,18 +22,18 @@
                 </div>
 
                 <!-- Heading Utama -->
-                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-4xl mx-auto">
-                    Pasang Iklan, <span class="inline-block bg-[#ea580c] text-white px-3 sm:px-4 py-0.5 sm:py-1 rounded-2xl font-black shadow-lg mx-1 border border-orange-400/40 align-middle">Wanted Ads</span>, dan Lelang Barang Mahasiswa
+                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-white text-black tracking-tight leading-[1.15] max-w-4xl mx-auto">
+                    Pasang Iklan, <span class="inline-block bg-[#ea580c] text-black px-3 sm:px-4 py-0.5 sm:py-1 rounded-2xl font-black shadow-lg mx-1 border border-orange-400/40 align-middle">Wanted Ads</span>, dan Lelang Barang Mahasiswa
                 </h1>
 
                 <!-- Deskripsi Singkat -->
-                <p class="text-sm sm:text-base text-slate-300/85 leading-relaxed max-w-2xl mx-auto font-normal">
+                <p class="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto font-normal">
                     Pasang iklan barang yang mau kamu lungsurkan, buat iklan dicari saat butuh barang, atau ikut lelang terbuka. Nego dan COD langsung sesama mahasiswa Malang.
                 </p>
 
                 <!-- Search Box Pill -->
                 <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" class="max-w-xl mx-auto w-full pt-1">
-                    <div class="bg-[#141d30] p-1.5 sm:p-2 pl-4 sm:pl-5 rounded-full border border-slate-700/80 shadow-inner flex items-center justify-between gap-3">
+                    <div class="bg-slate-50 p-1.5 sm:p-2 pl-4 sm:pl-5 rounded-full border border-slate-200 shadow-inner flex items-center justify-between gap-3">
                         <div class="flex items-center gap-3 w-full">
                             <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -56,8 +54,8 @@
                 </form>
 
                 <!-- 3 Badge Jaminan Kepercayaan -->
-                <div class="pt-1 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs font-semibold text-slate-300">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141d30]/90 border border-slate-700/70 shadow-xs">
+                <div class="pt-1 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs font-semibold text-slate-700">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 shadow-xs">
                         <div class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
@@ -65,7 +63,7 @@
                         </div>
                         <span>Khusus Mahasiswa Malang</span>
                     </div>
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141d30]/90 border border-slate-700/70 shadow-xs">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 shadow-xs">
                         <div class="w-4 h-4 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -73,7 +71,7 @@
                         </div>
                         <span>Iklan, Wanted Ads &amp; Lelang</span>
                     </div>
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141d30]/90 border border-slate-700/70 shadow-xs">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 shadow-xs">
                         <div class="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
