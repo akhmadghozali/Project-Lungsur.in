@@ -13,18 +13,17 @@
         {{-- 2. TAMPILAN HALAMAN BERANDA / LANDING PAGE               --}}
         {{-- ======================================================== --}}
         <div class="space-y-12 sm:space-y-16">
-
+    @endif
         <!-- ========================================== -->
         <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
         <!-- ========================================== -->
-        <section class="bg-[#0b101d] rounded-[2.5rem] border-2 border-slate-700/60 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xl text-center text-white">
-            <!-- Background Radial Glow -->
-            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-950/40 via-transparent to-transparent pointer-events-none"></div>
-
+        @if (!request()->is('katalog*'))
+           <section class="bg-white rounded-[2.5rem] border border-slate-200 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-xl shadow-slate-200/60 text-center text-slate-900">
+            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/80 via-white to-white pointer-events-none"></div>
             <div class="relative z-10 max-w-5xl mx-auto space-y-6 sm:space-y-7">
                 
                 <!-- Badge Header -->
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-[#facc15] text-slate-950 shadow-sm mx-auto">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-[#FFEE58] text-slate-950 shadow-sm mx-auto">
                     <svg class="w-3.5 h-3.5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                     </svg>
@@ -32,18 +31,19 @@
                 </div>
 
                 <!-- Heading Utama -->
-                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-4xl mx-auto">
-                    Pasang Iklan, <span class="inline-block bg-[#ea580c] text-white px-3 sm:px-4 py-0.5 sm:py-1 rounded-2xl font-black shadow-lg mx-1 border border-orange-400/40 align-middle">Wanted Ads</span>, dan Lelang Barang Mahasiswa
+                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-white text-black tracking-tight leading-[1.15] max-w-4xl mx-auto">
+                    Pasang Iklan, <span class="inline-block bg-[#ea580c] text-[#EFF6FF] px-3 sm:px-4 py-0.5 sm:py-1 rounded-2xl font-black shadow-lg mx-1 border border-orange-400/40 align-middle">Wanted Ads</span>, dan Lelang Barang Mahasiswa
                 </h1>
 
                 <!-- Deskripsi Singkat -->
-                <p class="text-sm sm:text-base text-slate-300/85 leading-relaxed max-w-2xl mx-auto font-normal">
+                <p class="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto font-normal">
                     Pasang iklan barang yang mau kamu lungsurkan, buat iklan dicari saat butuh barang, atau ikut lelang terbuka. Nego dan COD langsung sesama mahasiswa Malang.
                 </p>
 
                 <!-- Search Box Pill -->
                 <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" class="max-w-xl mx-auto w-full pt-1">
-                    <div class="bg-[#141d30] p-1.5 sm:p-2 pl-4 sm:pl-5 rounded-full border border-slate-700/80 shadow-inner flex items-center justify-between gap-3">
+                    <div class="searchbox-glow bg-slate-50 p-1.5 sm:p-2 pl-4 sm:pl-5 rounded-full border border-slate-200 shadow-inner flex items-center justify-between gap-3">
+                        
                         <div class="flex items-center gap-3 w-full">
                             <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -63,9 +63,11 @@
                     </div>
                 </form>
 
+
                 <!-- 3 Badge Jaminan Kepercayaan -->
-                <div class="pt-1 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs font-semibold text-slate-300">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141d30]/90 border border-slate-700/70 shadow-xs">
+                <div class="pt-1 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs font-semibold text-slate-700">
+                  <div class="trust-badge inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 shadow-xs">  
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 shadow-xs">
                         <div class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
@@ -73,7 +75,7 @@
                         </div>
                         <span>Khusus Mahasiswa Malang</span>
                     </div>
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141d30]/90 border border-slate-700/70 shadow-xs">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 shadow-xs">
                         <div class="w-4 h-4 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -81,7 +83,7 @@
                         </div>
                         <span>Iklan, Wanted Ads &amp; Lelang</span>
                     </div>
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141d30]/90 border border-slate-700/70 shadow-xs">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 shadow-xs">
                         <div class="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -90,35 +92,107 @@
                         <span>Deal &amp; COD Langsung</span>
                     </div>
                 </div>
+                
+                
 
                 <!-- Clothesline & 5 Hanging Cards Section -->
                 <div class="relative w-full pt-8 sm:pt-10">
                     
-                    <!-- Banner Kuning di Atas Jemuran -->
-                    <div class="relative z-20 text-center mb-6 sm:mb-8">
-                        <div class="inline-block bg-[#facc15] text-slate-950 font-black text-xs sm:text-sm px-5 py-2 rounded-xl shadow-lg border border-amber-300 transform -rotate-1 hover:rotate-0 transition duration-200">
-                            Lungsurkan Barang, Temukan Kebutuhan!
-                        </div>
-                    </div>
+        @endif           
+<!-- Banner Kuning di Atas Jemuran -->
+<div class="relative z-20 text-center mb-8 sm:mb-10">
+    <div class="inline-block bg-[#FFF5B8] text-[#5C4825] font-black
+    text-sm sm:text-base
+    px-7 sm:px-10 py-3 sm:py-4
+    rounded-xl sm:rounded-2xl
+    shadow-lg border border-[#F0D77A]
+    animate-banner-float">
+
+        Lungsurkan Barang, Temukan Kebutuhan!
+    </div>
+</div>
+<style>
+    @keyframes bannerFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(-1deg);
+        }
+
+        50% {
+            transform: translateY(-7px) rotate(1deg);
+        }
+    }
+
+    .animate-banner-float {
+        animation: bannerFloat 3s ease-in-out infinite;
+    }
+</style>
+
 
                     <!-- Clothesline Curved Wire SVG -->
-                    <div class="absolute top-[4.5rem] sm:top-[5.25rem] left-0 right-0 h-6 pointer-events-none z-10 hidden sm:block">
-                        <svg class="w-full h-full text-slate-600/80" preserveAspectRatio="none" viewBox="0 0 1000 30" fill="none">
-                            <path d="M 0 10 Q 500 28 1000 10" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                    </div>
+                      <!-- AREA JEMURAN -->
+    <div class="relative">
 
+        <!-- TALI RAMI REALISTIS -->
+        <div class="absolute top-3 sm:top-4 left-2 right-2
+                    h-12 pointer-events-none z-10">
+
+            <svg class="w-full h-full"
+                 viewBox="0 0 1000 70"
+                 preserveAspectRatio="none">
+
+                <!-- Bayangan tali -->
+                <path d="M5 8 Q500 75 995 8"
+                      stroke="#92400e"
+                      stroke-width="10"
+                      opacity=".15"
+                      fill="none"
+                      stroke-linecap="round"/>
+
+                <!-- Badan tali -->
+                <path d="M5 5 Q500 72 995 5"
+                      stroke="#a87943"
+                      stroke-width="6"
+                      fill="none"
+                      stroke-linecap="round"/>
+
+                <!-- Serat tali -->
+                <path d="M5 4 Q500 71 995 4"
+                      stroke="#e6c18b"
+                      stroke-width="2"
+                      stroke-dasharray="5 4"
+                      fill="none"
+                      stroke-linecap="round"/>
+
+                <!-- Highlight -->
+                <path d="M5 2 Q500 69 995 2"
+                      stroke="#f5deb3"
+                      stroke-width="1.5"
+                      opacity=".9"
+                      fill="none"/>
+
+            </svg>
+        </div>
                     <!-- 5 Hanging Cards -->
                     <div class="flex items-end justify-start sm:justify-center gap-3 sm:gap-4 lg:gap-5 overflow-x-auto pb-4 pt-2 no-scrollbar snap-x relative z-20 px-2">
                         
                         <!-- Card 1: Sepatu (Olive Brown) -->
                         <a href="{{ Route::has('listings.index') ? route('listings.index', ['q' => 'sepatu']) : url('/katalog') }}" class="flex flex-col items-center shrink-0 snap-center group">
                             <!-- Clothespin Wooden Peg -->
-                            <div class="w-3.5 h-6 sm:w-4 sm:h-7 bg-[#d59850] border border-[#a26829] rounded-xs mx-auto -mb-3 sm:-mb-3.5 relative z-30 shadow-xs flex flex-col items-center justify-center">
+                            <div class="w-3.5 h-10 sm:w-4 sm:h-7 bg-[#d59850] border border-[#a26829] rounded-xs mx-auto -mb-3 sm:-mb-3.5 relative z-30 shadow-xs flex flex-col items-center justify-center">
                                 <div class="w-full h-1 bg-[#8c521b] opacity-80"></div>
                             </div>
                             <!-- Card Body -->
-                            <div class="w-36 sm:w-44 lg:w-48 h-48 sm:h-56 lg:h-60 rounded-2xl sm:rounded-3xl bg-[#4a3d16] border border-amber-600/30 p-3 sm:p-4 flex flex-col items-center justify-center shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
+                           <div class="mt-3 w-36 sm:w-44 lg:w-48
+                                h-48 sm:h-56 lg:h-60
+                                rounded-2xl sm:rounded-3xl
+                                bg-[#FFE7A3]
+                                border border-[#E8C66D]/60
+                                p-3 sm:p-4
+                                flex flex-col items-center justify-center
+                                shadow-xl
+                                transition-all duration-300
+                                group-hover:-translate-y-2
+                                group-hover:shadow-2xl">
                                 <svg class="w-24 h-24 sm:w-28 sm:h-28 filter drop-shadow-md" viewBox="0 0 120 120" fill="none">
                                     <path d="M22 76C24 64 36 60 48 60L72 58C78 52 86 42 94 40C98 39 104 43 103 49L99 74C98 77 95 78 90 78L22 78Z" fill="#ef4444"/>
                                     <path d="M22 76C23 68 28 64 36 63L35 78L22 78Z" fill="#f8fafc"/>
@@ -140,7 +214,17 @@
                                 <div class="w-full h-1 bg-[#8c521b] opacity-80"></div>
                             </div>
                             <!-- Card Body -->
-                            <div class="w-36 sm:w-44 lg:w-48 h-48 sm:h-56 lg:h-60 rounded-2xl sm:rounded-3xl bg-[#17243c] border border-blue-500/30 p-3 sm:p-4 flex flex-col items-center justify-center shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
+                             <div class="mt-3 w-36 sm:w-44 lg:w-48
+                                h-48 sm:h-56 lg:h-60
+                                rounded-2xl sm:rounded-3xl
+                                bg-[#C2D7EA]
+                                border border-[#4D6882]/60
+                                p-3 sm:p-4
+                                flex flex-col items-center justify-center
+                                shadow-xl
+                                transition-all duration-300
+                                group-hover:-translate-y-2
+                                group-hover:shadow-2xl">
                                 <svg class="w-24 h-24 sm:w-28 sm:h-28 filter drop-shadow-md" viewBox="0 0 120 120" fill="none">
                                     <rect x="25" y="32" width="70" height="46" rx="4" fill="#334155" stroke="#475569" stroke-width="2"/>
                                     <rect x="29" y="36" width="62" height="38" rx="2" fill="#090d16"/>
@@ -160,7 +244,17 @@
                                 <div class="w-full h-1 bg-[#8c521b] opacity-80"></div>
                             </div>
                             <!-- Card Body -->
-                            <div class="w-36 sm:w-44 lg:w-48 h-48 sm:h-56 lg:h-60 rounded-2xl sm:rounded-3xl bg-[#1e2333] border border-slate-600/30 p-3 sm:p-4 flex flex-col items-center justify-center shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
+                             <div class="mt-3 w-36 sm:w-44 lg:w-48
+                                h-48 sm:h-56 lg:h-60
+                                rounded-2xl sm:rounded-3xl
+                                bg-[#C7D9B7]
+                                border border-[#526447]/60
+                                p-3 sm:p-4
+                                flex flex-col items-center justify-center
+                                shadow-xl
+                                transition-all duration-300
+                                group-hover:-translate-y-2
+                                group-hover:shadow-2xl">
                                 <svg class="w-24 h-24 sm:w-28 sm:h-28 filter drop-shadow-md" viewBox="0 0 120 120" fill="none">
                                     <path d="M60 38C60 34 63 31 66 31C69 31 71 33 71 35C71 38 68 40 64 42L60 45" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
                                     <path d="M60 45L34 56C32 57 32 59 34 60L60 63L86 60C88 59 88 57 86 56L60 45Z" stroke="#cbd5e1" stroke-width="2" fill="none"/>
@@ -178,7 +272,17 @@
                                 <div class="w-full h-1 bg-[#8c521b] opacity-80"></div>
                             </div>
                             <!-- Card Body -->
-                            <div class="w-36 sm:w-44 lg:w-48 h-48 sm:h-56 lg:h-60 rounded-2xl sm:rounded-3xl bg-[#102e21] border border-emerald-600/30 p-3 sm:p-4 flex flex-col items-center justify-center shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
+                            <div class="mt-3 w-36 sm:w-44 lg:w-48
+                                h-48 sm:h-56 lg:h-60
+                                rounded-2xl sm:rounded-3xl
+                                bg-[#E9DDF8]
+                                border border-[#A58BBE]/60
+                                p-3 sm:p-4
+                                flex flex-col items-center justify-center
+                                shadow-xl
+                                transition-all duration-300
+                                group-hover:-translate-y-2
+                                group-hover:shadow-2xl">
                                 <svg class="w-24 h-24 sm:w-28 sm:h-28 filter drop-shadow-md" viewBox="0 0 120 120" fill="none">
                                     <rect x="70" y="37" width="14" height="15" rx="3" fill="#f8fafc"/>
                                     <path d="M84 41C87 41 89 43 89 45C89 47 87 49 84 49" stroke="#f8fafc" stroke-width="2.5" fill="none"/>
@@ -202,7 +306,17 @@
                                 <div class="w-full h-1 bg-[#8c521b] opacity-80"></div>
                             </div>
                             <!-- Card Body -->
-                            <div class="w-36 sm:w-44 lg:w-48 h-48 sm:h-56 lg:h-60 rounded-2xl sm:rounded-3xl bg-[#341e4a] border border-purple-500/30 p-3 sm:p-4 flex flex-col items-center justify-center shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
+                             <div class="mt-3 w-36 sm:w-44 lg:w-48
+                                h-48 sm:h-56 lg:h-60
+                                rounded-2xl sm:rounded-3xl
+                                bg-[#F2C6C6]
+                                border border-[#875858]/60
+                                p-3 sm:p-4
+                                flex flex-col items-center justify-center
+                                shadow-xl
+                                transition-all duration-300
+                                group-hover:-translate-y-2
+                                group-hover:shadow-2xl">
                                 <svg class="w-24 h-24 sm:w-28 sm:h-28 filter drop-shadow-md" viewBox="0 0 120 120" fill="none">
                                     <path d="M52 35C52 31 55 28 60 28C65 28 68 31 68 35" stroke="#c2410c" stroke-width="3" fill="none" stroke-linecap="round"/>
                                     <rect x="34" y="35" width="52" height="58" rx="14" fill="#f97316"/>
@@ -1058,6 +1172,7 @@
         </section>
 
     </div>
+    @if (true)
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const listingContent = document.getElementById('listing-content');
@@ -1170,7 +1285,6 @@
                 console.error(error);
             });
         }
-
         // Klik tombol dropdown
         if (sortButton && sortMenu) {
             sortButton.addEventListener('click', function () {
