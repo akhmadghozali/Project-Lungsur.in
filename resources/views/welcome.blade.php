@@ -13,7 +13,7 @@
         {{-- 2. TAMPILAN HALAMAN BERANDA / LANDING PAGE               --}}
         {{-- ======================================================== --}}
         <div class="space-y-12 sm:space-y-16">
-
+    @endif
         <!-- ========================================== -->
         <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
         <!-- ========================================== -->
@@ -98,7 +98,7 @@
                 <!-- Clothesline & 5 Hanging Cards Section -->
                 <div class="relative w-full pt-8 sm:pt-10">
                     
-                   
+        @endif           
 <!-- Banner Kuning di Atas Jemuran -->
 <div class="relative z-20 text-center mb-8 sm:mb-10">
     <div class="inline-block bg-[#FFF5B8] text-[#5C4825] font-black
@@ -1172,6 +1172,7 @@
         </section>
 
     </div>
+    @if (true)
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const listingContent = document.getElementById('listing-content');
@@ -1284,7 +1285,6 @@
                 console.error(error);
             });
         }
-@if
         // Klik tombol dropdown
         if (sortButton && sortMenu) {
             sortButton.addEventListener('click', function () {
