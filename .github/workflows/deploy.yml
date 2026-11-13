@@ -1,0 +1,52 @@
+name: Deploy to VPS (Dev)
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH to VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ubuntu
+          key: ${{ secrets.ACTION_DEPLOY }}
+          port: 22
+          script: |
+            echo "Memulai proses deployment di VPS..."
+            cd /var/www/lungsur
+
+            # 1. Aktifkan maintenance mode sementara
+            php artisan down --render="errors::503" || true
+
+            # 2. Ambil update kode terbaru dari branch dev
+            git reset --hard
+            git pull origin dev
+
+            # 3. Install dependency PHP (Composer)
+            composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+            # 4. Build asset frontend (Vite & Tailwind)
+            npm ci
+            npm run build
+
+            # 5. Jalankan migrasi database otomatis
+            php artisan migrate --force
+
+            # 6. Optimasi Cache Laravel
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            # 7. Pastikan symbolic link storage terhubung
+            php artisan storage:link || true
+
+            # 8. Matikan maintenance mode (Website live kembali)
+            php artisan up
+
+            echo "Deployment ke dev berhasil selesai!"
