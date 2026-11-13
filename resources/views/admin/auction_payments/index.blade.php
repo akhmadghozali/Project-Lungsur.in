@@ -34,16 +34,14 @@
      }">
 
     {{-- ===== SIDEBAR NAVIGASI ADMIN ===== --}}
-    <aside class="hidden lg:flex w-64 shrink-0 flex-col bg-[#1c2541] text-slate-300">
-        <div class="px-6 py-6 border-b border-white/5">
-            <a href="{{ url('/') }}" class="text-xl font-extrabold text-white flex items-center gap-2">
-                <span>Lungsur<span class="text-blue-400">.in</span></span>
-            </a>
-            <div class="text-[10px] font-semibold tracking-widest text-slate-400 mt-1 uppercase">Staff Operations</div>
+    <aside class="hidden lg:flex w-60 shrink-0 flex-col bg-[#1c2541] text-slate-300">
+        <div class="px-6 py-6">
+            <div class="text-xl font-extrabold text-white">Lungsur.in</div>
+            <div class="text-[10px] font-semibold tracking-widest text-slate-400">STAFF OPERATIONS</div>
         </div>
 
-        <div class="px-6 pb-2 pt-5 text-[10px] font-bold tracking-widest text-slate-500">PORTAL MODERASI</div>
-        <nav class="space-y-1 px-3 text-sm flex-1 overflow-y-auto">
+        <div class="px-6 pb-2 pt-4 text-[10px] font-bold tracking-widest text-slate-500">PORTAL MODERASI</div>
+        <nav class="space-y-1 px-3 text-sm">
             {{-- Menu User Verification (KTM) --}}
             <a href="{{ route('admin.verifications.index') }}"
                class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
@@ -85,13 +83,13 @@
 
             <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-500">SISTEM & ADUAN</div>
             <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-slate-400"><span>▤</span> Content Moderation</a>
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-slate-400"><span>⚑</span> Reported Items</a>
+            <a href="{{ route('admin.reports.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-slate-300 hover:text-white transition"><span>⚑</span> Reported Items</a>
             <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-slate-400"><span>☰</span> System Logs</a>
             <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-slate-400"><span>⚙</span> Admin Settings</a>
         </nav>
 
         {{-- Info admin + logout --}}
-        <div class="mt-auto p-4 border-t border-white/5">
+        <div class="mt-auto p-4">
             <div class="rounded-xl bg-white/5 p-3">
                 <div class="flex items-center gap-3">
                     <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
@@ -112,7 +110,7 @@
                     </button>
                 </form>
             </div>
-            <div class="mt-3 text-[11px] text-slate-500 text-center">© {{ date('Y') }} Lungsur Campus</div>
+            <div class="mt-3 text-[11px] text-slate-500">© {{ date('Y') }} Lungsur Campus</div>
         </div>
     </aside>
 

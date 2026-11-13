@@ -203,19 +203,15 @@ class IklanController extends Controller
 
         return redirect()->route('dashboard')
             ->with('success', 'Iklan "' . $listing->title . '" berhasil diperbarui! 🎉');
-        }
-    
-        /**
+    }
+
+    /**
      * Tampilkan halaman detail barang.
      */
-
     public function show($id): View
     {
         // Mengambil data iklan beserta relasi kategori, gambar, dan user penjualnya
         $listing = Listing::with(['category', 'images', 'user'])->findOrFail($id);
         return view('listings.show', compact('listing'));
-        // Mengambil data listing beserta relasi user (penjual), kategori, dan foto
-        $item = Listing::with(['user', 'category', 'images'])->findOrFail($id);
-        return view('catalog.show', compact('item'));
     }
 }
