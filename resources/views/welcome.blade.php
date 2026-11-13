@@ -13,12 +13,10 @@
         {{-- 2. TAMPILAN HALAMAN BERANDA / LANDING PAGE               --}}
         {{-- ======================================================== --}}
         <div class="space-y-12 sm:space-y-16">
-    @endif
-        <!-- ========================================== -->
-        <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
-        <!-- ========================================== -->
-        @if (!request()->is('katalog*'))
-           <section class="bg-white rounded-[2.5rem] border border-slate-200 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-xl shadow-slate-200/60 text-center text-slate-900">
+            <!-- ========================================== -->
+            <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
+            <!-- ========================================== -->
+            <section class="bg-white rounded-[2.5rem] border border-slate-200 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-xl shadow-slate-200/60 text-center text-slate-900">
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/80 via-white to-white pointer-events-none"></div>
             <div class="relative z-10 max-w-5xl mx-auto space-y-6 sm:space-y-7">
                 
@@ -96,9 +94,7 @@
                 
 
                 <!-- Clothesline & 5 Hanging Cards Section -->
-                <div class="relative w-full pt-8 sm:pt-10">
-                    
-        @endif           
+                <div class="relative w-full pt-8 sm:pt-10">           
 <!-- Banner Kuning di Atas Jemuran -->
 <div class="relative z-20 text-center mb-8 sm:mb-10">
     <div class="inline-block bg-[#FFF5B8] text-[#5C4825] font-black
@@ -1172,7 +1168,7 @@
         </section>
 
     </div>
-    @if (true)
+
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const listingContent = document.getElementById('listing-content');
