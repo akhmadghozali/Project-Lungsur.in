@@ -31,21 +31,50 @@
 
         <div class="px-6 pb-2 pt-4 text-[10px] font-bold tracking-widest text-slate-500">PORTAL MODERASI</div>
         <nav class="space-y-1 px-3 text-sm">
-            <a href="{{ route('admin.verifications.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5">
-                <span>▦</span> Dashboard
-            </a>
             <a href="{{ route('admin.verifications.index') }}"
-               class="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-white/5">
+               class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
                 <span class="flex items-center gap-3"><span>🛡</span> User Verification</span>
                 @if ($pendingVerifications > 0)
-                    <span class="rounded-full bg-red-500 px-2 py-0.5 text-[11px] text-white">{{ $pendingVerifications }}</span>
+                    <span class="rounded-full bg-red-500 px-2 py-0.5 text-[11px] font-bold text-white">{{ $pendingVerifications }}</span>
                 @endif
             </a>
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>▤</span> Content Moderation</a>
+
+            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-500">MONETISASI</div>
+
+            {{-- Menu Verifikasi Boost Iklan (Rp5.000 / 30 Hari) --}}
+            <a href="{{ route('admin.payments.boost') }}"
+               class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
+                <span class="flex items-center gap-3">
+                    <span class="text-amber-400">⚡</span> Verifikasi Boost Iklan
+                </span>
+                @php
+                    $pendingBoostCount = \App\Models\BoostPayment::where('status', 'pending')->count();
+                @endphp
+                @if ($pendingBoostCount > 0)
+                    <span class="rounded-full bg-amber-500 text-slate-950 font-bold px-2 py-0.5 text-[11px]">{{ $pendingBoostCount }}</span>
+                @endif
+            </a>
+
+            {{-- Menu Verifikasi Pembukaan Sesi Lelang (Rp5.000) --}}
+            <a href="{{ route('admin.payments.auction') }}"
+               class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
+                <span class="flex items-center gap-3">
+                    <span class="text-emerald-400">🔨</span> Verifikasi Biaya Lelang
+                </span>
+                @php
+                    $pendingAuctionCount = \App\Models\AuctionPayment::where('status', 'pending')->count();
+                @endphp
+                @if ($pendingAuctionCount > 0)
+                    <span class="rounded-full bg-emerald-500 text-white font-bold px-2 py-0.5 text-[11px]">{{ $pendingAuctionCount }}</span>
+                @endif
+            </a>
+
+            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-500">SISTEM & ADUAN</div>
+            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-slate-400"><span>▤</span> Content Moderation</a>
             <a href="{{ route('admin.reports.index') }}"
                class="flex items-center gap-3 rounded-xl bg-blue-600 px-3 py-2.5 font-semibold text-white"><span>⚑</span> Reported Items</a>
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>☰</span> System Logs</a>
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>⚙</span> Admin Settings</a>
+            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-slate-400"><span>☰</span> System Logs</a>
+            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-slate-400"><span>⚙</span> Admin Settings</a>
         </nav>
 
         <div class="mt-auto p-4">

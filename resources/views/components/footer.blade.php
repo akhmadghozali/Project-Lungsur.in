@@ -43,11 +43,6 @@
                             Wanted Ads (Dicari)
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ url('/cara-kerja') }}" class="text-slate-400 hover:text-white transition inline-block">
-                            Cara Kerja
-                        </a>
-                    </li>
                 </ul>
             </div>
 

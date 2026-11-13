@@ -56,6 +56,30 @@ Route::middleware(['auth', 'verified_student'])->group(function () {
     Route::post('/katalog/{listing}/report', [ReportController::class, 'store'])->name('reports.store');
 });
 
+// Dashboard Admin (Portal Operasional & Moderasi)
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Verifikasi KTM Mahasiswa
+    Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications.index');
+    Route::post('/verifications/{user}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
+    Route::post('/verifications/{user}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
+
+    // Laporan & Moderasi Iklan
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
+    Route::post('/reports/{report}/ignore', [ReportController::class, 'ignore'])->name('reports.ignore');
+    Route::post('/reports/{report}/take-down', [ReportController::class, 'takeDown'])->name('reports.take_down');
+
+    // Monetisasi: Verifikasi Pembayaran Boost Iklan (Sprint 3)
+    Route::get('/pembayaran-boost', [AdminBoostPaymentController::class, 'index'])->name('payments.boost');
+    Route::post('/pembayaran-boost/{boostPayment}/approve', [AdminBoostPaymentController::class, 'approve'])->name('payments.boost.approve');
+    Route::post('/pembayaran-boost/{boostPayment}/reject', [AdminBoostPaymentController::class, 'reject'])->name('payments.boost.reject');
+
+    // Monetisasi: Verifikasi Pembayaran Pembukaan Lelang (Sprint 3)
+    Route::get('/pembayaran-lelang', [AdminAuctionPaymentController::class, 'index'])->name('payments.auction');
+    Route::post('/pembayaran-lelang/{auctionPayment}/approve', [AdminAuctionPaymentController::class, 'approve'])->name('payments.auction.approve');
+    Route::post('/pembayaran-lelang/{auctionPayment}/reject', [AdminAuctionPaymentController::class, 'reject'])->name('payments.auction.reject');
+});
+
 // Aksi Khusus MODE PENJUAL
 Route::middleware(['auth', 'verified_student', 'active_mode:seller'])->group(function () {
     // Pengelolaan listing
@@ -131,6 +155,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Chat Web API (Session-authenticated endpoints)
     Route::prefix('chat/api')->group(function () {
+        Route::get('/unread-count', [ChatController::class, 'unreadCount'])->name('chat.web.unread_count');
         Route::get('/conversations', [ChatController::class, 'index'])->name('chat.web.conversations.index');
         Route::post('/conversations', [ChatController::class, 'startConversation'])->name('chat.web.conversations.store');
         Route::get('/conversations/{id}', [ChatController::class, 'show'])->name('chat.web.conversations.show');
