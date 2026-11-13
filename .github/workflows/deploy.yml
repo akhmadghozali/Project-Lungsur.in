@@ -1,4 +1,4 @@
-name: Deploy to VPS (Dev)
+name: Deploy to VPS
 
 on:
   push:
@@ -7,46 +7,53 @@ on:
 
 jobs:
   deploy:
+    name: Deploy to AWS EC2
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy via SSH to VPS
+      - name: Eksekusi Deployment via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ubuntu
+          host: ${{ secrets.SSH_HOST || '47.128.227.240' }}
+          username: ${{ secrets.SSH_USER || 'ubuntu' }}
           key: ${{ secrets.ACTION_DEPLOY }}
           port: 22
+          script_stop: true
           script: |
-            echo "Memulai proses deployment di VPS..."
+            echo "=========================================="
+            echo "🚀 Memulai proses deployment Lungsur.in..."
+            echo "=========================================="
             cd /var/www/lungsur
 
-            # 1. Aktifkan maintenance mode sementara
-            php artisan down --render="errors::503" || true
+            # 1. Mode maintenance sementara (opsional)
+            php artisan down || true
 
-            # 2. Ambil update kode terbaru dari branch dev
+            # 2. Ambil perubahan terbaru dari branch dev
             git reset --hard
             git pull origin dev
 
-            # 3. Install dependency PHP (Composer)
+            # 3. Update dependencies backend
             composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
-            # 4. Build asset frontend (Vite & Tailwind)
+            # 4. Build assets frontend (Vite & Tailwind)
             npm ci
             npm run build
 
-            # 5. Jalankan migrasi database otomatis
+            # 5. Jalankan migrasi database
             php artisan migrate --force
 
             # 6. Optimasi Cache Laravel
+            php artisan optimize:clear
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
 
-            # 7. Pastikan symbolic link storage terhubung
+            # 7. Pastikan symbolic link storage aktif
             php artisan storage:link || true
 
-            # 8. Matikan maintenance mode (Website live kembali)
+            # 8. Matikan mode maintenance (Website live kembali)
             php artisan up
 
-            echo "Deployment ke dev berhasil selesai!"
+            echo "=========================================="
+            echo "✅ Deployment ke /var/www/lungsur sukses!"
+            echo "=========================================="
