@@ -47,8 +47,8 @@
                     @auth
                         @if(auth()->user()->isSeller())
                             <!-- MODE PENJUAL: Dagangan Saya -->
-                            <a href="{{ route('dashboard', ['tab' => 'dagangan']) }}" 
-                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab', 'dagangan') === 'dagangan' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
+                            <a href="{{ route('dagangan.index', ['tab' => 'dagangan']) }}" 
+                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dagangan.index') && request('tab', 'dagangan') === 'dagangan' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
                                 <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                 </svg>
@@ -56,8 +56,8 @@
                             </a>
 
                             <!-- MODE PENJUAL: Lelang Saya -->
-                            <a href="{{ route('dashboard', ['tab' => 'lelang']) }}" 
-                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab') === 'lelang' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
+                            <a href="{{ route('dagangan.index', ['tab' => 'lelang']) }}" 
+                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dagangan.index') && request('tab') === 'lelang' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
                                 <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                 </svg>
@@ -65,8 +65,8 @@
                             </a>
 
                             <!-- MODE PENJUAL: Peluang Wanted Ads -->
-                            <a href="{{ route('dashboard', ['tab' => 'peluang']) }}" 
-                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab') === 'peluang' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
+                            <a href="{{ route('dagangan.index', ['tab' => 'peluang']) }}" 
+                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dagangan.index') && request('tab') === 'peluang' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
                                 <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
@@ -167,7 +167,6 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                         </svg>
-                        <!-- Badge Lencana Jumlah Pesan Belum Dibaca -->
                         <span id="navbar-unread-badge" 
                               class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full ring-2 ring-white flex items-center justify-center {{ $unreadChatCount > 0 ? '' : 'hidden' }}">
                               {{ $unreadChatCount > 99 ? '99+' : $unreadChatCount }}
@@ -181,7 +180,6 @@
                             <span>+ Iklan<span class="hidden 2xl:inline"> Baru</span></span>
                         </a>
                     @endif
-                    
 
                     <!-- Bell Notifikasi -->
                     <button type="button" class="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-full transition shrink-0" aria-label="Notifikasi">
@@ -236,10 +234,7 @@
                             </div>
 
                             <a href="{{ Route::has('dashboard') ? route('dashboard') : url('/dashboard') }}" class="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium">Dashboard Saya</a>
-                            <a href="{{ route('dashboard.history') }}"
-                            class="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium">
-                                Riwayat Transaksi
-                            </a>
+                            <a href="{{ route('dashboard.history') }}" class="block px-4 py-2 text-slate-700 hover:bg-slate-50 font-medium">Riwayat Transaksi</a>
                             @if(auth()->user()->isSeller())
                                 <a href="{{ route('katalog.pasang') }}" class="block px-4 py-2 text-blue-600 hover:bg-blue-50 font-bold">+ Pasang Iklan Baru</a>
                             @endif
@@ -329,9 +324,15 @@
             </div>
 
             @if(auth()->user()->isSeller())
-                <a href="{{ route('dashboard', ['tab' => 'dagangan']) }}" class="block py-2 text-sm font-semibold text-emerald-700">Dagangan Saya</a>
-                <a href="{{ route('dashboard', ['tab' => 'lelang']) }}" class="block py-2 text-sm font-semibold text-emerald-700">Lelang Saya</a>
-                <a href="{{ route('dashboard', ['tab' => 'peluang']) }}" class="block py-2 text-sm font-semibold text-emerald-700">Peluang Wanted Ads</a>
+                <a href="{{ route('dagangan.index', ['tab' => 'dagangan']) }}" class="block py-2 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('dagangan.index') && request('tab', 'dagangan') === 'dagangan' ? 'bg-emerald-100 text-emerald-800 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                    Dagangan Saya
+                </a>
+                <a href="{{ route('dagangan.index', ['tab' => 'lelang']) }}" class="block py-2 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('dagangan.index') && request('tab') === 'lelang' ? 'bg-emerald-100 text-emerald-800 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                    Lelang Saya
+                </a>
+                <a href="{{ route('dagangan.index', ['tab' => 'peluang']) }}" class="block py-2 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('dagangan.index') && request('tab') === 'peluang' ? 'bg-emerald-100 text-emerald-800 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                    Peluang Wanted Ads
+                </a>
             @else
                 <a href="{{ route('dashboard', ['tab' => 'lelang']) }}" class="block py-2 text-sm font-semibold text-blue-600">Bidding Lelang Saya</a>
                 <a href="{{ route('dashboard', ['tab' => 'wanted']) }}" class="block py-2 text-sm font-semibold text-blue-600">Wanted Ads Saya</a>
@@ -372,8 +373,6 @@
                     });
                 };
 
-                // Polling interval 8 detik untuk memperbarui badge notifikasi chat
-                // saat pengguna membuka halaman di luar /chat
                 setInterval(async () => {
                     if (document.hidden) return;
                     if (window.location.pathname.startsWith('/chat')) return;
@@ -391,9 +390,7 @@
                                 updateNavbarBadges(data.unread_count);
                             }
                         }
-                    } catch (e) {
-                        // Ignore transient network errors
-                    }
+                    } catch (_) {}
                 }, 8000);
             })();
         </script>
