@@ -1,9 +1,9 @@
 <nav x-data="{ mobileMenuOpen: false, userDropdownOpen: false }" class="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-xs">
     <div class="w-full max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 sm:h-20 items-center gap-2 lg:gap-4">
+        <div class="flex justify-between h-16 sm:h-20 items-center gap-3 lg:gap-4">
             
             <!-- Logo Lungsur.in (Sesuai Desain Figma) -->
-            <div class="flex items-center gap-3 lg:gap-5 xl:gap-6 min-w-0">
+            <div class="flex items-center gap-3 xl:gap-4 2xl:gap-6 min-w-0 flex-1">
                 <a href="{{ url('/') }}" class="flex items-center gap-2 sm:gap-2.5 group shrink-0">
                     <!-- Icon Logo Biru Panah Sirkular + Toga Mahasiswa -->
                     <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-500/20 relative overflow-hidden group-hover:bg-blue-700 transition shrink-0">
@@ -65,6 +65,7 @@
                             </a>
 
                             <!-- MODE PENJUAL: Peluang Wanted Ads -->
+                            <div class="hidden 2xl:flex items-center gap-1 font-medium text-sm text-slate-600 whitespace-nowrap min-w-0">
                             <a href="{{ route('dagangan.index', ['tab' => 'peluang']) }}" 
                                class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dagangan.index') && request('tab') === 'peluang' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50' }} transition">
                                 <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,10 +113,10 @@
             </div>
 
             <!-- Bagian Kanan: Search Bar Mini + Notifikasi + Profil/Auth -->
-            <div class="flex items-center gap-1.5 sm:gap-2.5 lg:gap-3 shrink-0">
+            <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
                 <!-- Search Box di Navbar (Fleksibel & Otomatis Memanjang saat Fokus) -->
                 <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" 
-                      class="hidden md:flex relative w-28 sm:w-36 lg:w-44 xl:w-48 2xl:w-60 focus-within:w-44 sm:focus-within:w-52 lg:focus-within:w-60 xl:focus-within:w-64 2xl:focus-within:w-72 transition-all duration-300">
+                      class="hidden md:flex relative w-36 lg:w-44 2xl:w-56 focus-within:w-48 2xl:focus-within:w-64 transition-all duration-300 shrink-0">
                     <input type="text" 
                            name="q"
                            value="{{ request('q') }}"
@@ -262,10 +263,10 @@
                 @endauth
 
                 <!-- Hamburger Button (Mobile & Tablet) -->
-                <button @click="mobileMenuOpen = !mobileMenuOpen" 
-                        type="button" 
-                        class="xl:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 hover:bg-slate-100 shrink-0 cursor-pointer" 
-                        aria-label="Menu navigasi">
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                type="button"
+                class="2xl:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 hover:bg-slate-100 shrink-0 cursor-pointer"
+                aria-label="Menu navigasi">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
@@ -275,7 +276,7 @@
     </div>
 
     <!-- Mobile Navigation Drawer -->
-    <div x-show="mobileMenuOpen" x-cloak class="xl:hidden border-t border-slate-100 bg-white px-4 pt-3 pb-6 space-y-2.5">
+    <div x-show="mobileMenuOpen" x-cloak class="2xl:hidden border-t border-slate-100 bg-white px-4 pt-3 pb-6 space-y-2.5">
         <!-- Mobile Search Form -->
         <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" class="relative pb-1">
             <input type="text" 
