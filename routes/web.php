@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\AdminVerificationController;
 use App\Http\Controllers\Admin\AdminBoostPaymentController;
 use App\Http\Controllers\Admin\AdminAuctionPaymentController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuctionPaymentController;
 use App\Http\Controllers\BoostPaymentController;
@@ -57,7 +59,21 @@ Route::middleware(['auth', 'verified_student'])->group(function () {
 });
 
 // Dashboard Admin (Portal Operasional & Moderasi)
+Route::middleware(['auth', 'admin'])->get('/admin', function () {
+    return redirect()->route('admin.dashboard');
+});
+
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dasbor Analitik Bisnis
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Manajemen Pengguna & Pemblokiran (WBS 4.3 / UC 15)
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
+    Route::post('/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('users.suspend');
+    Route::post('/users/{user}/ban', [AdminUserController::class, 'ban'])->name('users.ban');
+    Route::post('/users/{user}/reactivate', [AdminUserController::class, 'reactivate'])->name('users.reactivate');
+
     // Verifikasi KTM Mahasiswa
     Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications.index');
     Route::post('/verifications/{user}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
@@ -68,6 +84,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
     Route::post('/reports/{report}/ignore', [ReportController::class, 'ignore'])->name('reports.ignore');
     Route::post('/reports/{report}/take-down', [ReportController::class, 'takeDown'])->name('reports.take_down');
+    Route::post('/reports/{report}/ban-seller', [ReportController::class, 'banSeller'])->name('reports.ban_seller');
 
     // Monetisasi: Verifikasi Pembayaran Boost Iklan (Sprint 3)
     Route::get('/pembayaran-boost', [AdminBoostPaymentController::class, 'index'])->name('payments.boost');

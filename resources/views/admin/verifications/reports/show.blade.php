@@ -23,84 +23,7 @@
 <div class="flex min-h-screen">
 
     {{-- ===== SIDEBAR ===== --}}
-    <aside class="hidden lg:flex w-60 shrink-0 flex-col bg-[#1c2541] text-slate-300">
-        <div class="px-6 py-6">
-            <div class="text-xl font-extrabold text-white">Lungsur.in</div>
-            <div class="text-[10px] font-semibold tracking-widest text-slate-400">STAFF OPERATIONS</div>
-        </div>
-
-        <div class="px-6 pb-2 pt-4 text-[10px] font-bold tracking-widest text-slate-500">PORTAL MODERASI</div>
-        <nav class="space-y-1 px-3 text-sm">
-            <a href="{{ route('admin.verifications.index') }}"
-               class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
-                <span class="flex items-center gap-3"><span>🛡</span> User Verification</span>
-                @if ($pendingVerifications > 0)
-                    <span class="rounded-full bg-red-500 px-2 py-0.5 text-[11px] font-bold text-white">{{ $pendingVerifications }}</span>
-                @endif
-            </a>
-
-            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-500">MONETISASI</div>
-
-            {{-- Menu Verifikasi Boost Iklan (Rp5.000 / 30 Hari) --}}
-            <a href="{{ route('admin.payments.boost') }}"
-               class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
-                <span class="flex items-center gap-3">
-                    <span class="text-amber-400">⚡</span> Verifikasi Boost Iklan
-                </span>
-                @php
-                    $pendingBoostCount = \App\Models\BoostPayment::where('status', 'pending')->count();
-                @endphp
-                @if ($pendingBoostCount > 0)
-                    <span class="rounded-full bg-amber-500 text-slate-950 font-bold px-2 py-0.5 text-[11px]">{{ $pendingBoostCount }}</span>
-                @endif
-            </a>
-
-            {{-- Menu Verifikasi Pembukaan Sesi Lelang (Rp5.000) --}}
-            <a href="{{ route('admin.payments.auction') }}"
-               class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
-                <span class="flex items-center gap-3">
-                    <span class="text-emerald-400">🔨</span> Verifikasi Biaya Lelang
-                </span>
-                @php
-                    $pendingAuctionCount = \App\Models\AuctionPayment::where('status', 'pending')->count();
-                @endphp
-                @if ($pendingAuctionCount > 0)
-                    <span class="rounded-full bg-emerald-500 text-white font-bold px-2 py-0.5 text-[11px]">{{ $pendingAuctionCount }}</span>
-                @endif
-            </a>
-
-            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-500">SISTEM & ADUAN</div>
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-slate-400"><span>▤</span> Content Moderation</a>
-            <a href="{{ route('admin.reports.index') }}"
-               class="flex items-center gap-3 rounded-xl bg-blue-600 px-3 py-2.5 font-semibold text-white"><span>⚑</span> Reported Items</a>
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-slate-400"><span>☰</span> System Logs</a>
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-slate-400"><span>⚙</span> Admin Settings</a>
-        </nav>
-
-        <div class="mt-auto p-4">
-            <div class="rounded-xl bg-white/5 p-3">
-                <div class="flex items-center gap-3">
-                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-                        {{ $adminInitial }}
-                    </div>
-                    <div class="min-w-0 leading-tight">
-                        <div class="truncate text-sm font-semibold text-white">{{ $admin->name }}</div>
-                        <div class="text-[11px] text-slate-400">{{ $adminRoleLabel }}</div>
-                    </div>
-                </div>
-                <div class="mt-2 truncate text-[11px] text-slate-400">{{ $admin->email }}</div>
-
-                <form method="POST" action="{{ route('logout') }}" class="mt-3">
-                    @csrf
-                    <button type="submit"
-                            class="w-full rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-red-500 hover:text-white">
-                        ⎋ Keluar
-                    </button>
-                </form>
-            </div>
-            <div class="mt-3 text-[11px] text-slate-500">© {{ date('Y') }} Lungsur Campus</div>
-        </div>
-    </aside>
+    <x-admin-sidebar active="reports" />
 
     {{-- ===== KONTEN ===== --}}
     <div class="flex min-w-0 flex-1 flex-col">
@@ -298,10 +221,15 @@
 
                         @if ($listing && !$listing->trashed())
                             <button type="button" onclick="openModerationModal('take-down')"
-                                    class="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">
-                                Turunkan Iklan
+                                    class="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-700">
+                                Turunkan Iklan Saja
                             </button>
                         @endif
+
+                        <button type="button" onclick="openModerationModal('ban-seller')"
+                                class="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">
+                            Blokir Penjual & Turunkan Iklan
+                        </button>
                     </div>
                 </section>
 
@@ -357,14 +285,22 @@
                             icon.className = 'mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-2xl font-bold text-blue-600';
                             confirmButton.textContent = 'Ya, Abaikan';
                             confirmButton.className = 'rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700';
+                        } else if (action === 'ban-seller') {
+                            form.action = "{{ route('admin.reports.ban_seller', $report) }}";
+                            title.textContent = 'Blokir Penjual & Turunkan Iklan?';
+                            message.textContent = 'Akun penjual terlapor akan diblokir permanen dan seluruh postingan iklan aktif miliknya otomatis ditarik dari katalog (WBS 4.2 / UC 14).';
+                            icon.textContent = '🚫';
+                            icon.className = 'mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-2xl font-bold text-red-600';
+                            confirmButton.textContent = 'Ya, Blokir & Turunkan';
+                            confirmButton.className = 'rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700';
                         } else {
                             form.action = "{{ route('admin.reports.take_down', $report) }}";
                             title.textContent = 'Turunkan Iklan?';
                             message.textContent = 'Apakah kamu yakin ingin menurunkan iklan ini? Iklan tidak akan tampil lagi di halaman publik.';
                             icon.textContent = '!';
-                            icon.className = 'mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-2xl font-bold text-red-600';
+                            icon.className = 'mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-2xl font-bold text-amber-600';
                             confirmButton.textContent = 'Ya, Turunkan';
-                            confirmButton.className = 'rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700';
+                            confirmButton.className = 'rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-700';
                         }
 
                         modal.classList.remove('hidden');

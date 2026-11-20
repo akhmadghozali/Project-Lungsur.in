@@ -108,4 +108,45 @@ class ReportController extends Controller
         return redirect()->route('admin.reports.index')
             ->with('success', 'Iklan berhasil diturunkan.');
     }
+
+    /**
+     * Blokir akun penjual terlapor sekaligus turunkan iklannya (WBS 4.2 / UC 14).
+     */
+    public function banSeller(Request $request, Report $report)
+    {
+        abort_if($report->status !== 'pending', 422, 'Laporan ini sudah ditangani.');
+
+        $seller = $report->reportedUser ?? $report->reportedListing?->user;
+        abort_if(!$seller, 404, 'Data penjual terlapor tidak ditemukan.');
+        abort_if($seller->role === 'admin', 403, 'Tidak dapat memblokir administrator.');
+
+        $validated = $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $banReason = !empty($validated['reason'])
+            ? $validated['reason']
+            : 'Diblokir admin akibat laporan terverifikasi: ' . $report->reason;
+
+        $seller->update([
+            'status' => 'banned',
+            'rejection_reason' => $banReason,
+        ]);
+
+        // Turunkan seluruh iklan aktif milik penjual
+        $seller->listings()->where('status', 'available')->update(['status' => 'archived']);
+        $report->reportedListing?->delete();
+
+        // Selesaikan semua laporan pending untuk user/iklan ini
+        Report::where('reported_user_id', $seller->id)
+            ->where('status', 'pending')
+            ->update([
+                'status'      => 'resolved',
+                'resolved_by' => Auth::id(),
+                'resolved_at' => now(),
+            ]);
+
+        return redirect()->route('admin.reports.index')
+            ->with('success', "Akun penjual {$seller->name} berhasil diblokir permanen dan seluruh iklan aktif miliknya diturunkan.");
+    }
 }

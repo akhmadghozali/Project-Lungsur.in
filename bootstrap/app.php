@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Tujuan redirect kalau user yang sudah login membuka /login atau /register
         $middleware->redirectUsersTo(fn (Request $request) =>
             $request->user()?->role === 'admin'
-                ? route('admin.verifications.index')
+                ? route('admin.dashboard')
                 : route('dashboard')
         );
     })
