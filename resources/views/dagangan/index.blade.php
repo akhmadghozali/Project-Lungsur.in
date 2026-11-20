@@ -97,7 +97,7 @@
                             </p>
                         </div>
 
-                        <a href="{{ route('katalog.pasang') }}"
+                        <a href="{{ route('katalog.pasang', ['from' => 'dagangan-saya']) }}"
                            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition self-start sm:self-auto">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
