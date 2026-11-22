@@ -13,12 +13,10 @@
         {{-- 2. TAMPILAN HALAMAN BERANDA / LANDING PAGE               --}}
         {{-- ======================================================== --}}
         <div class="space-y-12 sm:space-y-16">
-    @endif
-        <!-- ========================================== -->
-        <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
-        <!-- ========================================== -->
-        @if (!request()->is('katalog*'))
-           <section class="bg-white rounded-[2.5rem] border border-slate-200 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-xl shadow-slate-200/60 text-center text-slate-900">
+            <!-- ========================================== -->
+            <!-- 1. HERO SECTION (Sesuai Desain Figma)      -->
+            <!-- ========================================== -->
+            <section class="bg-white rounded-[2.5rem] border border-slate-200 p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-xl shadow-slate-200/60 text-center text-slate-900">
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/80 via-white to-white pointer-events-none"></div>
             <div class="relative z-10 max-w-5xl mx-auto space-y-6 sm:space-y-7">
                 
@@ -37,36 +35,42 @@
 
                 <!-- Deskripsi Singkat -->
                 <p class="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto font-normal">
-                    Pasang iklan barang yang mau kamu lungsurkan, buat iklan dicari saat butuh barang, atau ikut lelang terbuka. Nego dan COD langsung sesama mahasiswa Malang.
-                </p>
+                                        Lungsurkan barang tak terpakai, cari kebutuhan kos impian, atau menangkan lelang terbuka! Nego santai, COD Sat-Set sesama mahasiswa Malang.</p>
 
-                <!-- Search Box Pill -->
-                <form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" class="max-w-xl mx-auto w-full pt-1">
-                    <div class="searchbox-glow bg-slate-50 p-1.5 sm:p-2 pl-4 sm:pl-5 rounded-full border border-slate-200 shadow-inner flex items-center justify-between gap-3">
-                        
-                        <div class="flex items-center gap-3 w-full">
-                            <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                            <input type="text" 
-                                   name="q" 
-                                   placeholder="Cari iklan barang kos, buku, elektronik, atau cek wanted ads..." 
-                                   class="w-full text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none bg-transparent">
-                        </div>
-                        <button type="submit" 
-                                class="shrink-0 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-md shadow-blue-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                            <span>Cari</span>
-                        </button>
-                    </div>
-                </form>
+                <!-- Search Box Pill Reaktif -->
+<!-- Search Box Pill Reaktif dengan Cahaya Mengelilingi -->
+<form action="{{ Route::has('listings.index') ? route('listings.index') : url('/katalog') }}" method="GET" class="max-w-xl mx-auto w-full pt-1">
+    <div class="relative group">
+        <!-- Efek Cahaya (Glow) yang Mengelilingi -->
+        <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 via-sky-400 to-[#FFEE58] rounded-full blur-md opacity-25 group-hover:opacity-50 group-focus-within:opacity-80 transition-all duration-500"></div>
 
+        <!-- Kode Search Box Sebelumnya (Tidak Diubah) -->
+        <div class="relative searchbox-glow bg-slate-50 hover:bg-white focus-within:bg-white p-1.5 sm:p-2 pl-4 sm:pl-5 rounded-full border-2 border-slate-200 hover:border-blue-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/15 shadow-sm focus-within:shadow-lg focus-within:shadow-blue-500/10 transition-all duration-300 flex items-center justify-between gap-3">
+
+            <div class="flex items-center gap-3 w-full">
+                <!-- Ikon ikut berubah biru saat input aktif -->
+                <svg class="w-5 h-5 text-slate-400 group-focus-within:text-blue-600 group-focus-within:scale-110 transition-all duration-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" 
+                       name="q" 
+                       placeholder="Cari iklan barang kos, buku, elektronik, atau cek wanted ads..." 
+                       class="w-full text-xs sm:text-sm font-medium text-slate-900 placeholder-slate-400 focus:placeholder-slate-300 focus:outline-none bg-transparent">
+            </div>
+
+            <button type="submit" 
+                    class="shrink-0 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-md shadow-blue-600/30 hover:shadow-blue-500/40 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <span>Cari</span>
+            </button>
+        </div>
+    </div>
+</form>
 
                 <!-- 3 Badge Jaminan Kepercayaan -->
                 <div class="pt-1 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs font-semibold text-slate-700">
-                  <div class="trust-badge inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 shadow-xs">  
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 shadow-xs">
                         <div class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,9 +100,7 @@
                 
 
                 <!-- Clothesline & 5 Hanging Cards Section -->
-                <div class="relative w-full pt-8 sm:pt-10">
-                    
-        @endif           
+                <div class="relative w-full pt-8 sm:pt-10">           
 <!-- Banner Kuning di Atas Jemuran -->
 <div class="relative z-20 text-center mb-8 sm:mb-10">
     <div class="inline-block bg-[#FFF5B8] text-[#5C4825] font-black
@@ -1172,7 +1174,7 @@
         </section>
 
     </div>
-    @if (true)
+
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const listingContent = document.getElementById('listing-content');
