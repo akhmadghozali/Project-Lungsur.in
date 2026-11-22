@@ -247,9 +247,9 @@
                                         <div class="text-[10px] text-slate-400">Pelanggaran troll / fraud</div>
                                     </div>
                                 </div>
-                                <a href="{{ route('admin.users.index', ['status' => 'banned']) }}" class="font-extrabold text-sm text-slate-800">
+                                <span class="font-extrabold text-sm text-slate-800">
                                     {{ $suspendedUsers }} akun
-                                </a>
+                                </span>
                             </div>
 
                             <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/60">
@@ -337,8 +337,8 @@
                             <h2 class="text-sm font-extrabold text-slate-900 tracking-tight">Pendaftar Mahasiswa Terbaru</h2>
                             <p class="text-xs text-slate-400">Civitas akademika yang baru bergabung di ekosistem Lungsur.in</p>
                         </div>
-                        <a href="{{ route('admin.users.index') }}" class="text-xs font-bold text-blue-600 hover:underline">
-                            Lihat Semua →
+                        <a href="{{ route('admin.verifications.index') }}" class="text-xs font-bold text-blue-600 hover:underline">
+                            Antrean Verifikasi →
                         </a>
                     </div>
 
@@ -349,7 +349,7 @@
                                     <th class="px-5 py-3">Nama Mahasiswa</th>
                                     <th class="px-4 py-3">Kampus / NIM</th>
                                     <th class="px-4 py-3">Jalur & Status</th>
-                                    <th class="px-4 py-3 text-right">Aksi</th>
+                                    <th class="px-4 py-3 text-right">Waktu / Tindakan</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 font-medium">
@@ -374,9 +374,13 @@
                                             <span class="block text-[10px] text-slate-400 mt-0.5">{{ $user->email_type === 'campus' ? 'Email Kampus' : 'KTM Manual' }}</span>
                                         </td>
                                         <td class="px-4 py-3.5 text-right">
-                                            <a href="{{ route('admin.users.show', $user) }}" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition">
-                                                Detail
-                                            </a>
+                                            @if($user->verification_status === 'pending')
+                                                <a href="{{ route('admin.verifications.index') }}" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-800 text-[10px] font-bold transition">
+                                                    Tinjau KTM
+                                                </a>
+                                            @else
+                                                <span class="text-slate-400 text-[11px] font-medium">{{ $user->created_at?->diffForHumans() ?? '-' }}</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty

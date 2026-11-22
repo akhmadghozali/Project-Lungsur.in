@@ -1,0 +1,71 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Category;
+use App\Models\Listing;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class AdminDashboardTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected User $admin;
+    protected User $student;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->admin = User::factory()->create([
+            'role' => 'admin',
+            'status' => 'active',
+            'verification_status' => 'active',
+        ]);
+
+        $this->student = User::factory()->create([
+            'role' => 'seller',
+            'status' => 'active',
+            'verification_status' => 'active',
+        ]);
+    }
+
+    public function test_guest_is_redirected_when_accessing_admin_dashboard(): void
+    {
+        $response = $this->get('/admin/dashboard');
+        $response->assertRedirect('/login');
+    }
+
+    public function test_student_cannot_access_admin_dashboard(): void
+    {
+        $response = $this->actingAs($this->student)->get('/admin/dashboard');
+        $response->assertStatus(403);
+    }
+
+    public function test_admin_can_access_admin_dashboard_and_see_metrics(): void
+    {
+        $response = $this->actingAs($this->admin)->get('/admin/dashboard');
+
+        $response->assertStatus(200);
+        $response->assertSee('Dasbor Analitik Bisnis');
+        $response->assertSee('Kategori Barang Paling Banyak Diiklankan');
+        $response->assertSee('Tren Penerimaan Biaya Mikro');
+        $response->assertSee('Tren Rata-rata Harga Pasar Barang Bekas');
+    }
+
+    public function test_admin_can_filter_dashboard_by_period(): void
+    {
+        $response = $this->actingAs($this->admin)->get('/admin/dashboard?period=30d');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('period', '30d');
+    }
+
+    public function test_admin_route_redirects_to_dashboard(): void
+    {
+        $response = $this->actingAs($this->admin)->get('/admin');
+        $response->assertRedirect('/admin/dashboard');
+    }
+}
