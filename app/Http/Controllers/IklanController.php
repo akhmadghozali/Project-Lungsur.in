@@ -105,7 +105,7 @@ class IklanController extends Controller
         abort_if($listing->user_id !== Auth::id(), 403, 'Anda tidak memiliki hak untuk mengedit iklan ini.');
 
         if (!Auth::user()->isSeller()) {
-            return redirect()->route('dashboard')->with(
+            return redirect()->route('dagangan.index')->with(
                 'warning',
                 'Silakan beralih ke Mode Penjual untuk mengelola atau mengedit barang dagangan Anda.'
             );
@@ -201,8 +201,8 @@ class IklanController extends Controller
                 ->with('error', 'Terjadi kesalahan saat memperbarui iklan. Silakan coba lagi.');
         }
 
-        return redirect()->route('dashboard')
-            ->with('success', 'Iklan "' . $listing->title . '" berhasil diperbarui! 🎉');
+        return redirect()->route('dagangan.index')
+            ->with('success', "Iklan '{$listing->title}' berhasil diperbarui! 🎉");
     }
 
     /**
