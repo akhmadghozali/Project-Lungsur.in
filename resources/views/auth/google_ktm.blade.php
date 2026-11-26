@@ -7,18 +7,15 @@
 
     <title>Lengkapi Berkas KTM - Lungsur.in</title>
 
-    <!-- Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-slate-100/70 flex flex-col justify-center items-center py-6 sm:py-10 px-4 sm:px-6 lg:px-8 font-sans antialiased text-slate-900 selection:bg-blue-600 selection:text-white">
+<body class="min-h-screen bg-slate-100/70 flex flex-col justify-center items-center py-4 sm:py-10 px-3 sm:px-6 lg:px-8 font-sans antialiased text-slate-900 selection:bg-blue-600 selection:text-white">
 
-    <!-- Card Container -->
-    <div class="max-w-2xl w-full bg-white rounded-[2rem] sm:rounded-[2.25rem] shadow-2xl shadow-slate-300/50 border border-slate-200/80 overflow-hidden p-6 sm:p-10 transition-all duration-300"
+    <div class="max-w-2xl w-full bg-white rounded-3xl sm:rounded-[2.25rem] shadow-2xl shadow-slate-300/50 border border-slate-200/80 overflow-hidden p-5 sm:p-10 transition-all duration-300"
          x-data="googleKtmForm()">
 
-        <!-- Header Info -->
-        <div class="text-center mb-8">
-            <a href="{{ route('home') }}" class="inline-flex items-center gap-2 mb-4 group">
+        <div class="text-center mb-6 sm:mb-8">
+            <a href="{{ route('home') }}" class="min-h-[44px] inline-flex items-center gap-2 mb-3 group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded-xl">
                 <span class="w-10 h-10 rounded-2xl bg-blue-600 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-500/30 group-hover:scale-105 transition">
                     L
                 </span>
@@ -27,22 +24,21 @@
                 </span>
             </a>
 
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 mx-auto flex items-center justify-center mb-3">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 mx-auto flex items-center justify-center mb-3">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
             </div>
 
-            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+            <h1 class="text-xl sm:text-3xl font-black tracking-tight text-slate-900">
                 Verifikasi Identitas Mahasiswa (KTM)
             </h1>
-            <p class="mt-2 text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-                Akun Google Anda menggunakan email umum (<strong>{{ $user->email }}</strong>). Lengkapi data dan unggah foto KTM aktif Anda agar dapat disetujui administrator.
+            <p class="mt-2 text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                Akun Google Anda menggunakan email umum (<strong class="text-slate-900">{{ $user->email }}</strong>). Lengkapi asal kampus, NIM, dan unggah foto KTM aktif Anda untuk divalidasi admin.
             </p>
         </div>
 
-        <!-- Google User Banner -->
-        <div class="mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3">
+        <div class="mb-5 p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3">
             @if ($user->avatar)
                 <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0">
             @else
@@ -52,19 +48,18 @@
             @endif
             <div class="min-w-0 flex-1">
                 <div class="text-sm font-bold text-slate-900 truncate">{{ $user->name }}</div>
-                <div class="text-xs text-slate-500 truncate">{{ $user->email }}</div>
+                <div class="text-xs text-slate-600 truncate">{{ $user->email }}</div>
             </div>
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
                 Menunggu Berkas
             </span>
         </div>
 
-        <!-- Error Alert -->
         @if ($errors->any())
-            <div class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-medium space-y-1">
+            <div class="mb-5 p-3.5 sm:p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold space-y-1">
                 @foreach ($errors->all() as $error)
                     <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>{{ $error }}</span>
@@ -73,22 +68,20 @@
             </div>
         @endif
 
-        <!-- Formulir Unggah KTM -->
         <form action="{{ route('auth.google.ktm.submit') }}" 
               method="POST" 
               enctype="multipart/form-data" 
               class="space-y-4">
             @csrf
 
-            <!-- Pilihan Kampus -->
             <div>
-                <label for="campus" class="block text-xs font-bold text-slate-700 mb-1">
-                    Asal Kampus / Perguruan Tinggi <span class="text-red-500">*</span>
+                <label for="campus" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    Asal Kampus / Perguruan Tinggi <span class="text-red-600">*</span>
                 </label>
                 <select name="campus" 
                         id="campus" 
                         required 
-                        class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                        class="w-full min-h-[46px] px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-base sm:text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
                     <option value="" disabled selected>Pilih Kampus</option>
                     @foreach ($campusList as $c)
                         <option value="{{ $c->campus_name }}" {{ old('campus', $user->campus) === $c->campus_name ? 'selected' : '' }}>
@@ -99,27 +92,26 @@
                 </select>
             </div>
 
-            <!-- NIM -->
             <div>
-                <label for="nim" class="block text-xs font-bold text-slate-700 mb-1">
-                    Nomor Induk Mahasiswa (NIM) <span class="text-red-500">*</span>
+                <label for="nim" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    Nomor Induk Mahasiswa (NIM) <span class="text-red-600">*</span>
                 </label>
                 <input type="text" 
                        name="nim" 
                        id="nim" 
+                       inputmode="numeric"
                        value="{{ old('nim', $user->nim) }}" 
                        placeholder="Contoh: 244107060059" 
                        required 
-                       class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-slate-900 font-medium text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
+                       class="w-full min-h-[46px] px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-slate-900 placeholder-slate-500 font-medium text-base sm:text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition shadow-2xs">
             </div>
 
-            <!-- Upload Foto KTM -->
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">
-                    Foto Kartu Tanda Mahasiswa (KTM) <span class="text-red-500">*</span>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                    Foto Kartu Tanda Mahasiswa (KTM) <span class="text-red-600">*</span>
                 </label>
 
-                <div class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-5 text-center transition cursor-pointer bg-slate-50/50 hover:bg-blue-50/30"
+                <div class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-4 sm:p-5 text-center transition cursor-pointer bg-slate-50/50 hover:bg-blue-50/30"
                      @click="$refs.ktmInput.click()"
                      @dragover.prevent="dragOver = true"
                      @dragleave.prevent="dragOver = false"
@@ -134,35 +126,34 @@
                            class="hidden" 
                            required>
 
-                    <!-- Belum pilih file -->
                     <template x-if="!ktmPreview">
-                        <div class="space-y-2">
+                        <div class="space-y-2 py-1">
                             <div class="w-12 h-12 rounded-2xl bg-white shadow-2xs border border-slate-200 text-blue-600 mx-auto flex items-center justify-center">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                             </div>
-                            <div class="text-xs font-bold text-slate-700">
-                                Klik untuk unggah atau seret foto KTM ke sini
+                            <div class="text-xs font-bold text-slate-800">
+                                Ketuk untuk unggah atau ambil foto KTM
                             </div>
-                            <div class="text-[11px] text-slate-400">
-                                Format JPG atau PNG, maksimal 2 MB
+                            <div class="text-[11px] text-slate-600">
+                                Format JPG atau PNG, maksimal 2 MB. Pastikan Nama &amp; NIM terbaca jelas.
                             </div>
                         </div>
                     </template>
 
-                    <!-- Preview Foto Terpilih -->
                     <template x-if="ktmPreview">
                         <div class="space-y-3">
                             <div class="relative inline-block mx-auto">
                                 <img :src="ktmPreview" alt="Pratinjau KTM" class="max-h-48 rounded-xl object-contain border border-slate-200 shadow-sm mx-auto">
                                 <button type="button" 
                                         @click.stop="removeKtmFile()" 
-                                        class="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-600 text-white font-bold flex items-center justify-center shadow hover:bg-red-700 transition">
+                                        aria-label="Hapus foto KTM terpilih"
+                                        class="absolute -top-3 -right-3 w-11 h-11 rounded-full bg-red-600 text-white text-lg font-bold flex items-center justify-center shadow-md hover:bg-red-700 transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">
                                     &times;
                                 </button>
                             </div>
-                            <div class="text-xs font-semibold text-slate-600">
+                            <div class="text-xs font-semibold text-slate-700">
                                 <span x-text="ktmFileName"></span> (<span x-text="ktmFileSize"></span>)
                             </div>
                         </div>
@@ -170,10 +161,9 @@
                 </div>
             </div>
 
-            <!-- Tombol Aksi -->
-            <div class="pt-4 space-y-2.5">
+            <div class="pt-3 space-y-2.5">
                 <button type="submit" 
-                        class="w-full py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm tracking-wide shadow-md shadow-blue-500/20 focus:outline-none focus:ring-4 focus:ring-blue-100 transition cursor-pointer flex items-center justify-center gap-2">
+                        class="w-full min-h-[48px] py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm tracking-wide shadow-md shadow-blue-500/20 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition cursor-pointer flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
@@ -181,7 +171,7 @@
                 </button>
 
                 <a href="{{ route('login') }}" 
-                   class="block text-center text-xs font-semibold text-slate-500 hover:text-slate-700 py-2 transition">
+                   class="min-h-[44px] flex items-center justify-center text-center text-xs font-bold text-slate-600 hover:text-slate-900 py-2 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded-xl">
                     &larr; Batalkan &amp; Kembali ke Halaman Login
                 </a>
             </div>
@@ -189,7 +179,6 @@
 
     </div>
 
-    <!-- Script Alpine.js Form -->
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('googleKtmForm', () => ({

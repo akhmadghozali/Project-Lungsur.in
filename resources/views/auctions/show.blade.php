@@ -55,49 +55,50 @@
             && ! $isHighestBidder;
 
         $bidCap = (float) $auction->bid_cap;
+        $inc = (int) ($auction->bid_increment ?: 10000);
+        $quickPreset1 = $minimumBid;
+        $quickPreset2 = $bidCap > 0 ? min($minimumBid + $inc, (int) $bidCap) : ($minimumBid + $inc);
+        $quickPreset3 = $bidCap > 0 ? (int) $bidCap : ($minimumBid + ($inc * 2));
     @endphp
 
     <div
         id="auction-detail"
-        class="space-y-6"
+        class="space-y-5 sm:space-y-6 pb-20 sm:pb-0"
         data-auction-active="{{ $canBid ? 'true' : 'false' }}"
         data-remaining-seconds="{{ $remaining }}"
         data-expire-url="{{ route('auctions.expire', $auction->id) }}"
     >
-        {{-- Kembali --}}
         <a
             href="{{ route('auctions.index') }}"
-            class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-blue-600"
+            class="min-h-[44px] inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition hover:border-blue-300 hover:text-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         >
-            <span aria-hidden="true">←</span>
-            Kembali ke daftar lelang
+            <span aria-hidden="true">&larr;</span>
+            <span>Kembali ke Daftar Lelang</span>
         </a>
 
-        {{-- Notifikasi --}}
         <div
             id="bid-feedback"
-            class="hidden rounded-xl border px-4 py-3 text-sm"
+            class="hidden rounded-xl border px-4 py-3 text-sm font-semibold"
             role="alert"
             aria-live="polite"
         ></div>
 
         @if (session('error'))
-            <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">
                 {{ session('error') }}
             </div>
         @endif
 
         @if (session('success'))
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
                 {{ session('success') }}
             </div>
         @endif
 
-        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-5">
+        <div class="grid grid-cols-1 items-start gap-5 sm:gap-6 lg:grid-cols-5">
 
-            {{-- KIRI: FOTO DAN DESKRIPSI BARANG --}}
-            <section class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm lg:col-span-3">
-                <div class="relative h-48 overflow-hidden bg-slate-100 sm:h-56 lg:h-64">
+            <section class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs lg:col-span-3">
+                <div class="relative h-60 overflow-hidden bg-slate-100 sm:h-72 lg:h-80">
                     @if ($listing?->photo_url)
                         <img
                             src="{{ $listing->photo_url }}"
@@ -105,45 +106,44 @@
                             class="h-full w-full object-cover"
                         >
                     @else
-                        <div class="flex h-full w-full items-center justify-center text-sm text-slate-400">
+                        <div class="flex h-full w-full items-center justify-center text-sm font-medium text-slate-500">
                             Belum ada foto barang
                         </div>
                     @endif
 
                     <span
                         id="auction-status-badge"
-                        class="absolute left-4 top-4 rounded-full px-3 py-1.5 text-xs font-bold {{ $isPendingVerification ? 'bg-amber-100 text-amber-800' : ($isClosed ? 'bg-slate-800/90 text-white' : ($isNotStarted ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700')) }}"
+                        class="absolute left-4 top-4 rounded-full px-3.5 py-1.5 text-xs font-bold shadow-2xs {{ $isPendingVerification ? 'bg-amber-50 text-amber-800 border border-amber-200' : ($isClosed ? 'bg-slate-800/95 text-white' : ($isNotStarted ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200')) }}"
                     >
-                        {{ $isPendingVerification ? '⏳ Menunggu Verifikasi Admin' : ($isClosed ? 'Lelang Ditutup' : ($isNotStarted ? 'Belum Dimulai' : 'Sedang Berlangsung')) }}
+                        {{ $isPendingVerification ? 'Menunggu Verifikasi Admin' : ($isClosed ? 'Lelang Ditutup' : ($isNotStarted ? 'Belum Dimulai' : 'Sedang Berlangsung')) }}
                     </span>
                 </div>
 
                 <div class="space-y-4 p-5 sm:p-7">
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
+                        <span class="rounded-lg bg-blue-50 border border-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700">
                             {{ $listing?->category?->name ?? 'Perlengkapan Kos' }}
                         </span>
 
-                        <span class="text-xs text-slate-400">
-                            Dipublikasikan
-                            {{ $auction->created_at?->format('d M Y') }}
+                        <span class="text-xs font-medium text-slate-600">
+                            Dipublikasikan {{ $auction->created_at?->format('d M Y') }}
                         </span>
                     </div>
 
-                    <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+                    <h1 class="text-xl sm:text-3xl font-black tracking-tight text-slate-900">
                         {{ $listing?->title ?? 'Barang lelang' }}
                     </h1>
 
                     @auth
                         @if ($listing?->user)
-                            <div class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+                            <div class="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-4 py-3">
                                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
                                     {{ strtoupper(substr($listing->user->name, 0, 1)) }}
                                 </div>
 
                                 <div class="min-w-0">
-                                    <p class="text-xs font-semibold text-slate-500">
-                                        Penjual
+                                    <p class="text-xs font-semibold text-slate-600">
+                                        Penjual Mahasiswa
                                     </p>
 
                                     <p class="truncate text-sm font-bold text-slate-900">
@@ -156,21 +156,21 @@
 
                     <div>
                         <h2 class="text-sm font-bold text-slate-900">
-                            Deskripsi barang
+                            Deskripsi Barang
                         </h2>
 
-                        <p class="mt-2 whitespace-pre-line text-sm leading-7 text-slate-600">
-                            {{ $listing?->description ?: 'Tidak ada deskripsi barang.' }}
+                        <p class="mt-2 whitespace-pre-line text-xs sm:text-sm leading-relaxed text-slate-700">
+                            {{ $listing?->description ?: 'Penjual belum menambahkan deskripsi barang.' }}
                         </p>
                     </div>
 
                     @if ($listing?->addresses)
                         <div class="border-t border-slate-100 pt-4">
-                            <p class="text-xs font-semibold text-slate-500">
-                                Lokasi / area kampus
+                            <p class="text-xs font-semibold text-slate-600">
+                                Titik COD / Area Kampus
                             </p>
 
-                            <p class="mt-1 text-sm font-medium text-slate-800">
+                            <p class="mt-1 text-sm font-bold text-slate-900">
                                 {{ $listing->addresses }}
                             </p>
                         </div>
@@ -178,36 +178,35 @@
                 </div>
             </section>
 
-            {{-- KANAN: HARGA, COUNTDOWN, DAN PENAWARAN --}}
             <aside class="space-y-5 lg:col-span-2">
 
-                {{-- Informasi lelang --}}
-                <section class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6">
-                    <p class="text-sm font-medium text-slate-500">
+                <section class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6">
+                    <p class="text-xs sm:text-sm font-semibold text-slate-600">
                         Harga tertinggi saat ini
                     </p>
 
                     <p
                         id="current-price"
-                        class="mt-1 text-3xl font-black tracking-tight text-blue-700"
+                        class="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-blue-700"
                     >
                         Rp {{ number_format($currentPrice, 0, ',', '.') }}
                     </p>
 
-                    <p class="mt-2 text-xs text-slate-500">
-                        Harga awal:
-                        Rp {{ number_format($auction->starting_price, 0, ',', '.') }}
+                    <p class="mt-1.5 text-xs font-medium text-slate-600">
+                        Harga awal: Rp {{ number_format($auction->starting_price, 0, ',', '.') }}
+                        @if ($bidCap > 0)
+                            • Batas Menang Instan: <strong class="text-slate-900">Rp {{ number_format($bidCap, 0, ',', '.') }}</strong>
+                        @endif
                     </p>
 
-                    {{-- COUNTDOWN --}}
-                    <div class="mt-5 rounded-2xl bg-slate-50 p-4">
+                    <div class="mt-4 sm:mt-5 rounded-2xl bg-slate-50 border border-slate-100 p-4">
                         <div class="mb-3 flex items-center justify-between gap-2">
-                            <span class="text-sm font-bold text-slate-700">
+                            <span class="text-xs sm:text-sm font-bold text-slate-800">
                                 Sisa waktu lelang
                             </span>
 
-                            <span class="text-[11px] font-semibold text-slate-400">
-                                Berdasarkan waktu server
+                            <span class="text-[11px] font-semibold text-slate-600">
+                                Waktu server
                             </span>
                         </div>
 
@@ -221,13 +220,13 @@
                                 ['minutes', 'Menit'],
                                 ['seconds', 'Detik'],
                             ] as [$unit, $label])
-                                <div class="rounded-xl border border-slate-100 bg-white px-1 py-3">
+                                <div class="rounded-xl border border-slate-200/80 bg-white px-1 py-2.5 sm:py-3">
                                     <span
                                         data-unit="{{ $unit }}"
-                                        class="block text-xl font-black tabular-nums text-slate-900"
+                                        class="block text-lg sm:text-xl font-black tabular-nums text-slate-900"
                                     >00</span>
 
-                                    <span class="mt-1 block text-[10px] font-semibold text-slate-500">
+                                    <span class="mt-0.5 block text-[11px] font-semibold text-slate-600">
                                         {{ $label }}
                                     </span>
                                 </div>
@@ -243,16 +242,15 @@
 
                         <p
                             id="not-started-message"
-                            class="mt-3 {{ $isNotStarted ? '' : 'hidden' }} text-center text-sm font-bold text-amber-700"
+                            class="mt-3 {{ $isNotStarted ? '' : 'hidden' }} text-center text-sm font-bold text-amber-800"
                         >
                             Lelang belum dimulai.
                         </p>
                     </div>
 
-                    {{-- Informasi bid --}}
-                    <div class="mt-5 grid grid-cols-2 gap-3 text-xs">
-                        <div class="rounded-xl border border-slate-100 p-3">
-                            <p class="text-slate-500">
+                    <div class="mt-4 sm:mt-5 grid grid-cols-2 gap-3 text-xs">
+                        <div class="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3">
+                            <p class="font-medium text-slate-600">
                                 Kelipatan tawaran
                             </p>
 
@@ -261,8 +259,8 @@
                             </p>
                         </div>
 
-                        <div class="rounded-xl border border-slate-100 p-3">
-                            <p class="text-slate-500">
+                        <div class="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3">
+                            <p class="font-medium text-slate-600">
                                 Jumlah penawaran
                             </p>
 
@@ -272,73 +270,72 @@
                         </div>
                     </div>
 
-                    {{-- TOMBOL SESUAI STATUS PENGGUNA --}}
                     <div id="bid-action-area" class="mt-5">
 
-                    @if ($isClosed)
-                        <div class="space-y-3">
-                            <div class="rounded-xl bg-slate-100 px-4 py-3 text-center text-sm font-bold text-slate-500">
-                                Lelang Ditutup
+                        @if ($isClosed)
+                            <div class="space-y-3">
+                                <div class="rounded-xl bg-slate-100 border border-slate-200 px-4 py-3 text-center text-sm font-bold text-slate-700">
+                                    Lelang Ditutup
+                                </div>
+
+                                @if ($canContactSeller)
+                                    <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-center text-xs font-semibold text-emerald-800">
+                                        Selamat! Kamu adalah pemenang lelang ini. Silakan hubungi penjual untuk berkoordinasi COD.
+                                    </div>
+                                    <a
+                                        href="{{ route('chat.index', ['listing_id' => $auction->listing_id]) }}"
+                                        id="contact-seller-button"
+                                        class="min-h-[48px] flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-blue-700 shadow-md shadow-blue-500/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                        <span>Hubungi Penjual &rarr;</span>
+                                    </a>
+                                @endif
                             </div>
 
-                            @if ($canContactSeller)
-                                <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-center text-xs font-semibold text-emerald-800">
-                                    🎉 Selamat! Kamu adalah pemenang lelang ini. Silakan hubungi penjual untuk berkoordinasi COD.
-                                </div>
-                                <a
-                                    href="{{ route('chat.index', ['listing_id' => $auction->listing_id]) }}"
-                                    id="contact-seller-button"
-                                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-blue-700 shadow-md shadow-blue-500/20"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                    <span>Hubungi Penjual &rarr;</span>
-                                </a>
-                            @endif
-                        </div>
-
                         @elseif ($isNotStarted)
-                            <div class="rounded-xl bg-amber-50 px-4 py-3 text-center text-sm font-semibold text-amber-800">
+                            <div class="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-center text-sm font-semibold text-amber-800">
                                 Lelang belum dimulai.
                             </div>
 
                         @elseif (auth()->guest())
                             <div class="space-y-3">
-                                <p class="text-center text-sm text-slate-500">
+                                <p class="text-center text-xs sm:text-sm text-slate-600">
                                     Masuk atau daftar akun mahasiswa untuk ikut menawar.
                                 </p>
 
                                 <a
                                     href="{{ route('login') }}"
-                                    class="flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-blue-700"
+                                    class="min-h-[48px] flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                                 >
                                     Masuk untuk Menawar
                                 </a>
 
                                 <a
                                     href="{{ route('register') }}"
-                                    class="block text-center text-sm font-semibold text-blue-600 hover:text-blue-700"
+                                    class="min-h-[44px] flex items-center justify-center text-center text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded-xl"
                                 >
-                                    Belum punya akun? Daftar
+                                    Belum punya akun? Daftar sekarang
                                 </a>
                             </div>
 
                         @elseif ($isAdmin)
-                            <div class="rounded-xl bg-slate-100 px-4 py-3 text-center text-sm font-semibold text-slate-600">
+                            <div class="rounded-xl bg-slate-100 border border-slate-200 px-4 py-3 text-center text-sm font-semibold text-slate-700">
                                 Administrator tidak dapat ikut menawar.
                             </div>
 
                         @elseif (! $isVerified)
-                            <div class="rounded-xl bg-amber-50 px-4 py-3 text-center text-sm font-semibold text-amber-800">
+                            <div class="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-center text-sm font-semibold text-amber-800">
                                 Akun harus terverifikasi aktif untuk ikut menawar.
                             </div>
 
                         @elseif ($isOwner)
-                            <div class="rounded-xl bg-amber-50 px-4 py-3 text-center text-sm font-semibold text-amber-800">
+                            <div class="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-center text-sm font-semibold text-amber-800">
                                 Kamu tidak dapat menawar barang lelang milik sendiri.
                             </div>
 
                         @elseif ($isHighestBidder)
-                            <div class="rounded-xl bg-blue-50 px-4 py-3 text-center text-sm font-semibold text-blue-800">
+                            <div class="rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-center text-sm font-semibold text-blue-800">
                                 Kamu sedang menjadi penawar tertinggi. Tunggu penawaran peserta lain.
                             </div>
 
@@ -350,7 +347,7 @@
                                 <form method="POST" action="{{ route('user.switch_mode') }}">
                                     @csrf
                                     <input type="hidden" name="mode" value="buyer">
-                                    <button type="submit" class="w-full py-2 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition cursor-pointer">
+                                    <button type="submit" class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700">
                                         Beralih ke Mode Pembeli &amp; Tawar
                                     </button>
                                 </form>
@@ -360,26 +357,25 @@
                             <button
                                 id="open-bid-modal"
                                 type="button"
-                                class="w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-700 cursor-pointer"
+                                class="w-full min-h-[48px] rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-700 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                             >
                                 Tawar Sekarang
                             </button>
                         @endif
                     </div>
 
-                    <p class="mt-3 text-center text-[11px] leading-relaxed text-slate-400">
+                    <p class="mt-3 text-center text-[11px] leading-relaxed text-slate-600">
                         Pembayaran barang hasil lelang dilakukan langsung antara pemenang dan penjual saat serah terima (COD).
                     </p>
                 </section>
 
-                {{-- RIWAYAT PENAWARAN --}}
-                <section class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6">
+                <section class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6">
                     <div class="flex items-center justify-between gap-3">
-                        <h2 class="font-black text-slate-900">
-                            Riwayat penawaran
+                        <h2 class="text-base font-black text-slate-900">
+                            Riwayat Penawaran
                         </h2>
 
-                        <span class="rounded-lg bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700">
+                        <span class="rounded-lg bg-blue-50 border border-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700">
                             {{ $auction->bids->count() }}
                         </span>
                     </div>
@@ -388,11 +384,11 @@
                         @forelse ($auction->bids as $bid)
                             <div class="bid-history-item flex items-center justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
                                 <div class="min-w-0">
-                                    <p class="truncate text-sm font-bold text-slate-800">
+                                    <p class="truncate text-sm font-bold text-slate-900">
                                         {{ $bid->user?->name ?? 'Mahasiswa' }}
                                     </p>
 
-                                    <p class="mt-0.5 text-[11px] text-slate-400">
+                                    <p class="mt-0.5 text-[11px] font-medium text-slate-600">
                                         {{ $bid->created_at?->format('d M Y, H:i') }}
                                     </p>
                                 </div>
@@ -404,9 +400,9 @@
                         @empty
                             <p
                                 id="no-bids-message"
-                                class="rounded-xl bg-slate-50 px-3 py-5 text-center text-sm text-slate-500"
+                                class="rounded-xl bg-slate-50 border border-slate-100 px-3 py-5 text-center text-xs sm:text-sm font-medium text-slate-600"
                             >
-                                Belum ada penawaran. Jadilah yang pertama!
+                                Belum ada penawaran. Jadilah penawar pertama!
                             </p>
                         @endforelse
                     </div>
@@ -415,11 +411,55 @@
         </div>
     </div>
 
-    {{-- MODAL PENAWARAN --}}
+    <div id="mobile-auction-sticky-bar" class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2.5 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]">
+        <div class="flex items-center justify-between gap-3 max-w-xl mx-auto">
+            <div class="min-w-0">
+                <span class="block text-[11px] font-semibold text-slate-600">Harga tertinggi</span>
+                <span id="mobile-sticky-price" class="block text-base font-black text-blue-700">Rp {{ number_format($currentPrice, 0, ',', '.') }}</span>
+            </div>
+
+            <div id="mobile-sticky-action">
+                @if ($showBidModal)
+                    <button type="button"
+                            id="open-bid-modal-mobile"
+                            class="shrink-0 min-h-[44px] px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs inline-flex items-center justify-center shadow-sm transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                        Tawar Sekarang
+                    </button>
+                @elseif ($canContactSeller)
+                    <a href="{{ route('chat.index', ['listing_id' => $auction->listing_id]) }}"
+                       class="shrink-0 min-h-[44px] px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs inline-flex items-center justify-center shadow-sm transition">
+                        Hubungi Penjual
+                    </a>
+                @elseif ($canBid && auth()->guest())
+                    <a href="{{ route('login') }}"
+                       class="shrink-0 min-h-[44px] px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs inline-flex items-center justify-center shadow-sm transition">
+                        Masuk &amp; Tawar
+                    </a>
+                @elseif ($canBid && $isSeller)
+                    <form method="POST" action="{{ route('user.switch_mode') }}">
+                        @csrf
+                        <input type="hidden" name="mode" value="buyer">
+                        <button type="submit" class="shrink-0 min-h-[44px] px-3.5 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs transition cursor-pointer">
+                            Mode Pembeli
+                        </button>
+                    </form>
+                @elseif ($isHighestBidder && !$isClosed)
+                    <span class="shrink-0 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 font-bold text-xs">
+                        Penawar Tertinggi
+                    </span>
+                @elseif ($isClosed)
+                    <span class="shrink-0 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs">
+                        Lelang Ditutup
+                    </span>
+                @endif
+            </div>
+        </div>
+    </div>
+
     @if ($showBidModal)
         <div
             id="bid-modal"
-            class="fixed inset-0 z-[60] hidden items-center justify-center overflow-y-auto bg-slate-950/50 p-4"
+            class="fixed inset-0 z-[60] hidden items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-xs"
             role="dialog"
             aria-modal="true"
             aria-labelledby="bid-modal-title"
@@ -427,35 +467,35 @@
             <div class="my-auto w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl sm:p-7">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-blue-600">
-                            Penawaran lelang
+                        <p class="text-xs font-bold uppercase tracking-wider text-blue-700">
+                            Penawaran Lelang
                         </p>
 
                         <h2 id="bid-modal-title" class="mt-1 text-xl font-black text-slate-900">
-                            Ajukan harga tawaran
+                            Ajukan Harga Tawaran
                         </h2>
 
-                        <p class="mt-1 text-sm text-slate-500">
-                            Masukkan nominal sesuai ketentuan lelang.
+                        <p class="mt-1 text-xs sm:text-sm text-slate-600">
+                            Pilih nominal cepat atau ketik tawaran sesuai kelipatan lelang.
                         </p>
                     </div>
 
                     <button
                         type="button"
                         id="close-bid-modal"
-                        class="rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                        aria-label="Tutup modal"
+                        class="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                        aria-label="Tutup modal penawaran"
                     >
                         ✕
                     </button>
                 </div>
 
-                <div class="mt-5 rounded-2xl bg-blue-50 p-4">
-                    <p class="text-xs text-blue-700">
+                <div class="mt-4 rounded-2xl bg-blue-50 border border-blue-100 p-4">
+                    <p class="text-xs font-semibold text-blue-800">
                         Penawaran minimum berikutnya
                     </p>
 
-                    <p id="minimum-bid-label" class="mt-1 text-lg font-black text-blue-800">
+                    <p id="minimum-bid-label" class="mt-1 text-lg font-black text-blue-900">
                         Rp {{ number_format($minimumBid, 0, ',', '.') }}
                     </p>
                 </div>
@@ -464,12 +504,38 @@
                     id="bid-form"
                     action="{{ route('auctions.bids.store', $auction->id) }}"
                     method="POST"
-                    class="mt-5 space-y-4"
+                    class="mt-4 space-y-4"
                 >
                     @csrf
 
                     <div>
-                        <label for="bid_amount" class="block text-sm font-bold text-slate-700">
+                        <label class="block text-xs font-bold text-slate-700 mb-2">
+                            Pilih Cepat Nominal
+                        </label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button"
+                                    data-quick-bid="{{ $quickPreset1 }}"
+                                    class="js-quick-bid min-h-[44px] px-2 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 text-slate-800 hover:text-blue-700 text-xs font-bold transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                                <span class="block text-[10px] text-slate-600 font-semibold">Minimum</span>
+                                <span class="js-quick-bid-label">Rp {{ number_format($quickPreset1, 0, ',', '.') }}</span>
+                            </button>
+                            <button type="button"
+                                    data-quick-bid="{{ $quickPreset2 }}"
+                                    class="js-quick-bid min-h-[44px] px-2 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 text-slate-800 hover:text-blue-700 text-xs font-bold transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                                <span class="block text-[10px] text-slate-600 font-semibold">+1 Kelipatan</span>
+                                <span class="js-quick-bid-label">Rp {{ number_format($quickPreset2, 0, ',', '.') }}</span>
+                            </button>
+                            <button type="button"
+                                    data-quick-bid="{{ $quickPreset3 }}"
+                                    class="js-quick-bid min-h-[44px] px-2 py-2 rounded-xl border border-blue-200 bg-blue-50/60 hover:bg-blue-100 text-blue-800 text-xs font-bold transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                                <span class="block text-[10px] text-blue-700 font-semibold">{{ $bidCap > 0 ? 'Menang Instan' : '+2 Kelipatan' }}</span>
+                                <span class="js-quick-bid-label">Rp {{ number_format($quickPreset3, 0, ',', '.') }}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="bid_amount" class="block text-xs sm:text-sm font-bold text-slate-800">
                             Nominal tawaran (Rp)
                         </label>
 
@@ -477,6 +543,7 @@
                             id="bid_amount"
                             name="bid_amount"
                             type="number"
+                            inputmode="numeric"
                             min="{{ $minimumBid }}"
                             step="{{ $auction->bid_increment }}"
                             @if ($bidCap > 0)
@@ -484,25 +551,25 @@
                             @endif
                             value="{{ $minimumBid }}"
                             required
-                            class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-base font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                            class="mt-1.5 w-full min-h-[46px] rounded-xl border border-slate-300 px-4 py-3 text-base font-bold text-slate-900 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                         >
                     </div>
 
-                    <p class="text-xs leading-relaxed text-slate-500">
-                        Kelipatan tawaran:
-                        Rp {{ number_format($auction->bid_increment, 0, ',', '.') }}.
-                    </p>
-
-                    @if ($bidCap > 0)
-                        <p class="text-xs leading-relaxed text-slate-500">
-                            Batas maksimal / buy-out:
-                            Rp {{ number_format($bidCap, 0, ',', '.') }}.
+                    <div class="space-y-1 text-xs leading-relaxed text-slate-600">
+                        <p>
+                            Kelipatan tawaran: <strong class="text-slate-800">Rp {{ number_format($auction->bid_increment, 0, ',', '.') }}</strong>.
                         </p>
-                    @endif
+
+                        @if ($bidCap > 0)
+                            <p>
+                                Batas maksimal / menang instan (buy-out): <strong class="text-slate-800">Rp {{ number_format($bidCap, 0, ',', '.') }}</strong>.
+                            </p>
+                        @endif
+                    </div>
 
                     <p
                         id="bid-form-error"
-                        class="hidden rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700"
+                        class="hidden rounded-xl bg-rose-50 border border-rose-200 px-3 py-2.5 text-xs sm:text-sm font-semibold text-rose-800"
                         role="alert"
                     ></p>
 
@@ -510,7 +577,7 @@
                         <button
                             type="button"
                             id="cancel-bid-modal"
-                            class="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50"
+                            class="flex-1 min-h-[46px] rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600"
                         >
                             Batal
                         </button>
@@ -518,7 +585,7 @@
                         <button
                             type="submit"
                             id="submit-bid-button"
-                            class="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            class="flex-1 min-h-[46px] rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                         >
                             Kirim Penawaran
                         </button>
@@ -528,7 +595,6 @@
         </div>
     @endif
 
-    {{-- JAVASCRIPT COUNTDOWN DAN MODAL --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const root = document.getElementById('auction-detail');
@@ -546,6 +612,7 @@
 
             const modal = document.getElementById('bid-modal');
             const openButton = document.getElementById('open-bid-modal');
+            const openButtonMobile = document.getElementById('open-bid-modal-mobile');
             const form = document.getElementById('bid-form');
             const input = document.getElementById('bid_amount');
             const submitButton = document.getElementById('submit-bid-button');
@@ -575,13 +642,22 @@
                 input?.focus();
             };
 
+            document.querySelectorAll('.js-quick-bid').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    if (input && btn.dataset.quickBid) {
+                        input.value = btn.dataset.quickBid;
+                        input.focus();
+                    }
+                });
+            });
+
             const showFeedback = (message, success = false) => {
                 if (!feedback) return;
 
                 feedback.textContent = message;
                 feedback.className = success
-                    ? 'rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700'
-                    : 'rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700';
+                    ? 'rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800'
+                    : 'rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800';
             };
 
             const closeAuctionUI = () => {
@@ -592,7 +668,7 @@
                 if (badge) {
                     badge.textContent = 'Lelang Ditutup';
                     badge.className =
-                        'absolute left-4 top-4 rounded-full bg-slate-800/90 px-3 py-1.5 text-xs font-bold text-white';
+                        'absolute left-4 top-4 rounded-full bg-slate-800/95 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs';
                 }
 
                 document.getElementById('closed-message')
@@ -609,13 +685,18 @@
 
                 if (actionArea) {
                     actionArea.innerHTML =
-                        '<div class="rounded-xl bg-slate-100 px-4 py-3 text-center text-sm font-bold text-slate-500">Lelang Ditutup</div>';
+                        '<div class="rounded-xl bg-slate-100 border border-slate-200 px-4 py-3 text-center text-sm font-bold text-slate-700">Lelang Ditutup</div>';
+                }
+
+                const mobileStickyAction = document.getElementById('mobile-sticky-action');
+                if (mobileStickyAction) {
+                    mobileStickyAction.innerHTML =
+                        '<span class="shrink-0 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs">Lelang Ditutup</span>';
                 }
 
                 closeModal();
             };
 
-            // Minta server memperbarui status setelah countdown habis.
             const notifyServerExpired = async () => {
                 if (expirationRequestSent) return;
 
@@ -636,8 +717,6 @@
 
                     const result = await response.json();
 
-                    // Jika timer browser sedikit lebih cepat daripada waktu server,
-                    // coba sinkronkan kembali setelah satu detik.
                     if (
                         response.status === 409 &&
                         result.status === 'active'
@@ -702,6 +781,7 @@
             }
 
             openButton?.addEventListener('click', openModal);
+            openButtonMobile?.addEventListener('click', openModal);
 
             document.getElementById('close-bid-modal')
                 ?.addEventListener('click', closeModal);
@@ -721,7 +801,6 @@
                 }
             });
 
-            // Kirim penawaran menggunakan format JSON dari AuctionController.
             if (form) {
                 form.addEventListener('submit', async (event) => {
                     event.preventDefault();
@@ -764,10 +843,13 @@
                         }
 
                         const result = payload.data;
+                        const formattedHighest = 'Rp ' + Number(result.highest_bid).toLocaleString('id-ID');
 
-                        document.getElementById('current-price').textContent =
-                            'Rp ' + Number(result.highest_bid)
-                                .toLocaleString('id-ID');
+                        document.getElementById('current-price').textContent = formattedHighest;
+                        const mobilePriceEl = document.getElementById('mobile-sticky-price');
+                        if (mobilePriceEl) {
+                            mobilePriceEl.textContent = formattedHighest;
+                        }
 
                         document.getElementById('minimum-bid-label').textContent =
                             'Rp ' + Number(result.min_next_bid)
@@ -776,7 +858,6 @@
                         input.min = result.min_next_bid;
                         input.value = result.min_next_bid;
 
-                        // Perbarui countdown menggunakan sisa waktu yang dikirim server.
                         if (result.time_remaining_seconds !== undefined) {
                             remainingSeconds = Math.max(
                                 0,
@@ -797,7 +878,6 @@
                         document.getElementById('no-bids-message')?.remove();
 
                         const item = document.createElement('div');
-
                         item.className =
                             'bid-history-item flex items-center justify-between gap-3 border-b border-slate-100 pb-3';
 
@@ -806,11 +886,11 @@
 
                         const name = document.createElement('p');
                         name.className =
-                            'truncate text-sm font-bold text-slate-800';
+                            'truncate text-sm font-bold text-slate-900';
                         name.textContent = result.bidder?.name || 'Mahasiswa';
 
                         const date = document.createElement('p');
-                        date.className = 'mt-0.5 text-[11px] text-slate-400';
+                        date.className = 'mt-0.5 text-[11px] font-medium text-slate-600';
                         date.textContent = 'Baru saja';
 
                         left.append(name, date);
@@ -835,7 +915,6 @@
                         showFeedback(payload.message, true);
                         closeModal();
 
-                        // Perbarui tombol bila user baru saja memenangkan buy-out.
                         if (result.is_closed) {
                             closeAuctionUI();
                         } else {
@@ -844,10 +923,17 @@
 
                             if (actionArea) {
                                 actionArea.innerHTML =
-                                    '<div class="rounded-xl bg-blue-50 px-4 py-3 text-center text-sm font-semibold text-blue-800">Kamu sedang menjadi penawar tertinggi. Tunggu penawaran peserta lain.</div>';
+                                    '<div class="rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-center text-sm font-semibold text-blue-800">Kamu sedang menjadi penawar tertinggi. Tunggu penawaran peserta lain.</div>';
+                            }
+
+                            const mobileStickyAction = document.getElementById('mobile-sticky-action');
+                            if (mobileStickyAction) {
+                                mobileStickyAction.innerHTML =
+                                    '<span class="shrink-0 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 font-bold text-xs">Penawar Tertinggi</span>';
                             }
 
                             openButton?.remove();
+                            openButtonMobile?.remove();
                         }
                     } catch (error) {
                         errorBox.textContent = error.message;

@@ -22,6 +22,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Halaman katalog barang publik (listings.index)
 Route::get('/katalog', [HomeController::class, 'index'])->name('listings.index');
 
+// Halaman Syarat, Ketentuan Layanan, dan Kebijakan Privasi
+Route::view('/syarat-dan-ketentuan', 'pages.terms')->name('terms');
+Route::get('/kebijakan-privasi', fn () => redirect()->to(route('terms') . '#kebijakan-privasi'))->name('privacy');
+
 // Autentikasi Pengguna (Login, Register Jalur Ganda & Logout)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

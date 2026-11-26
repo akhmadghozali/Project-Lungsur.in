@@ -43,6 +43,16 @@
                             Wanted Ads (Dicari)
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ Route::has('terms') ? route('terms') : url('/syarat-dan-ketentuan') }}" class="text-slate-400 hover:text-white transition inline-block">
+                            Syarat &amp; Ketentuan
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ (Route::has('terms') ? route('terms') : url('/syarat-dan-ketentuan')) . '#kebijakan-privasi' }}" class="text-slate-400 hover:text-white transition inline-block">
+                            Kebijakan Privasi
+                        </a>
+                    </li>
                 </ul>
             </div>
 

@@ -17,66 +17,60 @@
         default => ucfirst($admin->role),
     };
     $adminInitial = strtoupper(mb_substr($admin->name, 0, 1));
+    $pendingBoostCount = \App\Models\BoostPayment::where('status', 'pending')->count();
+    $pendingAuctionCount = \App\Models\AuctionPayment::where('status', 'pending')->count();
 @endphp
 
 <div class="flex min-h-screen"
      x-data="{ imageOpen: false, rejectOpen: false, profileOpen: false, reason: '' }">
 
-    {{-- ===== SIDEBAR ===== --}}
     <aside class="hidden lg:flex w-60 shrink-0 flex-col bg-[#1c2541] text-slate-300">
         <div class="px-6 py-6">
             <div class="text-xl font-extrabold text-white">Lungsur.in</div>
             <div class="text-[10px] font-semibold tracking-widest text-slate-400">STAFF OPERATIONS</div>
         </div>
 
-        <div class="px-6 pb-2 pt-4 text-[10px] font-bold tracking-widest text-slate-500">PORTAL MODERASI</div>
+        <div class="px-6 pb-2 pt-4 text-[10px] font-bold tracking-widest text-slate-400">PORTAL MODERASI</div>
         <nav class="space-y-1 px-3 text-sm">
             <a href="{{ route('admin.verifications.index') }}"
                class="flex items-center justify-between rounded-xl bg-blue-600 px-3 py-2.5 font-semibold text-white">
                 <span class="flex items-center gap-3"><span>🛡</span> User Verification</span>
                 @if ($stats['pending'] > 0)
-                    <span class="rounded-full bg-red-500 px-2 py-0.5 text-[11px]">{{ $stats['pending'] }}</span>
+                    <span class="rounded-full bg-red-500 px-2 py-0.5 text-[11px] font-bold text-white">{{ $stats['pending'] }}</span>
                 @endif
             </a>
 
-            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-500">MONETISASI</div>
+            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-400">MONETISASI</div>
 
-            {{-- Menu Verifikasi Boost Iklan (Rp5.000 / 30 Hari) --}}
             <a href="{{ route('admin.payments.boost') }}"
                class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
                 <span class="flex items-center gap-3">
                     <span class="text-amber-400">⚡</span> Verifikasi Boost Iklan
                 </span>
-                @php
-                    $pendingBoostCount = \App\Models\BoostPayment::where('status', 'pending')->count();
-                @endphp
                 @if ($pendingBoostCount > 0)
                     <span class="rounded-full bg-amber-500 text-slate-950 font-bold px-2 py-0.5 text-[11px]">{{ $pendingBoostCount }}</span>
                 @endif
             </a>
 
-            {{-- Menu Verifikasi Pembukaan Sesi Lelang (Rp5.000) --}}
             <a href="{{ route('admin.payments.auction') }}"
                class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
                 <span class="flex items-center gap-3">
                     <span class="text-emerald-400">🔨</span> Verifikasi Biaya Lelang
                 </span>
-                @php
-                    $pendingAuctionCount = \App\Models\AuctionPayment::where('status', 'pending')->count();
-                @endphp
                 @if ($pendingAuctionCount > 0)
                     <span class="rounded-full bg-emerald-500 text-white font-bold px-2 py-0.5 text-[11px]">{{ $pendingAuctionCount }}</span>
                 @endif
             </a>
 
-            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-500">SISTEM & ADUAN</div>
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>▤</span> Content Moderation</a>
-            <a href="{{ route('admin.reports.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>⚑</span> Reported Items</a>
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>☰</span> System Logs</a>
-            <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"><span>⚙</span> Admin Settings</a>
+            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-400">SISTEM &amp; ADUAN</div>
+            <a href="{{ route('admin.reports.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
+                <span>⚑</span> Reported Items
+            </a>
+            <a href="{{ route('home') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
+                <span>🌐</span> Lihat Katalog Publik
+            </a>
         </nav>
 
-        {{-- Info admin + logout --}}
         <div class="mt-auto p-4">
             <div class="rounded-xl bg-white/5 p-3">
                 <div class="flex items-center gap-3">
@@ -93,44 +87,42 @@
                 <form method="POST" action="{{ route('logout') }}" class="mt-3">
                     @csrf
                     <button type="submit"
-                            class="w-full rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-red-500 hover:text-white">
+                            class="w-full min-h-[40px] rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-red-500 hover:text-white cursor-pointer">
                         ⎋ Keluar
                     </button>
                 </form>
             </div>
-            <div class="mt-3 text-[11px] text-slate-500">© {{ date('Y') }} Lungsur Campus</div>
+            <div class="mt-3 text-[11px] text-slate-400">© {{ date('Y') }} Lungsur Campus</div>
         </div>
     </aside>
 
-    {{-- ===== KONTEN ===== --}}
     <div class="flex min-w-0 flex-1 flex-col">
 
-        {{-- Topbar --}}
-        <header class="flex items-center justify-between gap-4 border-b bg-white px-6 py-3">
+        <header class="flex items-center justify-between gap-3 border-b bg-white px-4 sm:px-6 py-3">
             <form method="GET" action="{{ route('admin.verifications.index') }}" class="w-full max-w-md">
                 <div class="relative flex items-center">
-                    <svg class="pointer-events-none absolute left-3.5 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="pointer-events-none absolute left-3.5 h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                     <input type="text"
                            name="q"
                            value="{{ $search ?? '' }}"
+                           aria-label="Cari nama, NIM, atau email mahasiswa"
                            placeholder="Cari nama, NIM, atau email mahasiswa..."
-                           class="w-full rounded-full bg-slate-100 pl-10 pr-10 py-2 text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 border border-transparent focus:border-blue-500 transition">
+                           class="w-full min-h-[44px] rounded-full bg-slate-100 pl-10 pr-10 py-2 text-base sm:text-sm text-slate-900 placeholder-slate-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 border border-transparent focus:border-blue-500 transition">
                     @if (!empty($search))
                         <a href="{{ route('admin.verifications.index') }}"
-                           class="absolute right-3.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                           class="absolute right-3.5 text-slate-500 hover:text-slate-800 text-xs font-bold"
                            title="Hapus pencarian">✕</a>
                     @endif
                 </div>
             </form>
 
-            {{-- Profil admin (dropdown) --}}
-            <div class="relative" @click.outside="profileOpen = false" @keydown.escape.window="profileOpen = false">
+            <div class="relative shrink-0" @click.outside="profileOpen = false" @keydown.escape.window="profileOpen = false">
                 <button type="button" @click="profileOpen = !profileOpen"
-                        class="flex items-center gap-3 rounded-full py-1 pl-3 pr-1 text-right transition hover:bg-slate-100 cursor-pointer">
+                        class="min-h-[44px] flex items-center gap-2.5 rounded-full py-1 pl-3 pr-1 text-right transition hover:bg-slate-100 cursor-pointer">
                     <div class="hidden leading-tight sm:block">
-                        <div class="text-sm font-semibold text-slate-800">{{ $admin->name }}</div>
+                        <div class="text-sm font-semibold text-slate-900">{{ $admin->name }}</div>
                     </div>
                     <div class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white shadow-xs">
                         {{ $adminInitial }}
@@ -140,16 +132,16 @@
                 <div x-show="profileOpen" x-cloak x-transition
                      class="absolute right-0 z-40 mt-2 w-60 overflow-hidden rounded-xl border bg-white shadow-lg">
                     <div class="border-b px-4 py-3">
-                        <div class="text-sm font-semibold">{{ $admin->name }}</div>
-                        <div class="truncate text-xs text-slate-500">{{ $admin->email }}</div>
-                        <div class="mt-1 inline-block rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                        <div class="text-sm font-semibold text-slate-900">{{ $admin->name }}</div>
+                        <div class="truncate text-xs text-slate-600">{{ $admin->email }}</div>
+                        <div class="mt-1 inline-block rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700">
                             {{ $adminRoleLabel }}
                         </div>
                     </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
-                                class="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-red-50">
+                                class="min-h-[44px] flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50 cursor-pointer">
                             ⎋ Keluar
                         </button>
                     </form>
@@ -157,61 +149,85 @@
             </div>
         </header>
 
-        <main class="space-y-6 p-6">
+        <nav aria-label="Menu Admin Mobile" class="lg:hidden bg-[#1c2541] px-3 py-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-slate-800">
+            <a href="{{ route('admin.verifications.index') }}"
+               class="min-h-[44px] shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-xs">
+                <span>🛡 Verifikasi KTM</span>
+                @if ($stats['pending'] > 0)
+                    <span class="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-extrabold text-white">{{ $stats['pending'] }}</span>
+                @endif
+            </a>
+            <a href="{{ route('admin.payments.boost') }}"
+               class="min-h-[44px] shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 bg-white/10 hover:bg-white/15">
+                <span>⚡ Boost Iklan</span>
+                @if ($pendingBoostCount > 0)
+                    <span class="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-extrabold text-slate-950">{{ $pendingBoostCount }}</span>
+                @endif
+            </a>
+            <a href="{{ route('admin.payments.auction') }}"
+               class="min-h-[44px] shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 bg-white/10 hover:bg-white/15">
+                <span>🔨 Biaya Lelang</span>
+                @if ($pendingAuctionCount > 0)
+                    <span class="rounded-full bg-emerald-500 px-1.5 py-0.5 text-[10px] font-extrabold text-white">{{ $pendingAuctionCount }}</span>
+                @endif
+            </a>
+            <a href="{{ route('admin.reports.index') }}"
+               class="min-h-[44px] shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 bg-white/10 hover:bg-white/15">
+                <span>⚑ Laporan Iklan</span>
+            </a>
+        </nav>
 
-            {{-- Judul --}}
+        <main class="space-y-6 p-4 sm:p-6">
+
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <div class="text-[11px] font-bold tracking-widest text-emerald-600">● CAMPUS TRUST &amp; SAFETY MODULE</div>
-                    <h1 class="mt-1 text-3xl font-extrabold leading-tight">Verifikasi Identitas<br>Mahasiswa (KTM)</h1>
-                    <p class="mt-2 max-w-xl text-sm text-slate-500">
+                    <div class="text-[11px] font-bold tracking-widest text-emerald-700">● CAMPUS TRUST &amp; SAFETY MODULE</div>
+                    <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold leading-tight text-slate-900">Verifikasi Identitas<br>Mahasiswa (KTM)</h1>
+                    <p class="mt-2 max-w-xl text-xs sm:text-sm text-slate-600">
                         Pendaftar dengan email kampus (.ac.id) otomatis lolos. Halaman ini untuk meninjau
                         KTM pendaftar yang memakai email non-kampus agar hanya mahasiswa asli
                         yang bisa berjualan dan bertransaksi di Lungsur.in.
                     </p>
                     @if (!empty($search))
-                        <div class="mt-3 inline-flex items-center gap-2 rounded-xl bg-blue-50 px-3.5 py-1.5 text-xs text-blue-700 border border-blue-200">
+                        <div class="mt-3 inline-flex items-center gap-2 rounded-xl bg-blue-50 px-3.5 py-1.5 text-xs text-blue-800 border border-blue-200">
                             <span>Menampilkan hasil pencarian untuk: <strong>"{{ $search }}"</strong></span>
-                            <a href="{{ route('admin.verifications.index') }}" class="font-bold text-blue-600 hover:text-blue-800 ml-1">✕ Reset Pencarian</a>
+                            <a href="{{ route('admin.verifications.index') }}" class="font-bold text-blue-700 hover:text-blue-900 ml-1">✕ Reset Pencarian</a>
                         </div>
                     @endif
                 </div>
                 <a href="{{ route('admin.verifications.index') }}"
-                   class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+                   class="min-h-[44px] inline-flex items-center rounded-xl bg-blue-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-blue-700">
                     ⟳ Refresh Antrean
                 </a>
             </div>
 
-            {{-- Flash --}}
             @if (session('success'))
-                <div class="rounded-xl bg-emerald-100 px-4 py-3 text-sm text-emerald-800">{{ session('success') }}</div>
+                <div class="rounded-xl bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-900">{{ session('success') }}</div>
             @endif
             @if ($errors->any())
-                <div class="rounded-xl bg-red-100 px-4 py-3 text-sm text-red-800">{{ $errors->first() }}</div>
+                <div class="rounded-xl bg-red-100 px-4 py-3 text-sm font-semibold text-red-900">{{ $errors->first() }}</div>
             @endif
 
-            {{-- Statistik --}}
-            <div class="grid grid-cols-2 gap-4 xl:grid-cols-4">
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
                 @php
                     $cards = [
-                        ['label' => 'ANTREAN KTM', 'value' => $stats['pending'], 'sub' => 'Menunggu verifikasi', 'color' => 'text-blue-600'],
-                        ['label' => 'DISETUJUI HARI INI', 'value' => $stats['approved_today'], 'sub' => 'Akun diaktifkan', 'color' => 'text-emerald-600'],
-                        ['label' => 'DITOLAK HARI INI', 'value' => $stats['rejected_today'], 'sub' => 'Perlu daftar ulang', 'color' => 'text-red-600'],
-                        ['label' => 'TOTAL TERVERIFIKASI', 'value' => $stats['total_verified'], 'sub' => 'Semua waktu', 'color' => 'text-slate-700'],
+                        ['label' => 'ANTREAN KTM', 'value' => $stats['pending'], 'sub' => 'Menunggu verifikasi', 'color' => 'text-blue-700'],
+                        ['label' => 'DISETUJUI HARI INI', 'value' => $stats['approved_today'], 'sub' => 'Akun diaktifkan', 'color' => 'text-emerald-700'],
+                        ['label' => 'DITOLAK HARI INI', 'value' => $stats['rejected_today'], 'sub' => 'Perlu daftar ulang', 'color' => 'text-red-700'],
+                        ['label' => 'TOTAL TERVERIFIKASI', 'value' => $stats['total_verified'], 'sub' => 'Semua waktu', 'color' => 'text-slate-900'],
                     ];
                 @endphp
                 @foreach ($cards as $c)
-                    <div class="rounded-2xl border bg-white p-4">
-                        <div class="text-[10px] font-bold tracking-wider text-slate-500">{{ $c['label'] }}</div>
-                        <div class="mt-1 text-3xl font-extrabold {{ $c['color'] }}">{{ $c['value'] }}</div>
-                        <div class="mt-1 text-xs text-slate-400">{{ $c['sub'] }}</div>
+                    <div class="rounded-2xl border bg-white p-3.5 sm:p-4">
+                        <div class="text-[10px] font-bold tracking-wider text-slate-600">{{ $c['label'] }}</div>
+                        <div class="mt-1 text-2xl sm:text-3xl font-extrabold {{ $c['color'] }}">{{ $c['value'] }}</div>
+                        <div class="mt-1 text-xs text-slate-600">{{ $c['sub'] }}</div>
                     </div>
                 @endforeach
             </div>
 
             <div class="grid gap-6 xl:grid-cols-3">
 
-                {{-- ===== KOLOM KIRI: DETAIL + ANTREAN ===== --}}
                 <div class="space-y-6 xl:col-span-2">
 
                     @if ($selected)
@@ -237,35 +253,33 @@
                             $allOk = collect($checks)->every(fn ($c) => $c['ok']);
                         @endphp
 
-                        <section class="rounded-2xl border bg-white p-5">
-                            {{-- Header pendaftar --}}
+                        <section class="rounded-2xl border bg-white p-4 sm:p-5">
                             <div class="flex flex-wrap items-center justify-between gap-3">
                                 <div class="flex items-center gap-3">
                                     <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-base font-bold text-blue-700">
                                         {{ strtoupper(mb_substr($selected->name, 0, 2)) }}
                                     </div>
                                     <div>
-                                        <div class="text-lg font-bold">{{ $selected->name }}</div>
-                                        <div class="text-xs text-slate-500">
+                                        <div class="text-lg font-bold text-slate-900">{{ $selected->name }}</div>
+                                        <div class="text-xs text-slate-600">
                                             Mendaftar {{ $selected->created_at?->diffForHumans() }}
                                             · {{ $selected->created_at?->format('d M Y, H:i') }} WIB
                                         </div>
                                     </div>
                                 </div>
-                                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
-                                    ⏳ Menunggu Verifikasi
+                                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
+                                    Menunggu Verifikasi
                                 </span>
                             </div>
 
                             <div class="mt-5 grid gap-5 md:grid-cols-2">
-                                {{-- Foto KTM --}}
                                 <div>
                                     <div class="mb-2 flex items-center justify-between">
-                                        <span class="text-[10px] font-bold tracking-widest text-slate-500">PRATINJAU FOTO KTM</span>
+                                        <span class="text-[10px] font-bold tracking-widest text-slate-600">PRATINJAU FOTO KTM</span>
                                         @if ($selected->ktm_image_path)
                                             <button type="button" @click="imageOpen = true"
-                                                    class="text-xs font-semibold text-blue-600 hover:underline">
-                                                🔍 Perbesar
+                                                    class="min-h-[36px] px-2 text-xs font-bold text-blue-700 hover:underline cursor-pointer">
+                                                Perbesar Foto
                                             </button>
                                         @endif
                                     </div>
@@ -276,36 +290,35 @@
                                                  @click="imageOpen = true"
                                                  class="max-h-72 w-full cursor-zoom-in rounded-lg object-contain">
                                         @else
-                                            <span class="text-sm text-slate-400">Foto KTM belum diunggah</span>
+                                            <span class="text-sm text-slate-600">Foto KTM belum diunggah</span>
                                         @endif
                                     </div>
                                 </div>
 
-                                {{-- Identitas + pengecekan --}}
                                 <div class="space-y-4">
                                     <div>
-                                        <div class="mb-2 text-[10px] font-bold tracking-widest text-slate-500">IDENTITAS PENDAFTAR</div>
+                                        <div class="mb-2 text-[10px] font-bold tracking-widest text-slate-600">IDENTITAS PENDAFTAR</div>
                                         <dl class="space-y-2 rounded-xl bg-slate-50 p-4 text-sm">
-                                            <div class="flex justify-between gap-3"><dt class="text-slate-500">Nama</dt><dd class="font-semibold text-right">{{ $selected->name }}</dd></div>
-                                            <div class="flex justify-between gap-3"><dt class="text-slate-500">NIM</dt><dd class="font-semibold text-right">{{ $selected->nim ?? '-' }}</dd></div>
-                                            <div class="flex justify-between gap-3"><dt class="text-slate-500">Email</dt><dd class="font-semibold text-right break-all">{{ $selected->email }}</dd></div>
-                                            <div class="flex justify-between gap-3"><dt class="text-slate-500">Tipe email</dt><dd class="font-semibold text-right capitalize">{{ $selected->email_type }}</dd></div>
-                                            <div class="flex justify-between gap-3"><dt class="text-slate-500">Kampus</dt><dd class="font-semibold text-right">{{ $selected->campus ?? '-' }}</dd></div>
+                                            <div class="flex justify-between gap-3"><dt class="text-slate-600">Nama</dt><dd class="font-bold text-slate-900 text-right">{{ $selected->name }}</dd></div>
+                                            <div class="flex justify-between gap-3"><dt class="text-slate-600">NIM</dt><dd class="font-bold text-slate-900 text-right">{{ $selected->nim ?? '-' }}</dd></div>
+                                            <div class="flex justify-between gap-3"><dt class="text-slate-600">Email</dt><dd class="font-bold text-slate-900 text-right break-all">{{ $selected->email }}</dd></div>
+                                            <div class="flex justify-between gap-3"><dt class="text-slate-600">Tipe email</dt><dd class="font-bold text-slate-900 text-right capitalize">{{ $selected->email_type }}</dd></div>
+                                            <div class="flex justify-between gap-3"><dt class="text-slate-600">Kampus</dt><dd class="font-bold text-slate-900 text-right">{{ $selected->campus ?? '-' }}</dd></div>
                                         </dl>
                                     </div>
 
                                     <div>
-                                        <div class="mb-2 text-[10px] font-bold tracking-widest text-slate-500">PENGECEKAN OTOMATIS</div>
+                                        <div class="mb-2 text-[10px] font-bold tracking-widest text-slate-600">PENGECEKAN OTOMATIS</div>
                                         <div class="rounded-xl p-4 {{ $allOk ? 'bg-emerald-50' : 'bg-amber-50' }}">
                                             <ul class="space-y-1.5 text-sm">
                                                 @foreach ($checks as $c)
-                                                    <li class="flex items-center gap-2 {{ $c['ok'] ? 'text-emerald-700' : 'text-amber-700' }}">
+                                                    <li class="flex items-center gap-2 {{ $c['ok'] ? 'text-emerald-800 font-semibold' : 'text-amber-800 font-semibold' }}">
                                                         <span class="font-bold">{{ $c['ok'] ? '✓' : '!' }}</span>
                                                         {{ $c['ok'] ? $c['label_ok'] : $c['label_fail'] }}
                                                     </li>
                                                 @endforeach
                                             </ul>
-                                            <p class="mt-3 text-[11px] text-slate-500">
+                                            <p class="mt-3 text-[11px] text-slate-600">
                                                 Cocokkan manual nama &amp; NIM di KTM dengan data di atas sebelum menyetujui.
                                             </p>
                                         </div>
@@ -313,20 +326,19 @@
                                 </div>
                             </div>
 
-                            {{-- Aksi --}}
                             <div class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-                                <p class="text-xs text-slate-500">
-                                    ⓘ Setelah disetujui, akun langsung aktif dan bisa bertransaksi.
+                                <p class="text-xs text-slate-600">
+                                    Setelah disetujui, akun langsung aktif dan bisa bertransaksi.
                                 </p>
-                                <div class="flex gap-2">
+                                <div class="flex gap-2 w-full sm:w-auto">
                                     <button type="button" @click="rejectOpen = true"
-                                            class="rounded-xl bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-100">
+                                            class="flex-1 sm:flex-initial min-h-[44px] rounded-xl bg-red-50 border border-red-200 px-5 py-2.5 text-sm font-bold text-red-700 hover:bg-red-100 cursor-pointer">
                                         ✕ Tolak
                                     </button>
-                                    <form method="POST" action="{{ route('admin.verifications.approve', $selected) }}">
+                                    <form method="POST" action="{{ route('admin.verifications.approve', $selected) }}" class="flex-1 sm:flex-initial">
                                         @csrf
                                         <button type="submit"
-                                                class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
+                                                class="w-full min-h-[44px] rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 cursor-pointer">
                                             ✓ Setujui &amp; Aktifkan Akun
                                         </button>
                                     </form>
@@ -334,41 +346,38 @@
                             </div>
                         </section>
                     @else
-                        <section class="rounded-2xl border bg-white p-12 text-center">
+                        <section class="rounded-2xl border bg-white p-8 sm:p-12 text-center">
                             @if (!empty($search))
-                                <div class="text-4xl">🔍</div>
-                                <div class="mt-2 text-lg font-bold">Tidak ada hasil pencarian</div>
-                                <p class="text-sm text-slate-500">Tidak ada pendaftar pending yang cocok dengan kata kunci "{{ $search }}".</p>
+                                <div class="text-lg font-bold text-slate-900">Tidak ada hasil pencarian</div>
+                                <p class="text-sm text-slate-600 mt-1">Tidak ada pendaftar pending yang cocok dengan kata kunci "{{ $search }}".</p>
                                 <a href="{{ route('admin.verifications.index') }}"
-                                   class="mt-4 inline-block rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700">
+                                   class="mt-4 min-h-[44px] inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700">
                                     Reset Pencarian
                                 </a>
                             @else
-                                <div class="text-4xl">🎉</div>
-                                <div class="mt-2 text-lg font-bold">Antrean kosong</div>
-                                <p class="text-sm text-slate-500">Tidak ada pendaftar yang menunggu verifikasi KTM.</p>
+                                <div class="text-lg font-bold text-slate-900">Antrean kosong</div>
+                                <p class="text-sm text-slate-600 mt-1">Tidak ada pendaftar yang menunggu verifikasi KTM.</p>
                             @endif
                         </section>
                     @endif
 
-                    {{-- Antrean lainnya --}}
                     @if ($queue->isNotEmpty())
                         <section>
                             <div class="mb-3 flex items-center justify-between">
-                                <span class="text-[10px] font-bold tracking-widest text-slate-500">
+                                <span class="text-[10px] font-bold tracking-widest text-slate-600">
                                     ANTREAN LAINNYA ({{ $queue->count() }} TERSISA)
                                 </span>
-                                <span class="text-xs font-semibold text-blue-600">Diurutkan berdasarkan waktu masuk</span>
+                                <span class="text-xs font-semibold text-blue-700">Diurutkan berdasarkan waktu masuk</span>
                             </div>
                             <div class="grid gap-3 sm:grid-cols-2">
                                 @foreach ($queue as $u)
                                     <a href="{{ route('admin.verifications.index', array_filter(['user' => $u->id, 'q' => $search ?? null])) }}"
                                        class="rounded-2xl border bg-white p-4 transition hover:border-blue-400 hover:shadow">
-                                        <div class="font-semibold">{{ $u->name }}</div>
-                                        <div class="text-xs text-slate-500">NIM {{ $u->nim ?? '-' }} · {{ $u->campus ?? '-' }}</div>
+                                        <div class="font-bold text-slate-900">{{ $u->name }}</div>
+                                        <div class="text-xs text-slate-600">NIM {{ $u->nim ?? '-' }} · {{ $u->campus ?? '-' }}</div>
                                         <div class="mt-2 flex items-center justify-between text-xs">
-                                            <span class="truncate text-slate-400">{{ $u->email }}</span>
-                                            <span class="ml-2 shrink-0 text-slate-500">{{ $u->created_at?->diffForHumans(null, true) }}</span>
+                                            <span class="truncate text-slate-600">{{ $u->email }}</span>
+                                            <span class="ml-2 shrink-0 text-slate-600 font-medium">{{ $u->created_at?->diffForHumans(null, true) }}</span>
                                         </div>
                                     </a>
                                 @endforeach
@@ -377,27 +386,26 @@
                     @endif
                 </div>
 
-                {{-- ===== KOLOM KANAN: RIWAYAT ===== --}}
                 <aside class="rounded-2xl border bg-white p-5">
-                    <div class="mb-4 text-[10px] font-bold tracking-widest text-slate-500">RIWAYAT VERIFIKASI TERBARU</div>
+                    <div class="mb-4 text-[10px] font-bold tracking-widest text-slate-600">RIWAYAT VERIFIKASI TERBARU</div>
                     <ul class="space-y-3">
                         @forelse ($recent as $r)
                             <li class="flex items-start justify-between gap-3 rounded-xl bg-slate-50 p-3">
                                 <div class="min-w-0">
-                                    <div class="truncate text-sm font-semibold">{{ $r->name }}</div>
-                                    <div class="text-[11px] text-slate-500">{{ $r->verified_at?->diffForHumans() }}</div>
+                                    <div class="truncate text-sm font-bold text-slate-900">{{ $r->name }}</div>
+                                    <div class="text-[11px] text-slate-600">{{ $r->verified_at?->diffForHumans() }}</div>
                                     @if ($r->verification_status === 'rejected' && $r->rejection_reason)
-                                        <div class="mt-1 text-[11px] text-red-600">{{ $r->rejection_reason }}</div>
+                                        <div class="mt-1 text-[11px] text-red-700 font-medium">{{ $r->rejection_reason }}</div>
                                     @endif
                                 </div>
                                 @if ($r->verification_status === 'active')
-                                    <span class="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Disetujui</span>
+                                    <span class="shrink-0 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800">Disetujui</span>
                                 @else
-                                    <span class="shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700">Ditolak</span>
+                                    <span class="shrink-0 rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-bold text-red-800">Ditolak</span>
                                 @endif
                             </li>
                         @empty
-                            <li class="text-sm text-slate-400">Belum ada riwayat verifikasi.</li>
+                            <li class="text-sm text-slate-600">Belum ada riwayat verifikasi.</li>
                         @endforelse
                     </ul>
                 </aside>
@@ -405,21 +413,20 @@
         </main>
     </div>
 
-    {{-- ===== MODAL: PERBESAR KTM ===== --}}
     @if ($selected && $selected->ktm_image_path)
         <div x-show="imageOpen" x-cloak
              class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
              @click.self="imageOpen = false" @keydown.escape.window="imageOpen = false">
             <div class="relative w-full max-w-4xl rounded-2xl bg-white p-4">
                 <button type="button" @click="imageOpen = false"
-                        class="absolute right-3 top-2 text-3xl leading-none text-slate-400 hover:text-black">&times;</button>
+                        aria-label="Tutup gambar KTM"
+                        class="absolute right-3 top-2 w-11 h-11 flex items-center justify-center text-3xl leading-none text-slate-600 hover:text-black cursor-pointer">&times;</button>
                 <img src="{{ asset('storage/' . $selected->ktm_image_path) }}" alt="KTM"
                      class="mx-auto max-h-[80vh] rounded-lg">
             </div>
         </div>
     @endif
 
-    {{-- ===== MODAL: ALASAN PENOLAKAN ===== --}}
     @if ($selected)
         <div x-show="rejectOpen" x-cloak
              class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
@@ -427,29 +434,29 @@
             <form method="POST" action="{{ route('admin.verifications.reject', $selected) }}"
                   class="w-full max-w-md rounded-2xl bg-white p-6">
                 @csrf
-                <h2 class="text-lg font-bold">Tolak pendaftaran</h2>
-                <p class="mb-4 text-sm text-slate-500">Akun: {{ $selected->name }}</p>
+                <h2 class="text-lg font-bold text-slate-900">Tolak Pendaftaran</h2>
+                <p class="mb-4 text-sm text-slate-600">Akun: {{ $selected->name }}</p>
 
                 <div class="mb-3 flex flex-wrap gap-2">
                     @foreach (['Foto KTM buram / tidak terbaca', 'NIM tidak sesuai dengan KTM', 'Nama tidak sesuai dengan KTM', 'Bukan KTM yang valid'] as $chip)
                         <button type="button" @click="reason = @js($chip)"
-                                class="rounded-full bg-slate-100 px-3 py-1 text-xs hover:bg-slate-200">
+                                class="min-h-[36px] rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-200 cursor-pointer">
                             {{ $chip }}
                         </button>
                     @endforeach
                 </div>
 
-                <label for="rejection_reason" class="mb-1 block text-sm font-medium">Alasan penolakan</label>
+                <label for="rejection_reason" class="mb-1 block text-sm font-bold text-slate-800">Alasan penolakan</label>
                 <textarea id="rejection_reason" name="rejection_reason" rows="3" required maxlength="255"
                           x-model="reason"
-                          class="mb-4 w-full rounded-lg border border-slate-300 p-2 text-sm"
+                          class="mb-4 w-full rounded-xl border border-slate-300 p-3 text-base sm:text-sm text-slate-900"
                           placeholder="Tulis alasan atau pilih salah satu di atas"></textarea>
 
                 <div class="flex justify-end gap-2">
                     <button type="button" @click="rejectOpen = false"
-                            class="rounded-lg px-4 py-2 text-sm text-slate-600 hover:bg-slate-100">Batal</button>
+                            class="min-h-[44px] rounded-xl px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 cursor-pointer">Batal</button>
                     <button type="submit"
-                            class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">
+                            class="min-h-[44px] rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700 cursor-pointer">
                         Tolak Pendaftaran
                     </button>
                 </div>
