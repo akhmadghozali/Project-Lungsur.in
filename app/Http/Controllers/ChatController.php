@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class ChatController extends Controller
 {
@@ -68,12 +69,12 @@ class ChatController extends Controller
 
                 return [
                     'id' => $conversation->id,
-                    'listing' => [
+                    'listing' => $conversation->listing ? [
                         'id' => $conversation->listing->id,
                         'title' => $conversation->listing->title,
                         'price' => (float) $conversation->listing->price,
                         'status' => $conversation->listing->status,
-                    ],
+                    ] : null,
                     'interlocutor' => $otherParticipant ? [
                         'id' => $otherParticipant->id,
                         'name' => $otherParticipant->name,
@@ -84,6 +85,9 @@ class ChatController extends Controller
                         'sender_id' => $conversation->latestMessage->sender_id,
                         'sender_name' => $conversation->latestMessage->sender?->name,
                         'message_text' => $conversation->latestMessage->message_text,
+                        'image_url' => $conversation->latestMessage->image_path
+                        ? Storage::disk('public')->url($conversation->latestMessage->image_path)
+                        : null,
                         'is_read' => $conversation->latestMessage->is_read,
                         'created_at' => $conversation->latestMessage->created_at?->toISOString(),
                     ] : null,
@@ -265,6 +269,10 @@ class ChatController extends Controller
                         'campus' => $msg->sender->campus,
                     ],
                     'message_text' => $msg->message_text,
+                    'image_path' => $msg->image_path,
+                    'image_url' => $msg->image_path
+                        ? Storage::disk('public')->url($msg->image_path)
+                        : null,
                     'is_read' => $msg->is_read,
                     'created_at' => $msg->created_at?->toISOString(),
                 ];
@@ -276,12 +284,12 @@ class ChatController extends Controller
             'status' => 'success',
             'data' => [
                 'conversation_id' => $conversation->id,
-                'listing' => [
+                'listing' => $conversation->listing ? [
                     'id' => $conversation->listing->id,
                     'title' => $conversation->listing->title,
                     'price' => (float) $conversation->listing->price,
                     'status' => $conversation->listing->status,
-                ],
+                ] : null,
                 'interlocutor' => $otherParticipant ? [
                     'id' => $otherParticipant->id,
                     'name' => $otherParticipant->name,
@@ -320,11 +328,20 @@ class ChatController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'message_text' => ['required', 'string', 'max:2000'],
+            'message_text' => ['nullable', 'string', 'max:2000'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ], [
-            'message_text.required' => 'Pesan tidak boleh kosong.',
             'message_text.max' => 'Pesan maksimal 2000 karakter.',
+            'image.image' => 'File harus berupa gambar.',
+            'image.mimes' => 'Format foto harus JPG, JPEG, PNG, atau WEBP.',
+            'image.max' => 'Ukuran foto maksimal 2 MB.',
         ]);
+
+        $validator->after(function ($validator) use ($request) {
+            if (!$request->filled('message_text') && !$request->hasFile('image')) {
+                $validator->errors()->add('message_text', 'Pesan atau foto harus diisi.');
+            }
+        });
 
         if ($validator->fails()) {
             return response()->json([
@@ -349,12 +366,17 @@ class ChatController extends Controller
             ], 403);
         }
 
-        $message = Message::create([
-            'conversation_id' => $conversation->id,
-            'sender_id' => $user->id,
-            'message_text' => $request->message_text,
-            'is_read' => false,
-        ]);
+        $imagePath = $request->hasFile('image')
+        ? $request->file('image')->store('chat-images', 'public')
+        : null;
+
+    $message = Message::create([
+        'conversation_id' => $conversation->id,
+        'sender_id' => $user->id,
+        'message_text' => $request->message_text,
+        'image_path' => $imagePath,
+        'is_read' => false,
+    ]);
 
         $conversation->update(['last_message_at' => now()]);
         $message->load('sender:id,name,campus');
@@ -377,6 +399,10 @@ class ChatController extends Controller
                     'campus' => $user->campus,
                 ],
                 'message_text' => $message->message_text,
+                'image_path' => $message->image_path,
+                'image_url' => $message->image_path
+                    ? Storage::disk('public')->url($message->image_path)
+                    : null,
                 'is_read' => $message->is_read,
                 'created_at' => $message->created_at?->toISOString(),
             ],
