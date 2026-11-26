@@ -116,7 +116,7 @@ class AuthRegistrationTest extends TestCase
         $this->assertSame('public', $cachedData['email_type']);
 
         $this->assertNotNull($cachedData['ktm_image_path']);
-        Storage::disk('public')->assertExists($cachedData['ktm_image_path']);
+        Storage::disk('local')->assertExists($cachedData['ktm_image_path']);
 
         Mail::assertSent(OtpVerificationMail::class);
 

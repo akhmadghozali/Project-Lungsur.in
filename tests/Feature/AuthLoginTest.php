@@ -102,7 +102,7 @@ class AuthLoginTest extends TestCase
             ->assertJsonPath('status', 'error')
             ->assertJsonPath(
                 'message',
-                'Akun Anda ditangguhkan karena pelanggaran ketentuan platform. Silakan hubungi admin.'
+                'Akun Anda ditangguhkan sementara oleh administrator. Silakan hubungi admin jika merasa ini kekeliruan.'
             );
 
         $this->assertGuest();
@@ -125,7 +125,7 @@ class AuthLoginTest extends TestCase
             ->assertJsonPath('status', 'error')
             ->assertJsonPath(
                 'message',
-                'Akun Anda ditangguhkan karena pelanggaran ketentuan platform. Silakan hubungi admin.'
+                'Akun Anda diblokir permanen oleh administrator. Silakan hubungi admin jika merasa ini kekeliruan.'
             );
 
         $this->assertGuest();
@@ -190,7 +190,7 @@ class AuthLoginTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonPath('status', 'success')
-            ->assertJsonPath('redirect', route('admin.verifications.index'));
+            ->assertJsonPath('redirect', route('admin.dashboard'));
 
         $this->assertAuthenticatedAs($admin);
     }
