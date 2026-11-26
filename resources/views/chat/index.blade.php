@@ -205,14 +205,40 @@
                         </div>
                         <div class="min-w-0">
                             <h3 class="text-xs font-bold text-slate-900 truncate" x-text="currentListing?.title"></h3>
-                            <p class="text-xs font-black text-blue-700" 
-                               x-text="'Rp ' + Number(currentListing?.price || 0).toLocaleString('id-ID')"></p>
+                            <div class="flex items-center gap-2 flex-wrap">
+                            <p class="text-xs font-black text-blue-700"
+                            x-text="'Rp ' + Number(currentListing?.price || 0).toLocaleString('id-ID')"></p>
+
+                            <span
+                                x-show="currentListing?.status"
+                                class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                :class="{
+                                    'bg-emerald-100 text-emerald-700': currentListing?.status === 'available',
+                                    'bg-red-100 text-red-700': currentListing?.status === 'sold',
+                                    'bg-amber-100 text-amber-700': currentListing?.status === 'lelang',
+                                    'bg-slate-100 text-slate-700': !['available', 'sold', 'lelang'].includes(currentListing?.status)
+                                }"
+                                x-text="{
+                                    available: 'Tersedia',
+                                    sold: 'Terjual',
+                                    lelang: 'Lelang'
+                                }[currentListing?.status] || currentListing?.status">
+                            </span>
+                        </div>
                         </div>
                     </div>
-                    <a :href="'/katalog/' + currentListing?.id" 
-                       class="min-h-[44px] inline-flex items-center px-2.5 text-xs font-bold text-blue-700 hover:text-blue-800 hover:underline flex-shrink-0 ml-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded-lg">
-                        Lihat Iklan
-                    </a>
+                   <template x-if="['available', 'lelang'].includes(currentListing?.status)">
+                        <a :href="'/katalog/' + currentListing?.id"
+                        class="text-xs font-bold text-blue-700 hover:underline">
+                            Lihat Iklan
+                        </a>
+                    </template>
+
+                    <template x-if="currentListing?.status === 'sold'">
+                        <span class="text-xs font-bold text-red-500">
+                            Iklan sudah terjual
+                        </span>
+                    </template>
                 </div>
 
                 <div class="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-3.5 sm:space-y-4" x-ref="messageContainer">
@@ -248,7 +274,16 @@
                             
                             <div class="px-3.5 py-2.5 shadow-xs rounded-2xl break-words" 
                                  :class="msg.sender === 'me' ? 'bg-blue-600 text-white rounded-tr-xs' : 'bg-slate-100 text-slate-900 rounded-tl-xs'">
-                                <p class="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap" x-text="msg.text"></p>
+                                <template x-if="msg.image_url">
+                                    <img :src="msg.image_url"
+                                        alt="Foto dalam pesan"
+                                        class="max-w-full max-h-64 rounded-lg object-contain mb-2 cursor-pointer"
+                                        @click="window.open(msg.image_url, '_blank')">
+                                </template>
+
+                                <p x-show="msg.text"
+                                class="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap"
+                                x-text="msg.text"></p>
                                 
                                 <div class="flex items-center justify-end gap-1 mt-1 text-[10px]" 
                                      :class="msg.sender === 'me' ? 'text-blue-100' : 'text-slate-600'">
@@ -306,26 +341,59 @@
                 </div>
 
                 <div class="p-3 sm:p-4 bg-white border-t border-slate-100 flex-shrink-0">
-                    <form @submit.prevent="sendMessage()" class="flex items-center gap-2">
-                        <div class="flex-1">
-                            <input type="text" 
-                                   x-model="newMessage" 
-                                   :disabled="isSending"
-                                   aria-label="Tulis pesan obrolan"
-                                   class="w-full min-h-[44px] px-4 py-2.5 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-600 transition placeholder:text-slate-500" 
-                                   placeholder="Tulis pesan untuk berdiskusi atau COD..."/>
-                        </div>
-                        <button type="submit" 
-                                :disabled="!newMessage.trim() || isSending"
-                                :class="(!newMessage.trim() || isSending) ? 'opacity-50 cursor-not-allowed bg-slate-300' : 'bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 cursor-pointer'"
-                                class="w-11 h-11 text-white rounded-xl flex items-center justify-center transition flex-shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" 
-                                aria-label="Kirim Pesan"
-                                title="Kirim Pesan">
-                            <svg class="w-4 h-4 translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
-                            </svg>
+                    
+                        <div x-show="imagePreview" class="mb-2">
+                    <div class="relative inline-block">
+                        <img :src="imagePreview"
+                            alt="Preview foto"
+                            class="w-20 h-20 object-cover rounded-lg border border-slate-200">
+
+                        <button type="button"
+                                @click="removeSelectedImage()"
+                                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full">
+                            &times;
                         </button>
-                    </form>
+                    </div>
+                </div>
+
+                <form @submit.prevent="sendMessage()" class="flex items-center gap-2">
+                    <input type="file"
+                        x-ref="imageInput"
+                        accept="image/jpeg,image/png,image/jpg,image/webp"
+                        @change="handleImageSelect($event)"
+                        class="hidden">
+
+                    <button type="button"
+                            @click="$refs.imageInput.click()"
+                            :disabled="isSending"
+                            class="w-11 h-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0"
+                            title="Pilih foto">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <path d="m21 15-5-5L5 21"/>
+                        </svg>
+                    </button>
+
+                    <div class="flex-1">
+                        <input type="text"
+                            x-model="newMessage"
+                            :disabled="isSending"
+                            aria-label="Tulis pesan obrolan"
+                            class="w-full min-h-[44px] px-4 py-2.5 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl"
+                            placeholder="Tulis pesan..."/>
+                    </div>
+
+                    <button type="submit"
+                            :disabled="(!newMessage.trim() && !selectedImage) || isSending"
+                            class="w-11 h-11 text-white rounded-xl flex items-center justify-center flex-shrink-0"
+                            :class="(!newMessage.trim() && !selectedImage) || isSending ? 'bg-slate-300' : 'bg-blue-600 hover:bg-blue-700'"
+                            aria-label="Kirim Pesan">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </form>
                 </div>
 
             </div>
@@ -345,6 +413,8 @@ function chatApp(initialListing = null, currentUser = null) {
         messages: [],
         searchQuery: '',
         newMessage: '',
+        selectedImage: null,
+        imagePreview: null,
         isLoadingRooms: true,
         isLoadingMessages: false,
         isSending: false,
@@ -533,8 +603,9 @@ function chatApp(initialListing = null, currentUser = null) {
                             id: m.id,
                             sender: (m.sender && m.sender.id === this.currentUser.id) ? 'me' : 'other',
                             sender_name: m.sender?.name || '',
-                            type: 'text',
-                            text: m.message_text,
+                            type: m.image_url ? 'image' : 'text',
+                            text: m.message_text || '',
+                            image_url: m.image_url || null,
                             time: this.formatClock(m.created_at),
                             is_read: m.is_read
                         }));
@@ -549,77 +620,142 @@ function chatApp(initialListing = null, currentUser = null) {
         },
 
         async sendMessage() {
-            if (!this.newMessage.trim() || !this.activeRoom || this.isSending) return;
+            if ((!this.newMessage.trim() && !this.selectedImage) || !this.activeRoom || this.isSending) return;
 
             const text = this.newMessage.trim();
-            this.newMessage = '';
+            const image = this.selectedImage;
+            const preview = this.imagePreview;
+            const roomId = this.activeRoom.id;
+
             this.isSending = true;
             this.errorMessage = null;
 
+            const formData = new FormData();
+            formData.append('message_text', text);
+
+            if (image) {
+                formData.append('image', image);
+            }
+
             const tempId = 'temp-' + Date.now();
-            const tempMsg = {
+
+            this.messages.push({
                 id: tempId,
                 sender: 'me',
                 sender_name: this.currentUser.name,
-                type: 'text',
+                type: image ? 'image' : 'text',
                 text: text,
+                image_url: preview,
                 time: this.formatClock(new Date().toISOString()),
                 is_pending: true,
                 is_read: false
-            };
-            this.messages.push(tempMsg);
-            this.activeRoom.last_message = text;
+            });
+
+            this.activeRoom.last_message = text || '📷 Foto';
             this.activeRoom.time = 'Baru saja';
             this.scrollToBottom();
 
-            const roomIndex = this.chatRooms.findIndex(r => r.id === this.activeRoom.id);
-            if (roomIndex > 0) {
-                const [movedRoom] = this.chatRooms.splice(roomIndex, 1);
-                this.chatRooms.unshift(movedRoom);
-            }
-
             try {
-                const res = await fetch(`/chat/api/conversations/${this.activeRoom.id}/messages`, {
+                const res = await fetch(`/chat/api/conversations/${roomId}/messages`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': this.csrfToken
                     },
-                    body: JSON.stringify({
-                        message_text: text
-                    })
+                    body: formData
                 });
 
                 const json = await res.json();
+
                 if (res.ok && json.status === 'success' && json.data) {
                     const idx = this.messages.findIndex(m => m.id === tempId);
+
                     if (idx !== -1) {
-                        this.messages[idx].id = json.data.id;
-                        this.messages[idx].is_pending = false;
-                        this.messages[idx].time = this.formatClock(json.data.created_at);
+                        this.messages[idx] = {
+                            id: json.data.id,
+                            sender: 'me',
+                            sender_name: this.currentUser.name,
+                            type: json.data.image_url ? 'image' : 'text',
+                            text: json.data.message_text || '',
+                            image_url: json.data.image_url,
+                            time: this.formatClock(json.data.created_at),
+                            is_read: json.data.is_read,
+                            is_pending: false
+                        };
                     }
+
+                    this.newMessage = '';
+                    this.removeSelectedImage();
                 } else {
                     const idx = this.messages.findIndex(m => m.id === tempId);
+
                     if (idx !== -1) {
-                        this.messages[idx].is_failed = true;
-                        this.messages[idx].is_pending = false;
+                        this.messages.splice(idx, 1);
                     }
+
                     this.errorMessage = json.message || 'Gagal mengirim pesan.';
                 }
             } catch (err) {
                 console.error('Error saat kirim pesan:', err);
+
                 const idx = this.messages.findIndex(m => m.id === tempId);
+
                 if (idx !== -1) {
-                    this.messages[idx].is_failed = true;
-                    this.messages[idx].is_pending = false;
+                    this.messages.splice(idx, 1);
                 }
+
                 this.errorMessage = 'Terjadi kendala koneksi saat mengirim pesan.';
             } finally {
                 this.isSending = false;
                 this.scrollToBottom();
             }
         },
+
+        handleImageSelect(event) {
+        const file = event.target.files[0];
+
+        if (!file) return;
+
+        const allowedTypes = [
+            'image/jpeg',
+            'image/png',
+            'image/jpg',
+            'image/webp'
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            alert('Format foto harus JPG, JPEG, PNG, atau WEBP.');
+            event.target.value = '';
+            return;
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Ukuran foto maksimal 2 MB.');
+            event.target.value = '';
+            return;
+        }
+
+        this.selectedImage = file;
+
+        if (this.imagePreview) {
+            URL.revokeObjectURL(this.imagePreview);
+        }
+
+        this.imagePreview = URL.createObjectURL(file);
+    },
+
+    removeSelectedImage() {
+        if (this.imagePreview) {
+            URL.revokeObjectURL(this.imagePreview);
+        }
+
+        this.selectedImage = null;
+        this.imagePreview = null;
+
+        if (this.$refs.imageInput) {
+            this.$refs.imageInput.value = '';
+        }
+    },
 
         sendQuickReply(text) {
             this.newMessage = text;
@@ -654,8 +790,9 @@ function chatApp(initialListing = null, currentUser = null) {
                             id: m.id,
                             sender: (m.sender && m.sender.id === this.currentUser.id) ? 'me' : 'other',
                             sender_name: m.sender?.name || '',
-                            type: 'text',
-                            text: m.message_text,
+                            type: m.image_url ? 'image' : 'text',
+                            text: m.message_text || '',
+                            image_url: m.image_url || null,
                             time: this.formatClock(m.created_at),
                             is_read: m.is_read
                         }));
