@@ -256,8 +256,8 @@ class AuthController extends Controller
                 ]);
             }
 
-            // Simpan foto KTM ke storage/app/public/ktm
-            $ktmPath = $request->file('ktm_file')->store('ktm', 'public');
+            // Simpan foto KTM ke private storage (disk: local)
+            $ktmPath = $request->file('ktm_file')->store('ktm', 'local');
         }
 
         // B. KIRIM KODE OTP 6-DIGIT KE SEMUA PENDAFTAR (BAIK EMAIL KAMPUS MAUPUN EMAIL UMUM)
@@ -722,7 +722,7 @@ class AuthController extends Controller
             'ktm_file.max' => 'Ukuran berkas KTM maksimal 2 MB.',
         ]);
 
-        $ktmPath = $request->file('ktm_file')->store('ktm', 'public');
+        $ktmPath = $request->file('ktm_file')->store('ktm', 'local');
 
         $user->update([
             'campus' => $validated['campus'],

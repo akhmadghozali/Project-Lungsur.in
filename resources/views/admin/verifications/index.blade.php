@@ -194,7 +194,7 @@
                                     </div>
                                     <div class="flex min-h-56 items-center justify-center overflow-hidden rounded-xl bg-slate-100 p-2">
                                         @if ($selected->ktm_image_path)
-                                            <img src="{{ asset('storage/' . $selected->ktm_image_path) }}"
+                                            <img src="{{ route('admin.verifications.ktm', $selected) }}"
                                                  alt="KTM {{ $selected->name }}"
                                                  @click="imageOpen = true"
                                                  class="max-h-72 w-full cursor-zoom-in rounded-lg object-contain">
@@ -336,7 +336,7 @@
             <div class="relative w-full max-w-4xl rounded-2xl bg-white p-4">
                 <button type="button" @click="imageOpen = false"
                         class="absolute right-3 top-2 text-3xl leading-none text-slate-400 hover:text-black">&times;</button>
-                <img src="{{ asset('storage/' . $selected->ktm_image_path) }}" alt="KTM"
+                <img src="{{ route('admin.verifications.ktm', $selected) }}" alt="KTM {{ $selected->name }}"
                      class="mx-auto max-h-[80vh] rounded-lg">
             </div>
         </div>

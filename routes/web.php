@@ -69,6 +69,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Verifikasi KTM Mahasiswa
     Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications.index');
+    Route::get('/verifications/{user}/ktm', [AdminVerificationController::class, 'showKtm'])->name('verifications.ktm');
     Route::post('/verifications/{user}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
     Route::post('/verifications/{user}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
 
