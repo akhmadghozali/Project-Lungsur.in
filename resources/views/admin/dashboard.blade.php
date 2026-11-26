@@ -49,7 +49,7 @@
                         <p class="text-sm font-bold text-slate-800 mt-1">LAPORAN ANALITIK BISNIS & TRANSAKSI MIKRO PLATFORM</p>
                     </div>
                     <div class="text-right text-xs text-slate-600 space-y-0.5">
-                        <div><strong>Waktu Cetak:</strong> {{ now()->translatedFormat('d F Y, H:i') }} WIB</div>
+                        <div><strong>Waktu Cetak:</strong> <span id="print-timestamp">{{ now()->timezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i') }} WIB</span></div>
                         <div><strong>Administrator:</strong> {{ auth()->user()->name }}</div>
                         <div><strong>Filter Periode:</strong> 
                             @if($period === '7d') 7 Hari Terakhir
@@ -89,7 +89,7 @@
                     </form>
 
                     <!-- Tombol Cetak / PDF -->
-                    <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs hover:shadow-sm transition cursor-pointer">
+                    <button type="button" onclick="updatePrintTimestamp(); window.print()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs hover:shadow-sm transition cursor-pointer">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
@@ -532,6 +532,24 @@
                 });
             }
         });
+
+        function updatePrintTimestamp() {
+            const el = document.getElementById('print-timestamp');
+            if (!el) return;
+            const now = new Date();
+            const months = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            const day = now.getDate();
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            el.textContent = `${day} ${month} ${year}, ${hours}:${minutes} WIB`;
+        }
+
+        window.addEventListener('beforeprint', updatePrintTimestamp);
     </script>
 </body>
 </html>

@@ -68,4 +68,13 @@ class AdminDashboardTest extends TestCase
         $response = $this->actingAs($this->admin)->get('/admin');
         $response->assertRedirect('/admin/dashboard');
     }
+
+    public function test_admin_dashboard_shows_correct_wib_print_timestamp(): void
+    {
+        $response = $this->actingAs($this->admin)->get('/admin/dashboard');
+
+        $response->assertStatus(200);
+        $expectedTimestamp = now()->timezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i') . ' WIB';
+        $response->assertSee($expectedTimestamp);
+    }
 }
