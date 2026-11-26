@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AdminVerificationController extends Controller
 {
@@ -130,5 +131,60 @@ class AdminVerificationController extends Controller
         return redirect()
             ->route('admin.verifications.index')
             ->with('success', "Akun {$user->name} ditolak.");
+    }
+
+    /**
+     * Sajikan foto KTM secara aman khusus untuk administrator.
+     * Mendukung private storage (disk: local), public storage (backward compatibility),
+     * dan fallback SVG jika file fisik belum tersedia di server deploy baru.
+     */
+    public function showKtm(User $user)
+    {
+        if (empty($user->ktm_image_path)) {
+            return response($this->getPlaceholderKtmSvg($user->name), 200, [
+                'Content-Type' => 'image/svg+xml',
+                'Cache-Control' => 'private, no-cache',
+            ]);
+        }
+
+        $path = $user->ktm_image_path;
+
+        // 1. Cek disk 'local' (Private storage utama)
+        if (Storage::disk('local')->exists($path)) {
+            return Storage::disk('local')->response($path, null, [
+                'Cache-Control' => 'private, no-cache, must-revalidate',
+            ]);
+        }
+
+        // 2. Cek disk 'public' (Backward compatibility untuk seeder/upload lama)
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::disk('public')->response($path, null, [
+                'Cache-Control' => 'private, no-cache, must-revalidate',
+            ]);
+        }
+
+        // 3. Fallback SVG jika file fisik tidak ada di server
+        return response($this->getPlaceholderKtmSvg($user->name), 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'private, no-cache',
+        ]);
+    }
+
+    private function getPlaceholderKtmSvg(string $name): string
+    {
+        $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+        return <<<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="380" viewBox="0 0 600 380">
+    <rect width="600" height="380" rx="16" fill="#1e293b"/>
+    <rect x="24" y="24" width="552" height="332" rx="12" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+    <circle cx="100" cy="140" r="45" fill="#3b82f6"/>
+    <text x="100" y="150" font-family="sans-serif" font-size="28" font-weight="bold" fill="#ffffff" text-anchor="middle">KTM</text>
+    <text x="170" y="130" font-family="sans-serif" font-size="20" font-weight="bold" fill="#f8fafc">KARTU TANDA MAHASISWA</text>
+    <text x="170" y="160" font-family="sans-serif" font-size="14" fill="#94a3b8">Nama: {$safeName}</text>
+    <text x="170" y="185" font-family="sans-serif" font-size="12" fill="#64748b">Pratinjau placeholder (berkas fisik belum tersedia)</text>
+    <rect x="24" y="290" width="552" height="66" rx="0" fill="#1e293b"/>
+    <text x="300" y="330" font-family="sans-serif" font-size="12" font-weight="600" fill="#cbd5e1" text-anchor="middle">LUNGSUR.IN VERIFIKASI IDENTITAS MAHASISWA</text>
+</svg>
+SVG;
     }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminVerificationController;
 use App\Http\Controllers\Admin\AdminBoostPaymentController;
 use App\Http\Controllers\Admin\AdminAuctionPaymentController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuctionPaymentController;
 use App\Http\Controllers\BoostPaymentController;
@@ -58,9 +59,17 @@ Route::middleware(['auth', 'verified_student'])->group(function () {
 });
 
 // Dashboard Admin (Portal Operasional & Moderasi)
+Route::middleware(['auth', 'admin'])->get('/admin', function () {
+    return redirect()->route('admin.dashboard');
+});
+
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dasbor Analitik Bisnis
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
     // Verifikasi KTM Mahasiswa
     Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications.index');
+    Route::get('/verifications/{user}/ktm', [AdminVerificationController::class, 'showKtm'])->name('verifications.ktm');
     Route::post('/verifications/{user}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
     Route::post('/verifications/{user}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
 
