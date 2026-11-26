@@ -14,7 +14,7 @@
     $pendingReportsCount = \App\Models\Report::where('status', 'pending')->count();
 @endphp
 
-<aside class="hidden lg:flex w-60 shrink-0 flex-col bg-[#1c2541] text-slate-300 border-r border-slate-800/80 min-h-screen">
+<aside class="hidden lg:flex w-60 shrink-0 flex-col bg-[#1c2541] text-slate-300 border-r border-slate-800/80 sticky top-0 h-screen no-print print:hidden">
     <!-- Brand -->
     <div class="px-6 py-6 border-b border-white/5">
         <a href="{{ route('admin.dashboard') }}" class="block">

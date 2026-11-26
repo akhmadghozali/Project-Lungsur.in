@@ -34,12 +34,10 @@
 
     <div class="flex min-h-screen">
         <!-- Sidebar Terpadu -->
-        <div class="no-print">
-            <x-admin-sidebar active="dashboard" />
-        </div>
+        <x-admin-sidebar active="dashboard" />
 
         <!-- Main Content -->
-        <main class="flex-1 min-w-0 p-4 sm:p-8 overflow-y-auto">
+        <main class="flex-1 min-w-0 p-4 sm:p-8">
             <!-- Kop Resmi Khusus Cetak / PDF -->
             <div class="hidden print-only mb-6 border-b-2 border-slate-900 pb-4">
                 <div class="flex justify-between items-start">
