@@ -86,7 +86,9 @@ class AuthController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            $errorMsg = 'Akun Anda ditangguhkan karena pelanggaran ketentuan platform. Silakan hubungi admin.';
+            $statusText = $user->status === 'banned' ? 'diblokir permanen' : 'ditangguhkan sementara';
+            $reasonText = !empty($user->rejection_reason) ? " Alasan: {$user->rejection_reason}" : '';
+            $errorMsg = "Akun Anda {$statusText} oleh administrator.{$reasonText} Silakan hubungi admin jika merasa ini kekeliruan.";
 
             if ($request->wantsJson()) {
                 return response()->json(['status' => 'error', 'message' => $errorMsg], 403);
@@ -142,7 +144,7 @@ class AuthController extends Controller
                 'message' => 'Login berhasil.',
                 'user' => $user,
                 'redirect' => $user->role === 'admin'
-                    ? route('admin.verifications.index')
+                    ? route('admin.dashboard')
                     : ($request->session()->pull('url.intended') ?? route('dashboard')),
             ]);
         }
@@ -254,8 +256,8 @@ class AuthController extends Controller
                 ]);
             }
 
-            // Simpan foto KTM ke storage/app/public/ktm
-            $ktmPath = $request->file('ktm_file')->store('ktm', 'public');
+            // Simpan foto KTM ke private storage (disk: local)
+            $ktmPath = $request->file('ktm_file')->store('ktm', 'local');
         }
 
         // B. KIRIM KODE OTP 6-DIGIT KE SEMUA PENDAFTAR (BAIK EMAIL KAMPUS MAUPUN EMAIL UMUM)
@@ -720,7 +722,7 @@ class AuthController extends Controller
             'ktm_file.max' => 'Ukuran berkas KTM maksimal 2 MB.',
         ]);
 
-        $ktmPath = $request->file('ktm_file')->store('ktm', 'public');
+        $ktmPath = $request->file('ktm_file')->store('ktm', 'local');
 
         $user->update([
             'campus' => $validated['campus'],
@@ -883,7 +885,7 @@ class AuthController extends Controller
     {
         // Admin selalu ke panel admin (tanpa intended, supaya tidak terseret ke URL user)
         if ($user->role === 'admin') {
-            return redirect()->route('admin.verifications.index');
+            return redirect()->route('admin.dashboard');
         }
 
         return redirect()->intended(route('dashboard'));

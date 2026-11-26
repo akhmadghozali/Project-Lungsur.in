@@ -40,24 +40,24 @@
 
                     @auth
                         @if(auth()->user()->isSeller())
-                            <a href="{{ route('dashboard', ['tab' => 'dagangan']) }}"
-                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab', 'dagangan') === 'dagangan' ? 'text-emerald-800 font-bold bg-emerald-50' : 'text-slate-700 hover:text-emerald-800 hover:bg-slate-50' }} transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                            <a href="{{ route('dagangan.index', ['tab' => 'dagangan']) }}"
+                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dagangan.index') && request('tab', 'dagangan') === 'dagangan' ? 'text-emerald-800 font-bold bg-emerald-50' : 'text-slate-700 hover:text-emerald-800 hover:bg-slate-50' }} transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
                                 <svg class="w-4 h-4 shrink-0 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                 </svg>
                                 <span>Dagangan<span class="hidden 2xl:inline"> Saya</span></span>
                             </a>
 
-                            <a href="{{ route('dashboard', ['tab' => 'lelang']) }}"
-                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab') === 'lelang' ? 'text-emerald-800 font-bold bg-emerald-50' : 'text-slate-700 hover:text-emerald-800 hover:bg-slate-50' }} transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                            <a href="{{ route('dagangan.index', ['tab' => 'lelang']) }}"
+                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dagangan.index') && request('tab') === 'lelang' ? 'text-emerald-800 font-bold bg-emerald-50' : 'text-slate-700 hover:text-emerald-800 hover:bg-slate-50' }} transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
                                 <svg class="w-4 h-4 shrink-0 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                 </svg>
                                 <span>Lelang<span class="hidden 2xl:inline"> Saya</span></span>
                             </a>
 
-                            <a href="{{ route('dashboard', ['tab' => 'peluang']) }}"
-                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dashboard*') && request('tab') === 'peluang' ? 'text-emerald-800 font-bold bg-emerald-50' : 'text-slate-700 hover:text-emerald-800 hover:bg-slate-50' }} transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                            <a href="{{ route('dagangan.index', ['tab' => 'peluang']) }}"
+                               class="flex items-center gap-1.5 px-2.5 py-1.5 2xl:px-3 2xl:py-2 rounded-xl {{ request()->routeIs('dagangan.index') && request('tab') === 'peluang' ? 'text-emerald-800 font-bold bg-emerald-50' : 'text-slate-700 hover:text-emerald-800 hover:bg-slate-50' }} transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
                                 <svg class="w-4 h-4 shrink-0 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
@@ -333,8 +333,8 @@
             </a>
             @auth
                 @if(auth()->user()->isSeller())
-                    <a href="{{ route('dashboard', ['tab' => 'dagangan']) }}"
-                       class="min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-bold inline-flex items-center transition {{ request()->routeIs('dashboard*') ? 'bg-emerald-700 text-white shadow-2xs' : 'text-emerald-800 bg-emerald-50 border border-emerald-200' }}">
+                    <a href="{{ route('dagangan.index', ['tab' => 'dagangan']) }}"
+                       class="min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-bold inline-flex items-center transition {{ request()->routeIs('dagangan.index') ? 'bg-emerald-700 text-white shadow-2xs' : 'text-emerald-800 bg-emerald-50 border border-emerald-200' }}">
                         Dagangan
                     </a>
                 @else
@@ -474,17 +474,17 @@
                 </p>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
                     @if(auth()->user()->isSeller())
-                        <a href="{{ route('dashboard', ['tab' => 'dagangan']) }}"
+                        <a href="{{ route('dagangan.index', ['tab' => 'dagangan']) }}"
                            class="min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center justify-between text-sm font-semibold text-emerald-800 bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-200/60 transition">
                             <span>Dagangan Saya</span>
                             <span class="text-xs text-emerald-700">&rarr;</span>
                         </a>
-                        <a href="{{ route('dashboard', ['tab' => 'lelang']) }}"
+                        <a href="{{ route('dagangan.index', ['tab' => 'lelang']) }}"
                            class="min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center justify-between text-sm font-semibold text-emerald-800 bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-200/60 transition">
                             <span>Lelang Saya</span>
                             <span class="text-xs text-emerald-700">&rarr;</span>
                         </a>
-                        <a href="{{ route('dashboard', ['tab' => 'peluang']) }}"
+                        <a href="{{ route('dagangan.index', ['tab' => 'peluang']) }}"
                            class="min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center justify-between text-sm font-semibold text-emerald-800 bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-200/60 transition">
                             <span>Peluang Wanted Ads</span>
                             <span class="text-xs text-emerald-700">&rarr;</span>
@@ -551,7 +551,6 @@
                     }
                 };
 
-                // Poll unread chat count every 8 seconds when outside /chat
                 setInterval(async () => {
                     if (document.hidden) return;
                     if (window.location.pathname.startsWith('/chat')) return;
@@ -569,9 +568,7 @@
                                 updateNavbarBadges(data.unread_count);
                             }
                         }
-                    } catch (e) {
-                        // Ignore transient network errors
-                    }
+                    } catch (_) {}
                 }, 8000);
             })();
         </script>

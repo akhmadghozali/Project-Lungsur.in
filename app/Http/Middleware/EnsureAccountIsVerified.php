@@ -31,7 +31,7 @@ class EnsureAccountIsVerified
                 ], 403);
             }
 
-            return redirect()->route('admin.verifications.index')
+            return redirect()->route('admin.dashboard')
                 ->with('warning', 'Akun administrator hanya memiliki akses ke portal operasional admin.');
         }
 

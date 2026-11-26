@@ -21,7 +21,7 @@ class IklanController extends Controller
     public function create(): View|RedirectResponse
     {
         if (Auth::check() && !Auth::user()->isSeller()) {
-            return redirect()->route('dashboard')->with(
+            return redirect()->route('dagangan.index')->with(
                 'warning',
                 'Fitur pasang iklan barang dagangan hanya tersedia untuk akun dalam Mode Penjual. Silakan beralih ke Mode Penjual terlebih dahulu.'
             );
@@ -43,7 +43,7 @@ class IklanController extends Controller
     public function store(StoreListingRequest $request): RedirectResponse
     {
         if (!Auth::user()->isSeller()) {
-            return redirect()->route('dashboard')->with(
+            return redirect()->route('dagangan.index')->with(
                 'warning',
                 'Anda sedang dalam Mode Pembeli. Silakan beralih ke Mode Penjual untuk dapat mempublikasikan iklan barang dagangan.'
             );
@@ -91,10 +91,10 @@ class IklanController extends Controller
                 ->withInput()
                 ->with('error', 'Terjadi kesalahan saat menyimpan iklan. Silakan coba lagi.');
         }
-
+ 
         // ── REDIRECT SUKSES ─────────────────────────────────────────────
-        return redirect('/')
-            ->with('success', 'Iklan "' . $validated['title'] . '" berhasil dipasang! Terima kasih. 🎉');
+        return redirect()->route('dagangan.index')
+            ->with('success', "Iklan '{$validated['title']}' berhasil dipasang! Terima kasih. 🎉");
     }
 
     /**
@@ -105,7 +105,7 @@ class IklanController extends Controller
         abort_if($listing->user_id !== Auth::id(), 403, 'Anda tidak memiliki hak untuk mengedit iklan ini.');
 
         if (!Auth::user()->isSeller()) {
-            return redirect()->route('dashboard')->with(
+            return redirect()->route('dagangan.index')->with(
                 'warning',
                 'Silakan beralih ke Mode Penjual untuk mengelola atau mengedit barang dagangan Anda.'
             );
@@ -201,8 +201,8 @@ class IklanController extends Controller
                 ->with('error', 'Terjadi kesalahan saat memperbarui iklan. Silakan coba lagi.');
         }
 
-        return redirect()->route('dashboard')
-            ->with('success', 'Iklan "' . $listing->title . '" berhasil diperbarui! 🎉');
+        return redirect()->route('dagangan.index')
+            ->with('success', "Iklan '{$listing->title}' berhasil diperbarui! 🎉");
     }
 
     /**

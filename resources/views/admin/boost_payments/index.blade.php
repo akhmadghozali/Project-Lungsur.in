@@ -35,77 +35,7 @@
         }
      }">
 
-    <aside class="hidden lg:flex w-60 shrink-0 flex-col bg-[#1c2541] text-slate-300">
-        <div class="px-6 py-6">
-            <div class="text-xl font-extrabold text-white">Lungsur.in</div>
-            <div class="text-[10px] font-semibold tracking-widest text-slate-400">STAFF OPERATIONS</div>
-        </div>
-
-        <div class="px-6 pb-2 pt-4 text-[10px] font-bold tracking-widest text-slate-400">PORTAL MODERASI</div>
-        <nav class="space-y-1 px-3 text-sm">
-            <a href="{{ route('admin.verifications.index') }}"
-               class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
-                <span class="flex items-center gap-3"><span>🛡</span> User Verification</span>
-                @if ($pendingUsers > 0)
-                    <span class="rounded-full bg-red-500 px-2 py-0.5 text-[11px] font-bold text-white">{{ $pendingUsers }}</span>
-                @endif
-            </a>
-
-            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-400">MONETISASI</div>
-
-            <a href="{{ route('admin.payments.boost') }}"
-               class="flex items-center justify-between rounded-xl bg-amber-600 px-3 py-2.5 font-semibold text-white shadow-xs">
-                <span class="flex items-center gap-3">
-                    <span class="text-amber-200">⚡</span> Verifikasi Boost Iklan
-                </span>
-                @if ($stats['pending'] > 0)
-                    <span class="rounded-full bg-white text-amber-800 font-bold px-2 py-0.5 text-[11px]">{{ $stats['pending'] }}</span>
-                @endif
-            </a>
-
-            <a href="{{ route('admin.payments.auction') }}"
-               class="flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition">
-                <span class="flex items-center gap-3">
-                    <span class="text-emerald-400">🔨</span> Verifikasi Biaya Lelang
-                </span>
-                @if ($pendingAuctionCount > 0)
-                    <span class="rounded-full bg-emerald-500 text-white font-bold px-2 py-0.5 text-[11px]">{{ $pendingAuctionCount }}</span>
-                @endif
-            </a>
-
-            <div class="px-3 pb-1 pt-4 text-[10px] font-bold tracking-widest text-slate-400">SISTEM &amp; ADUAN</div>
-            <a href="{{ route('admin.reports.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/5 text-slate-300 hover:text-white transition">
-                <span>⚑</span> Reported Items
-            </a>
-            <a href="{{ route('home') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/5 text-slate-300 hover:text-white transition">
-                <span>🌐</span> Lihat Katalog Publik
-            </a>
-        </nav>
-
-        <div class="mt-auto p-4">
-            <div class="rounded-xl bg-white/5 p-3">
-                <div class="flex items-center gap-3">
-                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-                        {{ $adminInitial }}
-                    </div>
-                    <div class="min-w-0 leading-tight">
-                        <div class="truncate text-sm font-semibold text-white">{{ $admin->name }}</div>
-                        <div class="text-[11px] text-slate-400">{{ $adminRoleLabel }}</div>
-                    </div>
-                </div>
-                <div class="mt-2 truncate text-[11px] text-slate-400">{{ $admin->email }}</div>
-
-                <form method="POST" action="{{ route('logout') }}" class="mt-3">
-                    @csrf
-                    <button type="submit"
-                            class="w-full min-h-[40px] rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-red-500 hover:text-white cursor-pointer">
-                        ⎋ Keluar
-                    </button>
-                </form>
-            </div>
-            <div class="mt-3 text-[11px] text-slate-400">© {{ date('Y') }} Lungsur Campus</div>
-        </div>
-    </aside>
+    <x-admin-sidebar active="payments.boost" />
 
     <div class="flex min-w-0 flex-1 flex-col">
 
@@ -144,6 +74,10 @@
         </header>
 
         <nav aria-label="Menu Admin Mobile" class="lg:hidden bg-[#1c2541] px-3 py-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-slate-800">
+            <a href="{{ route('admin.dashboard') }}"
+               class="min-h-[44px] shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 bg-white/10 hover:bg-white/15">
+                <span>📊 Dashboard</span>
+            </a>
             <a href="{{ route('admin.verifications.index') }}"
                class="min-h-[44px] shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 bg-white/10 hover:bg-white/15">
                 <span>🛡 Verifikasi KTM</span>

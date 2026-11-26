@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminVerificationController;
 use App\Http\Controllers\Admin\AdminBoostPaymentController;
 use App\Http\Controllers\Admin\AdminAuctionPaymentController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuctionPaymentController;
 use App\Http\Controllers\BoostPaymentController;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
 use Illuminate\Http\Request;
 use App\Models\Listing; 
+use App\Http\Controllers\DaganganController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -61,9 +63,17 @@ Route::middleware(['auth', 'verified_student'])->group(function () {
 });
 
 // Dashboard Admin (Portal Operasional & Moderasi)
+Route::middleware(['auth', 'admin'])->get('/admin', function () {
+    return redirect()->route('admin.dashboard');
+});
+
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dasbor Analitik Bisnis
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
     // Verifikasi KTM Mahasiswa
     Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications.index');
+    Route::get('/verifications/{user}/ktm', [AdminVerificationController::class, 'showKtm'])->name('verifications.ktm');
     Route::post('/verifications/{user}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
     Route::post('/verifications/{user}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
 
@@ -166,5 +176,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/conversations/{id}', [ChatController::class, 'show'])->name('chat.web.conversations.show');
         Route::post('/conversations/{id}/messages', [ChatController::class, 'sendMessage'])->name('chat.web.conversations.messages.store');
         Route::patch('/conversations/{id}/read', [ChatController::class, 'markAsRead'])->name('chat.web.conversations.read');
+    });
+    Route::middleware(['auth'])->group(function () {
+    // Khusus profil, ringkasan statistik, dan aktivitas utama
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Halaman khusus manajemen penjual (tampilan bersih seperti gambar kedua)
+    Route::get('/dagangan-saya', [DaganganController::class, 'index'])->name('dagangan.index');
     });
 });
