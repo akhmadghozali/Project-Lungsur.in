@@ -338,7 +338,7 @@
                             <p class="text-xs text-slate-400">Civitas akademika yang baru bergabung di ekosistem Lungsur.in</p>
                         </div>
                         <a href="{{ route('admin.verifications.index') }}" class="text-xs font-bold text-blue-600 hover:underline">
-                            Antrean Verifikasi →
+                            Verifikasi Mahasiswa →
                         </a>
                     </div>
 
@@ -349,7 +349,7 @@
                                     <th class="px-5 py-3">Nama Mahasiswa</th>
                                     <th class="px-4 py-3">Kampus / NIM</th>
                                     <th class="px-4 py-3">Jalur & Status</th>
-                                    <th class="px-4 py-3 text-right">Waktu / Tindakan</th>
+                                    <th class="px-4 py-3 text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 font-medium">
@@ -375,11 +375,13 @@
                                         </td>
                                         <td class="px-4 py-3.5 text-right">
                                             @if($user->verification_status === 'pending')
-                                                <a href="{{ route('admin.verifications.index') }}" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-800 text-[10px] font-bold transition">
-                                                    Tinjau KTM
+                                                <a href="{{ route('admin.verifications.index') }}" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 text-[11px] font-bold border border-amber-200 transition">
+                                                    Review KTM
                                                 </a>
                                             @else
-                                                <span class="text-slate-400 text-[11px] font-medium">{{ $user->created_at?->diffForHumans() ?? '-' }}</span>
+                                                <span class="text-[11px] text-slate-400 font-medium">
+                                                    {{ $user->created_at ? $user->created_at->diffForHumans() : '-' }}
+                                                </span>
                                             @endif
                                         </td>
                                     </tr>

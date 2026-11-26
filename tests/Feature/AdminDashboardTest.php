@@ -57,10 +57,16 @@ class AdminDashboardTest extends TestCase
 
     public function test_admin_can_filter_dashboard_by_period(): void
     {
-        $response = $this->actingAs($this->admin)->get('/admin/dashboard?period=30d');
+        // Seed users with various statuses to ensure table rendering doesn't throw RouteNotFoundException
+        User::factory()->create(['status' => 'banned', 'role' => 'seller']);
+        User::factory()->create(['verification_status' => 'pending', 'role' => 'buyer']);
+        User::factory()->create(['status' => 'active', 'verification_status' => 'active', 'role' => 'seller']);
 
-        $response->assertStatus(200);
-        $response->assertViewHas('period', '30d');
+        foreach (['7d', '30d', 'month', 'all'] as $period) {
+            $response = $this->actingAs($this->admin)->get("/admin/dashboard?period={$period}");
+            $response->assertStatus(200);
+            $response->assertViewHas('period', $period);
+        }
     }
 
     public function test_admin_route_redirects_to_dashboard(): void
@@ -78,3 +84,4 @@ class AdminDashboardTest extends TestCase
         $response->assertSee($expectedTimestamp);
     }
 }
+
