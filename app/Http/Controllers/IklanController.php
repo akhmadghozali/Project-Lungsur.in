@@ -220,6 +220,23 @@ class IklanController extends Controller
 
         // Mengambil data iklan beserta relasi kategori, gambar, dan user penjualnya
         $listing = Listing::with(['category', 'images', 'user'])->findOrFail($id);
+
+        // Memeriksa status akun penjual
+        if ($listing->user) {
+            $listing->user->refreshBanStatus();
+
+            if (in_array($listing->user->status, ['suspended', 'banned'], true)) {
+
+                // Iklan yang sudah terjual tetap dapat diakses pembelinya melalui riwayat transaksi
+                $isTransactionBuyer = $listing->status === 'sold'
+                    && (int) $listing->buyer_id === (int) Auth::id();
+
+                if (!$isTransactionBuyer) {
+                    abort(404);
+                }
+            }
+        }
+
         return view('listings.show', compact('listing'));
     }
 }

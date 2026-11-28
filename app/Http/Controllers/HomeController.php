@@ -7,6 +7,7 @@ use App\Models\AuctionBid;
 use App\Models\CampusDomain;
 use App\Models\Category;
 use App\Models\Listing;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -18,6 +19,18 @@ class HomeController extends Controller
         if (auth()->check() && auth()->user()->role === 'admin') {
             return redirect()->route('admin.verifications.index');
         }
+
+        // Memulihkan akun yang masa blokir sementaranya sudah berakhir.
+        User::where('status', 'suspended')
+            ->whereNotNull('ban_expires_at')
+            ->where('ban_expires_at', '<=', now())
+            ->update([
+                'status' => 'active',
+                'ban_reason' => null,
+                'banned_at' => null,
+                'ban_expires_at' => null,
+                'banned_by' => null,
+            ]);
 
         $isCatalog = $request->routeIs('listings.index') || $request->is('katalog*');
 
@@ -62,7 +75,11 @@ class HomeController extends Controller
             ->whereNotNull('auctions.end_time')
             ->where('auctions.end_time', '>', now())
             ->whereHas('bids')
-            ->whereHas('listing')
+            ->whereHas('listing', function ($query) {
+                $query->whereHas('user', function ($userQuery) {
+                    $userQuery->where('status', 'active');
+                });
+            })
             ->select('auctions.*')
             ->selectSub($uniqueBiddersQuery, 'unique_bidders_count')
             ->orderByDesc('unique_bidders_count')
@@ -71,12 +88,16 @@ class HomeController extends Controller
 
         if ($isCatalog) {
             // Halaman Katalog: pisahkan kotak Boost (atas) dan kotak produk non-boost (bawah)
-            $boostedQuery = Listing::available()->boosted()->with(['category', 'images', 'user']);
+            $boostedQuery = Listing::available()->boosted()->whereHas('user', function ($query) {
+                $query->where('status', 'active');
+            })->with(['category', 'images', 'user']);
             $this->applyFilters($boostedQuery, $filters);
             $this->applySorting($boostedQuery, $sort);
             $boostedListings = $boostedQuery->get();
 
-            $regularQuery = Listing::available()->notBoosted()->with(['category', 'images', 'user']);
+            $regularQuery = Listing::available()->notBoosted()->whereHas('user', function ($query) {
+                $query->where('status', 'active');
+            })->with(['category', 'images', 'user']);
             $this->applyFilters($regularQuery, $filters);
             $sort = $this->applySorting($regularQuery, $sort);
             $listings = $regularQuery->paginate(9)->withQueryString();
@@ -85,7 +106,9 @@ class HomeController extends Controller
             $isBoostedOnly = false;
         } else {
             // Halaman Beranda: hanya tampilkan produk yang sedang aktif di-boost
-            $boostedQuery = Listing::available()->boosted()->with(['category', 'images', 'user']);
+            $boostedQuery = Listing::available()->boosted()->whereHas('user', function ($query) {
+                $query->where('status', 'active');
+            })->with(['category', 'images', 'user']);
             $this->applyFilters($boostedQuery, $filters);
             $sort = $this->applySorting($boostedQuery, $sort);
             $listings = auth()->check()
@@ -100,11 +123,18 @@ class HomeController extends Controller
         $allCategories = Category::orderBy('name')->get();
         $campusList = CampusDomain::where('is_active', true)->orderBy('campus_name')->get();
         $categoryCounts = Listing::available()
+            ->whereHas('user', function ($query) {
+                $query->where('status', 'active');
+            })
             ->selectRaw('category_id, count(*) as count')
             ->groupBy('category_id')
             ->pluck('count', 'category_id')
             ->toArray();
-        $allListingsCount = Listing::available()->count();
+        $allListingsCount = Listing::available()
+            ->whereHas('user', function ($query) {
+                $query->where('status', 'active');
+            })
+            ->count();
 
         return view('welcome', compact(
             'listings',

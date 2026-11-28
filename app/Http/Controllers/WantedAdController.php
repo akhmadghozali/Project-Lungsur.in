@@ -20,7 +20,17 @@ class WantedAdController extends Controller
         $search = trim((string) $request->query('q', ''));
         $categoryParam = trim((string) $request->query('category', $request->query('kategori', '')));
 
-        $query = WantedAd::active()->with(['user', 'category'])->latest();
+        $query = WantedAd::active()
+            ->whereHas('user', function ($userQuery) {
+                $userQuery->where('status', 'active')
+                    ->orWhere(function ($expiredQuery) {
+                        $expiredQuery->where('status', 'suspended')
+                            ->whereNotNull('ban_expires_at')
+                            ->where('ban_expires_at', '<=', now());
+                    });
+            })
+            ->with(['user', 'category'])
+            ->latest();
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -191,4 +201,3 @@ class WantedAdController extends Controller
         );
     }
 }
-
