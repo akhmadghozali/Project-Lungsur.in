@@ -36,7 +36,8 @@ class ReportController extends Controller
             'details' => 'nullable|string|max:1000',
         ]);
 
-        $duplicateReport = Report::where('reporter_id', Auth::id())
+        $duplicateReport = Report::where('report_type', 'listing')
+            ->where('reporter_id', Auth::id())
             ->where('reported_listing_id', $listing->id)
             ->where('status', 'pending')
             ->exists();
@@ -49,6 +50,7 @@ class ReportController extends Controller
             'reporter_id' => Auth::id(),
             'reported_listing_id' => $listing->id,
             'reported_user_id' => $listing->user_id,
+            'report_type' => 'listing',
             'reason' => $validated['reason'],
             'details' => $validated['details'] ?? null,
             'status' => 'pending',
@@ -59,25 +61,30 @@ class ReportController extends Controller
 
     public function index()
     {
-        $reports = Report::with(['reporter', 'reportedListing', 'reportedUser'])
+        $reports = Report::where('report_type', 'listing')
+            ->with(['reporter', 'reportedListing', 'reportedUser'])
             ->latest()
             ->paginate(10);
 
-        return view('admin.verifications.reports.index', compact('reports'));
+        return view('admin.reports.listings.index', compact('reports'));
     }
 
     public function show(Report $report)
     {
+        abort_if($report->report_type !== 'listing', 404);
+
         $report->load(['reporter', 'reportedListing.images', 'reportedUser', 'resolver']);
 
-        $sameListingReports = Report::where('reported_listing_id', $report->reported_listing_id)->count();
+        $sameListingReports = Report::where('report_type', 'listing')
+            ->where('reported_listing_id', $report->reported_listing_id)
+            ->count();
 
-        return view('admin.verifications.reports.show', compact('report', 'sameListingReports'));
-
+        return view('admin.reports.listings.show', compact('report', 'sameListingReports'));
     }
 
     public function ignore(Report $report)
     {
+        abort_if($report->report_type !== 'listing', 404);
         abort_if($report->status !== 'pending', 422, 'Laporan ini sudah ditangani.');
 
         $report->update([
@@ -92,12 +99,14 @@ class ReportController extends Controller
 
     public function takeDown(Report $report)
     {
+        abort_if($report->report_type !== 'listing', 404);
         abort_if($report->status !== 'pending', 422, 'Laporan ini sudah ditangani.');
 
         $report->reportedListing?->delete(); // soft delete
 
         // Tutup semua laporan pending lain untuk iklan yang sama
-        Report::where('reported_listing_id', $report->reported_listing_id)
+        Report::where('report_type', 'listing')
+            ->where('reported_listing_id', $report->reported_listing_id)
             ->where('status', 'pending')
             ->update([
                 'status'      => 'resolved',

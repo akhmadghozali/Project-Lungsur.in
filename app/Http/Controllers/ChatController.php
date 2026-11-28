@@ -7,9 +7,11 @@ use App\Models\Conversation;
 use App\Models\Listing;
 use App\Models\Message;
 use App\Models\User;
+use App\Models\Report;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ChatController extends Controller
 {
@@ -47,8 +49,8 @@ class ChatController extends Controller
 
             $conversations = Conversation::with([
                 'listing:id,title,price,status',
-                'buyer:id,name,campus',
-                'seller:id,name,campus',
+                'buyer:id,name,campus,status,ban_expires_at',
+                'seller:id,name,campus,status,ban_expires_at',
                 'latestMessage.sender:id,name',
             ])
             ->where(function ($query) use ($user) {
@@ -61,6 +63,11 @@ class ChatController extends Controller
 
             $data = $conversations->map(function ($conversation) use ($user) {
                 $otherParticipant = $conversation->getOtherParticipant($user->id);
+
+                if ($otherParticipant) {
+                    $otherParticipant->refreshBanStatus();
+                }
+
                 $unreadCount = Message::where('conversation_id', $conversation->id)
                     ->where('sender_id', '!=', $user->id)
                     ->where('is_read', false)
@@ -78,6 +85,9 @@ class ChatController extends Controller
                         'id' => $otherParticipant->id,
                         'name' => $otherParticipant->name,
                         'campus' => $otherParticipant->campus,
+                        'is_blocked' => in_array($otherParticipant->status, ['suspended', 'banned'], true),
+                        'block_type' => $otherParticipant->status === 'banned' ? 'permanent' : ($otherParticipant->status === 'suspended' ? 'temporary' : null),
+                        'ban_expires_at' => $otherParticipant->status === 'suspended' ? $otherParticipant->ban_expires_at?->toISOString() : null,
                     ] : null,
                     'latest_message' => $conversation->latestMessage ? [
                         'id' => $conversation->latestMessage->id,
@@ -88,7 +98,8 @@ class ChatController extends Controller
                         'created_at' => $conversation->latestMessage->created_at?->toISOString(),
                     ] : null,
                     'unread_count' => $unreadCount,
-                    'last_message_at' => $conversation->last_message_at?->toISOString() ?? $conversation->created_at?->toISOString(),
+                    'last_message_at' => $conversation->last_message_at?->toISOString()
+                        ?? $conversation->created_at?->toISOString(),
                 ];
             });
 
@@ -146,13 +157,26 @@ class ChatController extends Controller
             ], 422);
         }
 
-        $listing = Listing::with('user:id,name,campus')->findOrFail($request->listing_id);
+        $listing = Listing::with('user:id,name,campus,status,ban_expires_at')->findOrFail($request->listing_id);
 
         if ((int) $listing->user_id === (int) $user->id) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda tidak dapat memulai percakapan pada barang jualan Anda sendiri.',
             ], 422);
+        }
+
+        if ($listing->user) {
+            $listing->user->refreshBanStatus();
+
+            if (in_array($listing->user->status, ['suspended', 'banned'], true)) {
+                return response()->json([
+                    'status' => 'forbidden',
+                    'message' => $listing->user->status === 'banned'
+                        ? 'Akun penjual telah diblokir secara permanen oleh admin Lungsur.in karena melanggar ketentuan penggunaan platform.'
+                        : 'Akun penjual sedang diblokir sementara oleh admin Lungsur.in. Silakan coba kembali setelah masa pemblokiran berakhir.',
+                ], 403);
+            }
         }
 
         $conversation = Conversation::firstOrCreate(
@@ -230,8 +254,8 @@ class ChatController extends Controller
 
         $conversation = Conversation::with([
             'listing:id,title,price,status',
-            'buyer:id,name,campus',
-            'seller:id,name,campus',
+            'buyer:id,name,campus,status,ban_expires_at',
+            'seller:id,name,campus,status,ban_expires_at',
         ])->find($id);
 
         if (!$conversation) {
@@ -272,6 +296,10 @@ class ChatController extends Controller
 
         $otherParticipant = $conversation->getOtherParticipant($user->id);
 
+        if ($otherParticipant) {
+            $otherParticipant->refreshBanStatus();
+        }
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -286,6 +314,9 @@ class ChatController extends Controller
                     'id' => $otherParticipant->id,
                     'name' => $otherParticipant->name,
                     'campus' => $otherParticipant->campus,
+                    'is_blocked' => in_array($otherParticipant->status, ['suspended', 'banned'], true),
+                    'block_type' => $otherParticipant->status === 'banned' ? 'permanent' : ($otherParticipant->status === 'suspended' ? 'temporary' : null),
+                    'ban_expires_at' => $otherParticipant->status === 'suspended' ? $otherParticipant->ban_expires_at?->toISOString() : null,
                 ] : null,
                 'messages' => $messages,
             ],
@@ -347,6 +378,21 @@ class ChatController extends Controller
                 'status' => 'forbidden',
                 'message' => 'Anda tidak memiliki hak akses untuk mengirim pesan di percakapan ini.',
             ], 403);
+        }
+
+        $otherParticipant = $conversation->getOtherParticipant($user->id);
+
+        if ($otherParticipant) {
+            $otherParticipant->refreshBanStatus();
+
+            if (in_array($otherParticipant->status, ['suspended', 'banned'], true)) {
+                return response()->json([
+                    'status' => 'forbidden',
+                    'message' => $otherParticipant->status === 'banned'
+                        ? 'Akun lawan bicara telah diblokir secara permanen oleh admin Lungsur.in karena melanggar ketentuan penggunaan platform. Percakapan ini tidak dapat dilanjutkan.'
+                        : 'Akun lawan bicara sedang diblokir sementara oleh admin Lungsur.in. Percakapan tidak dapat dilanjutkan selama masa pemblokiran berlangsung.',
+                ], 403);
+            }
         }
 
         $message = Message::create([
@@ -417,11 +463,139 @@ class ChatController extends Controller
     }
 
     /**
+     * Melaporkan akun lawan bicara dalam suatu percakapan.
+     */
+    public function reportAccount(Request $request, $id): JsonResponse
+    {
+        $user = $this->resolveUser($request);
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'unauthenticated',
+                'message' => 'Silakan masuk (login) terlebih dahulu.',
+            ], 401);
+        }
+
+        // Mencari percakapan
+        $conversation = Conversation::find($id);
+
+        if (!$conversation) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Percakapan tidak ditemukan.',
+            ], 404);
+        }
+
+        // Memastikan pelapor adalah peserta percakapan
+        if (!$conversation->isParticipant($user->id)) {
+            return response()->json([
+                'status' => 'forbidden',
+                'message' => 'Anda tidak memiliki akses untuk melaporkan akun dalam percakapan ini.',
+            ], 403);
+        }
+
+        // Mengambil akun lawan bicara secara otomatis
+        $reportedUser = $conversation->getOtherParticipant($user->id);
+
+        if (!$reportedUser) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Akun yang akan dilaporkan tidak ditemukan.',
+            ], 404);
+        }
+
+        // Mencegah laporan terhadap akun sendiri
+        if ((int) $reportedUser->id === (int) $user->id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak dapat melaporkan akun sendiri.',
+            ], 422);
+        }
+
+        // Alasan laporan akun
+        $allowedReasons = [
+            'Penipuan',
+            'Spam',
+            'Pelecehan atau kata-kata kasar',
+            'Ancaman atau intimidasi',
+            'Perilaku mencurigakan',
+            'Lainnya',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'reason' => [
+                'required',
+                'string',
+                Rule::in($allowedReasons),
+            ],
+            'details' => [
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+        ], [
+            'reason.required' => 'Pilih alasan laporan terlebih dahulu.',
+            'reason.in' => 'Alasan laporan tidak valid.',
+            'details.max' => 'Detail laporan maksimal 1000 karakter.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'validation_error',
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+
+        // Mencegah laporan pending yang sama dikirim berulang kali
+        $duplicateReport = Report::where('report_type', 'account')
+            ->where('reporter_id', $user->id)
+            ->where('reported_user_id', $reportedUser->id)
+            ->where('conversation_id', $conversation->id)
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($duplicateReport) {
+            return response()->json([
+                'status' => 'duplicate',
+                'message' => 'Anda sudah melaporkan akun ini melalui percakapan tersebut. Laporan masih menunggu pemeriksaan admin.',
+            ], 422);
+        }
+
+        // Menyimpan laporan akun
+        $report = Report::create([
+            'reporter_id' => $user->id,
+            'reported_user_id' => $reportedUser->id,
+            'report_type' => 'account',
+            'conversation_id' => $conversation->id,
+            'reported_message_id' => null,
+            'reason' => $validated['reason'],
+            'details' => $validated['details'] ?? null,
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Laporan akun berhasil dikirim dan akan diperiksa oleh admin.',
+            'data' => [
+                'report_id' => $report->id,
+                'report_type' => $report->report_type,
+                'reported_user' => $reportedUser->name,
+                'conversation_id' => $conversation->id,
+                'status' => $report->status,
+            ],
+        ], 201);
+    }
+
+    /**
      * Mendapatkan jumlah total pesan masuk yang belum dibaca pengguna aktif.
      */
     public function unreadCount(Request $request): JsonResponse
     {
         $user = $this->resolveUser($request);
+
         if (!$user) {
             return response()->json([
                 'status' => 'unauthenticated',

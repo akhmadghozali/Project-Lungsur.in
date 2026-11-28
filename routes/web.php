@@ -12,6 +12,7 @@ use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\IklanController;
 use App\Http\Controllers\WantedAdController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\AccountReportController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
 use Illuminate\Http\Request;
@@ -68,6 +69,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
     Route::post('/reports/{report}/ignore', [ReportController::class, 'ignore'])->name('reports.ignore');
     Route::post('/reports/{report}/take-down', [ReportController::class, 'takeDown'])->name('reports.take_down');
+
+    Route::prefix('account-reports')->name('account_reports.')->group(function () {
+        Route::get('/', [AccountReportController::class, 'index'])->name('index');
+        Route::get('/{report}', [AccountReportController::class, 'show'])->name('show');
+        Route::post('/{report}/ignore', [AccountReportController::class, 'ignore'])->name('ignore');
+        Route::post('/{report}/temporary-ban', [AccountReportController::class, 'temporaryBan'])->name('temporary_ban');
+        Route::post('/{report}/permanent-ban', [AccountReportController::class, 'permanentBan'])->name('permanent_ban');
+    });
 
     // Monetisasi: Verifikasi Pembayaran Boost Iklan (Sprint 3)
     Route::get('/pembayaran-boost', [AdminBoostPaymentController::class, 'index'])->name('payments.boost');
@@ -162,5 +171,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/conversations/{id}', [ChatController::class, 'show'])->name('chat.web.conversations.show');
         Route::post('/conversations/{id}/messages', [ChatController::class, 'sendMessage'])->name('chat.web.conversations.messages.store');
         Route::patch('/conversations/{id}/read', [ChatController::class, 'markAsRead'])->name('chat.web.conversations.read');
+        Route::post('/conversations/{id}/report', [ChatController::class, 'reportAccount'])->name('chat.web.conversations.report');
     });
 });
