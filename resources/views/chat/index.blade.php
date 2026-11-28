@@ -13,15 +13,15 @@
 <div class="flex-1 w-full flex flex-col min-w-0" 
       x-data="chatApp({{ \Illuminate\Support\Js::from($selectedListing) }}, {{ \Illuminate\Support\Js::from($userData) }})" 
       x-init="initChat()">
-    
+
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs flex-1 flex overflow-hidden min-h-[720px] max-h-[860px]">
-        
+
         <!-- ======================================================== -->
         <!-- 1. CONVERSATION SIDEBAR (KOLOM KIRI: DAFTAR KONTAK CHAT) -->
         <!-- ======================================================== -->
         <aside class="w-full md:w-[350px] lg:w-[390px] border-r border-slate-200/80 flex flex-col bg-white flex-shrink-0"
                :class="activeRoom ? 'hidden md:flex' : 'flex'">
-            
+
             <!-- Sidebar Header & Search -->
             <div class="p-4 border-b border-slate-100 space-y-3">
                 <div class="flex items-center justify-between">
@@ -86,7 +86,7 @@
                     <div @click="selectRoom(room)" 
                          class="flex items-center gap-3 p-3.5 cursor-pointer transition select-none"
                          :class="activeRoom && activeRoom.id === room.id ? 'bg-blue-50/70 border-l-4 border-blue-600' : 'hover:bg-slate-50'">
-                        
+
                         <!-- Avatar & Status Dot -->
                         <div class="relative flex-shrink-0">
                             <div class="w-11 h-11 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shadow-xs" 
@@ -101,7 +101,7 @@
                                 <h2 class="text-xs sm:text-sm font-bold truncate text-slate-900" x-text="room.name"></h2>
                                 <span class="text-[10px] font-semibold flex-shrink-0 ml-1 text-slate-400" x-text="room.time"></span>
                             </div>
-                            
+
                             <!-- Judul Listing Terkait (jika ada) -->
                             <template x-if="room.listing && room.listing.title">
                                 <p class="text-[10px] font-semibold text-blue-600 truncate mb-0.5 flex items-center gap-1">
@@ -129,11 +129,11 @@
         <!-- ======================================================== -->
         <section class="flex-1 flex flex-col bg-white overflow-hidden relative"
                  :class="!activeRoom ? 'hidden md:flex' : 'flex'">
-            
+
             <!-- KONDISI A: JIKA BELUM MEMILIH ROOM CHAT -->
             <div x-show="!activeRoom" class="flex-1 w-full h-full flex items-center justify-center p-6 bg-gradient-to-br from-slate-50 via-blue-50/20 to-slate-50">
                 <div class="max-w-md w-full p-8 bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/70 shadow-lg shadow-blue-500/5 text-center space-y-4">
-                    
+
                     <!-- Icon Wadah Chat Lungsur.in -->
                     <div class="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25 text-white mx-auto">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,11 +166,11 @@
 
             <!-- KONDISI B: JIKA ROOM CHAT AKTIF DIPILIH -->
             <div x-show="activeRoom" class="flex-1 flex flex-col h-full overflow-hidden" style="display: none;">
-                
+
                 <!-- Active Chat Header -->
                 <div class="px-4 sm:px-6 py-3 border-b border-slate-200/80 flex items-center justify-between bg-white z-10 flex-shrink-0">
                     <div class="flex items-center gap-3">
-                        
+
                         <!-- Tombol Kembali ke Sidebar di Layar Ponsel -->
                         <button type="button" 
                                 @click="activeRoom = null" 
@@ -183,24 +183,49 @@
                         <div class="relative flex-shrink-0">
                             <div class="w-10 h-10 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shadow-xs" 
                                  x-text="activeRoom?.initials"></div>
-                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 border-2 border-white rounded-full"
+                                  :class="activeRoom?.is_blocked ? (activeRoom?.block_type === 'permanent' ? 'bg-red-500' : 'bg-amber-500') : 'bg-emerald-500'"></span>
                         </div>
                         <div>
                             <h2 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight" x-text="activeRoom?.name"></h2>
-                            <p class="text-[11px] text-emerald-600 font-medium flex items-center gap-1.5 mt-0.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                <span x-text="activeRoom?.statusText"></span>
+                            <p class="text-[11px] font-medium flex items-center gap-1.5 mt-0.5"
+                               :class="activeRoom?.is_blocked ? (activeRoom?.block_type === 'permanent' ? 'text-red-600' : 'text-amber-600') : 'text-emerald-600'">
+                                <span class="w-1.5 h-1.5 rounded-full"
+                                      :class="activeRoom?.is_blocked ? (activeRoom?.block_type === 'permanent' ? 'bg-red-500' : 'bg-amber-500') : 'bg-emerald-500'"></span>
+                                <span x-text="activeRoom?.is_blocked ? (activeRoom?.block_type === 'permanent' ? 'Akun diblokir permanen' : 'Akun diblokir sementara') : activeRoom?.statusText"></span>
                             </p>
                         </div>
                     </div>
 
-                    <!-- Indikator Komunitas Kampus -->
-                    <div class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold border border-slate-200">
-                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-                        </svg>
-                        <span>Mahasiswa Malang</span>
+                    <!-- AKSI HEADER CHAT -->
+                    <div class="flex items-center gap-2">
+
+                        {{-- Tombol Laporkan Akun --}}
+                        <button type="button"
+                                @click="openReportModal()"
+                                class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-semibold text-red-600 transition hover:bg-red-100">
+
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4.5 21V4.5m0 0c4.5-3 7.5 3 12 0v9c-4.5-3-7.5-3-12 0"/>
+                            </svg>
+
+                            <span>Laporkan Akun</span>
+                        </button>
+
+                        {{-- Indikator Komunitas Kampus --}}
+                        <div class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold border border-slate-200">
+                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                            </svg>
+                            <span>Mahasiswa Malang</span>
+                        </div>
+
                     </div>
                 </div>
 
@@ -214,6 +239,28 @@
                             <span x-text="errorMessage"></span>
                         </div>
                         <button type="button" @click="errorMessage = null" class="text-amber-600 hover:text-amber-800 text-xs font-bold ml-2">Tutup</button>
+                    </div>
+                </template>
+
+                <template x-if="reportSuccessMessage">
+                    <div class="mx-4 sm:mx-6 mt-3 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-700">
+
+                        <div class="flex items-center gap-2">
+                            <svg class="h-4 w-4 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m5 12 4 4L19 6"/>
+                            </svg>
+
+                            <span x-text="reportSuccessMessage"></span>
+                        </div>
+
+                        <button type="button"
+                                @click="reportSuccessMessage = null"
+                                class="ml-3 font-semibold">
+                            Tutup
+                        </button>
                     </div>
                 </template>
 
@@ -240,7 +287,7 @@
 
                 <!-- Chat History Scroll Area -->
                 <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4" x-ref="messageContainer">
-                    
+
                     <!-- Loading Indicator Saat Memuat Pesan -->
                     <div x-show="isLoadingMessages" class="flex items-center justify-center py-6">
                         <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 text-xs font-medium">
@@ -273,15 +320,15 @@
                     <!-- Loop Pesan -->
                     <template x-for="msg in messages" :key="msg.id">
                         <div class="flex flex-col" :class="msg.sender === 'me' ? 'items-end ml-auto max-w-md' : 'items-start max-w-md'">
-                            
+
                             <div class="px-4 py-2.5 shadow-xs rounded-2xl break-words" 
                                  :class="msg.sender === 'me' ? 'bg-blue-600 text-white rounded-tr-xs' : 'bg-slate-100 text-slate-800 rounded-tl-xs'">
                                 <p class="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap" x-text="msg.text"></p>
-                                
+
                                 <div class="flex items-center justify-end gap-1 mt-1 text-[10px]" 
                                      :class="msg.sender === 'me' ? 'text-blue-100' : 'text-slate-400'">
                                     <span x-text="msg.time"></span>
-                                    
+
                                     <template x-if="msg.sender === 'me'">
                                         <span class="inline-flex items-center">
                                             <!-- Jam (Pending) -->
@@ -290,13 +337,13 @@
                                             </template>
                                             <!-- Centang Ganda (Read) -->
                                             <template x-if="!msg.is_pending && msg.is_read">
-                                                <svg class="w-3.5 h-3.5 text-blue-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="w-3.5 h-3.5 text-blue-100" fill="none" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7m-14 4l4 4L19 7"/>
                                                 </svg>
                                             </template>
                                             <!-- Centang Tunggal (Sent) -->
                                             <template x-if="!msg.is_pending && !msg.is_read">
-                                                <svg class="w-3 h-3 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="w-3 h-3 text-blue-200" fill="none" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                                                 </svg>
                                             </template>
@@ -313,8 +360,60 @@
                     </template>
                 </div>
 
+                <!-- Pemberitahuan Akun Diblokir -->
+                <div x-show="activeRoom?.is_blocked"
+                     class="mx-4 sm:mx-6 mb-3 rounded-xl border p-4"
+                     :class="activeRoom?.block_type === 'permanent' ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'">
+
+                    <div class="flex items-start gap-3">
+
+                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                             :class="activeRoom?.block_type === 'permanent' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'">
+
+                            <svg class="h-5 w-5" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor"
+                                 stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M12 9v3m0 4h.01M10.29 3.86 1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                            </svg>
+                        </div>
+
+                        <div>
+                            <template x-if="activeRoom?.block_type === 'permanent'">
+                                <div>
+                                    <h3 class="text-sm font-bold text-red-800">
+                                        Akun Diblokir Permanen
+                                    </h3>
+
+                                    <p class="mt-1 text-xs leading-relaxed text-red-700">
+                                        Akun ini telah diblokir secara permanen oleh admin Lungsur.in karena melanggar ketentuan penggunaan platform. Demi menjaga keamanan komunitas, percakapan ini tidak dapat dilanjutkan.
+                                    </p>
+                                </div>
+                            </template>
+
+                            <template x-if="activeRoom?.block_type === 'temporary'">
+                                <div>
+                                    <h3 class="text-sm font-bold text-amber-800">
+                                        Akun Diblokir Sementara
+                                    </h3>
+
+                                    <p class="mt-1 text-xs leading-relaxed text-amber-700">
+                                        Akun ini sedang diblokir sementara oleh admin Lungsur.in karena melanggar ketentuan penggunaan platform. Percakapan tidak dapat dilanjutkan selama masa pemblokiran berlangsung.
+                                    </p>
+
+                                    <p class="mt-2 text-xs font-semibold text-amber-800">
+                                        Masa pemblokiran berakhir:
+                                        <span x-text="activeRoom?.ban_expires_at ? new Date(activeRoom.ban_expires_at).toLocaleString('id-ID') : '-'"></span>
+                                    </p>
+                                </div>
+                            </template>
+                        </div>
+
+                    </div>
+                </div>
+
                 <!-- Quick Reply Bar (Tanpa Emoji / Gaya Mahasiswa Kasual) -->
-                <div class="px-4 sm:px-6 pb-2 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-slate-100">
+                <div x-show="!activeRoom?.is_blocked" class="px-4 sm:px-6 pb-2 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-slate-100">
                     <span class="text-[11px] font-semibold text-slate-400 shrink-0">Pesan Cepat:</span>
                     <button type="button" 
                             @click="sendQuickReply('Halo kak, apakah barang ini masih ada?')" 
@@ -339,7 +438,7 @@
                 </div>
 
                 <!-- Chat Input Form -->
-                <div class="p-3 sm:p-4 bg-white border-t border-slate-100 flex-shrink-0">
+                <div x-show="!activeRoom?.is_blocked" class="p-3 sm:p-4 bg-white border-t border-slate-100 flex-shrink-0">
                     <form @submit.prevent="sendMessage()" class="flex items-center gap-2">
                         <div class="flex-1">
                             <input type="text" 
@@ -365,6 +464,161 @@
         </section>
 
     </div>
+
+    <!-- MODAL LAPORKAN AKUN -->
+    <div x-show="showReportModal"
+        x-transition.opacity
+        style="display: none;"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+        @click.self="closeReportModal()"
+        @keydown.escape.window="closeReportModal()">
+
+        <div x-transition.scale
+            class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+
+            <!-- Header Modal -->
+            <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">
+                        Laporkan Akun
+                    </h2>
+
+                    <p class="mt-1 text-xs text-slate-500">
+                        Laporkan pengguna yang melakukan pelanggaran.
+                    </p>
+                </div>
+
+                <button type="button"
+                        @click="closeReportModal()"
+                        :disabled="isSubmittingReport"
+                        class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+
+                    <svg class="h-5 w-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6 18 18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Form Modal -->
+            <form @submit.prevent="submitAccountReport()"
+                class="space-y-5 p-6">
+
+                <!-- Akun yang Dilaporkan -->
+                <div>
+                    <label class="mb-2 block text-xs font-semibold text-slate-700">
+                        Akun yang Dilaporkan
+                    </label>
+
+                    <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+
+                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-sm font-bold text-white"
+                            x-text="activeRoom?.initials">
+                        </div>
+
+                        <div class="min-w-0">
+                            <p class="truncate text-sm font-semibold text-slate-800"
+                            x-text="activeRoom?.name">
+                            </p>
+
+                            <p class="text-[11px] text-slate-500">
+                                Lawan bicara
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alasan Laporan -->
+                <div>
+                    <label for="report_reason"
+                        class="mb-2 block text-xs font-semibold text-slate-700">
+                        Alasan Laporan <span class="text-red-500">*</span>
+                    </label>
+
+                    <select id="report_reason"
+                            x-model="reportReason"
+                            required
+                            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+
+                        <option value="" disabled selected hidden>Pilih alasan laporan</option>
+                        <option value="Penipuan">Penipuan</option>
+                        <option value="Spam">Spam</option>
+                        <option value="Pelecehan atau kata-kata kasar">Pelecehan atau kata-kata kasar</option>
+                        <option value="Ancaman atau intimidasi">Ancaman atau intimidasi</option>
+                        <option value="Perilaku mencurigakan">Perilaku mencurigakan</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+
+                <!-- Detail Laporan -->
+                <div>
+                    <label for="report_details"
+                        class="mb-2 block text-xs font-semibold text-slate-700">
+                        Detail Laporan
+                        <span class="font-normal text-slate-400">(Opsional)</span>
+                    </label>
+
+                    <textarea id="report_details"
+                            x-model="reportDetails"
+                            rows="4"
+                            maxlength="1000"
+                            placeholder="Jelaskan alasan kamu melaporkan akun ini..."
+                            class="w-full resize-none rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                    </textarea>
+
+                    <p class="mt-1 text-right text-[10px] text-slate-400"
+                    x-text="reportDetails.length + '/1000 karakter'">
+                    </p>
+                </div>
+
+                <!-- Informasi Bukti -->
+                <div class="rounded-xl border border-blue-100 bg-blue-50 p-3">
+                    <p class="text-xs leading-relaxed text-blue-700">
+                        Riwayat percakapan terkait akan digunakan sebagai bukti pendukung pemeriksaan laporan oleh admin.
+                    </p>
+                </div>
+
+                <!-- Error -->
+                <template x-if="reportErrorMessage">
+                    <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-700"
+                        x-text="reportErrorMessage">
+                    </div>
+                </template>
+
+                <!-- Tombol -->
+                <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+
+                    <button type="button"
+                            @click="closeReportModal()"
+                            :disabled="isSubmittingReport"
+                            class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">
+                        Batal
+                    </button>
+
+                    <button type="submit"
+                            :disabled="!reportReason || isSubmittingReport"
+                            class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">
+
+                        <svg x-show="isSubmittingReport"
+                            class="h-4 w-4 animate-spin"
+                            fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8v8H4z"/>
+                        </svg>
+
+                        <span x-text="isSubmittingReport ? 'Mengirim...' : 'Kirim Laporan'"></span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
 </div>
 
 <!-- Alpine.js Interactivity Script -->
@@ -382,6 +636,12 @@ function chatApp(initialListing = null, currentUser = null) {
         isLoadingMessages: false,
         isSending: false,
         errorMessage: null,
+        showReportModal: false,
+        reportReason: '',
+        reportDetails: '',
+        reportErrorMessage: null,
+        reportSuccessMessage: null,
+        isSubmittingReport: false,
         pollTimer: null,
 
         get csrfToken() {
@@ -410,7 +670,7 @@ function chatApp(initialListing = null, currentUser = null) {
             try {
                 const date = new Date(dateString);
                 if (isNaN(date.getTime())) return dateString;
-                
+
                 const now = new Date();
                 const diffMs = now - date;
                 const diffSec = Math.floor(diffMs / 1000);
@@ -456,6 +716,70 @@ function chatApp(initialListing = null, currentUser = null) {
 
             // Polling pembaruan berkala setiap 4 detik
             this.startPolling();
+        },
+
+        openReportModal() {
+            this.reportReason = '';
+            this.reportDetails = '';
+            this.reportErrorMessage = null;
+            this.showReportModal = true;
+        },
+
+        closeReportModal() {
+            if (this.isSubmittingReport) return;
+
+            this.showReportModal = false;
+            this.reportErrorMessage = null;
+        },
+
+        async submitAccountReport() {
+            if (!this.activeRoom || !this.reportReason || this.isSubmittingReport) {
+                return;
+            }
+
+            this.isSubmittingReport = true;
+            this.reportErrorMessage = null;
+
+            try {
+                const response = await fetch(
+                    `/chat/api/conversations/${this.activeRoom.id}/report`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': this.csrfToken
+                        },
+                        body: JSON.stringify({
+                            reason: this.reportReason,
+                            details: this.reportDetails.trim() || null
+                        })
+                    }
+                );
+
+                const json = await response.json();
+
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (!response.ok || json.status !== 'success') {
+                    this.reportErrorMessage = json.message || 'Laporan gagal dikirim.';
+                    return;
+                }
+
+                this.showReportModal = false;
+                this.reportReason = '';
+                this.reportDetails = '';
+                this.reportSuccessMessage = json.message;
+
+            } catch (error) {
+                console.error('Gagal mengirim laporan akun:', error);
+                this.reportErrorMessage = 'Terjadi kesalahan koneksi. Silakan coba kembali.';
+            } finally {
+                this.isSubmittingReport = false;
+            }
         },
 
         async handleListingInitiation() {
@@ -531,6 +855,9 @@ function chatApp(initialListing = null, currentUser = null) {
                             last_message: item.latest_message ? item.latest_message.message_text : 'Percakapan baru dibuat',
                             unread_count: item.unread_count || 0,
                             is_online: true,
+                            is_blocked: item.interlocutor?.is_blocked === true,
+                            block_type: item.interlocutor?.block_type || null,
+                            ban_expires_at: item.interlocutor?.ban_expires_at || null,
                             listing: item.listing || null,
                             raw: item
                         };
@@ -564,6 +891,11 @@ function chatApp(initialListing = null, currentUser = null) {
 
                 const json = await res.json();
                 if (json.status === 'success' && json.data) {
+                    if (json.data.interlocutor) {
+                            this.activeRoom.is_blocked = json.data.interlocutor.is_blocked === true;
+                            this.activeRoom.block_type = json.data.interlocutor.block_type || null;
+                            this.activeRoom.ban_expires_at = json.data.interlocutor.ban_expires_at || null;
+                        }
                     if (json.data.listing) {
                         this.currentListing = json.data.listing;
                     }
@@ -588,7 +920,7 @@ function chatApp(initialListing = null, currentUser = null) {
         },
 
         async sendMessage() {
-            if (!this.newMessage.trim() || !this.activeRoom || this.isSending) return;
+            if (!this.newMessage.trim() || !this.activeRoom || this.isSending || this.activeRoom.is_blocked) return;
 
             const text = this.newMessage.trim();
             this.newMessage = '';
@@ -688,6 +1020,11 @@ function chatApp(initialListing = null, currentUser = null) {
                 });
                 const json = await res.json();
                 if (json.status === 'success' && json.data && Array.isArray(json.data.messages)) {
+                    if (json.data.interlocutor && this.activeRoom) {
+                        this.activeRoom.is_blocked = json.data.interlocutor.is_blocked === true;
+                        this.activeRoom.block_type = json.data.interlocutor.block_type || null;
+                        this.activeRoom.ban_expires_at = json.data.interlocutor.ban_expires_at || null;
+                    }
                     const serverMessages = json.data.messages;
                     if (serverMessages.length !== this.messages.length) {
                         const wasAtBottom = this.isScrolledToBottom();
