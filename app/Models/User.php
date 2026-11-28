@@ -28,7 +28,11 @@ use App\Models\Listing;
     'campus',
     'status',
     'google_id',
-    'avatar'
+    'avatar',
+    'ban_reason',
+    'banned_at',
+    'ban_expires_at',
+    'banned_by',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -36,68 +40,91 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'verified_at' => 'datetime',
+            'banned_at' => 'datetime',
+            'ban_expires_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
 
-    public function listings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /**
+     * Memeriksa apakah masa ban sementara sudah berakhir.
+     * Jika sudah berakhir, status akun dikembalikan menjadi active.
+     */
+    public function refreshBanStatus(): void
+    {
+        if (
+            $this->status === 'suspended' &&
+            $this->ban_expires_at !== null &&
+            $this->ban_expires_at->isPast()
+        ) {
+            $this->update([
+                'status' => 'active',
+                'ban_reason' => null,
+                'banned_at' => null,
+                'ban_expires_at' => null,
+                'banned_by' => null,
+            ]);
+        }
+    }
+
+    public function listings(): HasMany
     {
         return $this->hasMany(Listing::class);
     }
 
-   public function purchasedListings(): HasMany
+    public function purchasedListings(): HasMany
     {
         return $this->hasMany(Listing::class, 'buyer_id');
     }
 
-    public function bids(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function bids(): HasMany
     {
         return $this->hasMany(AuctionBid::class);
     }
 
-    public function wonAuctions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function wonAuctions(): HasMany
     {
         return $this->hasMany(Auction::class, 'winner_id');
     }
 
-    public function buyerConversations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function buyerConversations(): HasMany
     {
         return $this->hasMany(Conversation::class, 'buyer_id');
     }
 
-    public function sellerConversations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function sellerConversations(): HasMany
     {
         return $this->hasMany(Conversation::class, 'seller_id');
     }
 
-    public function messages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function messages(): HasMany
     {
         return $this->hasMany(Message::class, 'sender_id');
     }
 
-    public function wantedAds(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function wantedAds(): HasMany
     {
         return $this->hasMany(WantedAd::class);
     }
 
-    public function boostPayments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function boostPayments(): HasMany
     {
         return $this->hasMany(BoostPayment::class);
     }
 
-    public function auctionPayments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function auctionPayments(): HasMany
     {
         return $this->hasMany(AuctionPayment::class);
+    }
+
+    public function bannedBy()
+    {
+        return $this->belongsTo(User::class, 'banned_by');
     }
 
     public function getActiveMode(): string
