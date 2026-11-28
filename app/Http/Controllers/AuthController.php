@@ -81,15 +81,32 @@ class AuthController extends Controller
         $user = Auth::user();
 
         // 1. Cek apakah akun diblokir/ditangguhkan
-        if ($user->status === 'suspended' || $user->status === 'banned') {
+        $user->refreshBanStatus();
+
+        if (in_array($user->status, ['suspended', 'banned'], true)) {
+            if ($user->status === 'banned') {
+                $errorMsg = 'Akun Anda diblokir secara permanen karena pelanggaran ketentuan platform.';
+            } else {
+                $expiresAt = $user->ban_expires_at?->timezone('Asia/Jakarta');
+
+                $errorMsg = 'Akun Anda sedang diblokir sementara karena pelanggaran ketentuan platform.';
+
+                if ($expiresAt) {
+                    $errorMsg .= ' Masa pemblokiran berakhir pada '
+                        . $expiresAt->translatedFormat('d F Y, H:i')
+                        . ' WIB.';
+                }
+            }
+
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            $errorMsg = 'Akun Anda ditangguhkan karena pelanggaran ketentuan platform. Silakan hubungi admin.';
-
             if ($request->wantsJson()) {
-                return response()->json(['status' => 'error', 'message' => $errorMsg], 403);
+                return response()->json([
+                    'status' => 'account_banned',
+                    'message' => $errorMsg,
+                ], 403);
             }
 
             return back()->with('error', $errorMsg);
@@ -331,6 +348,25 @@ class AuthController extends Controller
             // Cek apakah akun ini sudah terdaftar dan terverifikasi (mencegah false error jika ada duplikasi request/race condition)
             $alreadyRegisteredUser = User::where('email', strtolower($validated['email']))->first();
             if ($alreadyRegisteredUser && $alreadyRegisteredUser->email_verified_at) {
+
+                // Periksa status pemblokiran sebelum login otomatis melalui OTP.
+                $alreadyRegisteredUser->refreshBanStatus();
+
+                if (in_array($alreadyRegisteredUser->status, ['suspended', 'banned'], true)) {
+                    $errorMsg = $alreadyRegisteredUser->status === 'banned'
+                        ? 'Akun Anda diblokir secara permanen karena pelanggaran ketentuan platform.'
+                        : 'Akun Anda sedang diblokir sementara karena pelanggaran ketentuan platform.';
+
+                    if ($request->wantsJson()) {
+                        return response()->json([
+                            'status' => 'account_banned',
+                            'message' => $errorMsg,
+                        ], 403);
+                    }
+
+                    return redirect()->route('login')->with('error', $errorMsg);
+                }
+
                 if ($alreadyRegisteredUser->email_type === 'campus') {
                     Auth::login($alreadyRegisteredUser);
                     if ($request->wantsJson()) {
@@ -352,7 +388,7 @@ class AuthController extends Controller
                             'user' => $alreadyRegisteredUser,
                         ], 200);
                     }
-                    return redirect()->route('login')->with('info', 'Verifikasi email berhasil! Akun Anda sedang dalam antrean verifikasi berkas KTM oleh administrator (maksimal 1x24 jam).');
+                    return redirect()->route('login')->with('info', 'Verifikasi email berhasil! Akun Anda sedang dalam antrean verifikasi berkas KTM oleh admin (maksimal 1x24 jam).');
                 }
             }
 
@@ -606,8 +642,15 @@ class AuthController extends Controller
             ]);
         }
 
-        if ($user->status === 'suspended' || $user->status === 'banned') {
-            return redirect()->route('login')->with('error', 'Akun Anda ditangguhkan karena pelanggaran ketentuan platform.');
+        // Periksa masa berlaku ban sebelum melanjutkan login Google.
+        $user->refreshBanStatus();
+
+        if (in_array($user->status, ['suspended', 'banned'], true)) {
+            $errorMsg = $user->status === 'banned'
+                ? 'Akun Anda diblokir secara permanen karena pelanggaran ketentuan platform.'
+                : 'Akun Anda sedang diblokir sementara karena pelanggaran ketentuan platform.';
+
+            return redirect()->route('login')->with('error', $errorMsg);
         }
 
         // JIKA BUKAN EMAIL KAMPUS:
@@ -665,6 +708,19 @@ class AuthController extends Controller
             return redirect()->route('login');
         }
 
+        // Periksa status pemblokiran sebelum melanjutkan proses Google KTM.
+        $user->refreshBanStatus();
+
+        if (in_array($user->status, ['suspended', 'banned'], true)) {
+            session()->forget('google_ktm_user_id');
+
+            $errorMsg = $user->status === 'banned'
+                ? 'Akun Anda diblokir secara permanen karena pelanggaran ketentuan platform.'
+                : 'Akun Anda sedang diblokir sementara karena pelanggaran ketentuan platform.';
+
+            return redirect()->route('login')->with('error', $errorMsg);
+        }
+
         // Cek domain email user
         $emailParts = explode('@', $user->email);
         $domain = strtolower($emailParts[1] ?? '');
@@ -707,6 +763,19 @@ class AuthController extends Controller
         }
 
         $user = User::findOrFail($userId);
+
+        // Periksa status pemblokiran sebelum menerima berkas KTM.
+        $user->refreshBanStatus();
+
+        if (in_array($user->status, ['suspended', 'banned'], true)) {
+            session()->forget('google_ktm_user_id');
+
+            $errorMsg = $user->status === 'banned'
+                ? 'Akun Anda diblokir secara permanen karena pelanggaran ketentuan platform.'
+                : 'Akun Anda sedang diblokir sementara karena pelanggaran ketentuan platform.';
+
+            return redirect()->route('login')->with('error', $errorMsg);
+        }
 
         $validated = $request->validate([
             'campus' => ['required', 'string', 'max:150'],
