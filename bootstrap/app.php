@@ -20,10 +20,17 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Session\Middleware\StartSession::class,
         ]);
 
+        // Memeriksa status pemblokiran akun pada seluruh halaman web
+        $middleware->appendToGroup(
+            'web',
+            \App\Http\Middleware\EnsureAccountNotBanned::class
+        );
+
         $middleware->alias([
             'verified_student' => \App\Http\Middleware\EnsureAccountIsVerified::class,
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'active_mode' => \App\Http\Middleware\EnsureActiveMode::class,
+            'account_not_banned' => \App\Http\Middleware\EnsureAccountNotBanned::class,
         ]);
 
         // Tujuan redirect kalau user yang sudah login membuka /login atau /register
