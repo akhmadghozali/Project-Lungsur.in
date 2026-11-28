@@ -21,12 +21,26 @@ class AuctionController extends Controller
     {
         $status = $request->query('status', 'active');
         $query = Auction::with(['listing.user', 'listing.category', 'highestBid.user'])
+            ->whereHas('listing.user', function ($userQuery) {
+                $userQuery->where(function ($statusQuery) {
+                    $statusQuery->where('status', 'active')
+                        ->orWhere(function ($expiredQuery) {
+                            $expiredQuery->where('status', 'suspended')
+                                ->whereNotNull('ban_expires_at')
+                                ->where('ban_expires_at', '<=', now());
+                        });
+                });
+            })
             ->when($status !== 'all', function ($q) use ($status) {
                 $q->where('status', $status);
             })
             ->orderBy('end_time', 'asc');
 
         $auctions = $query->paginate($request->query('per_page', 15));
+
+        foreach ($auctions as $auction) {
+            $auction->listing->user->refreshBanStatus();
+        }
 
         return response()->json([
             'status' => 'success',
@@ -45,7 +59,7 @@ class AuctionController extends Controller
     public function show(Request $request, $id): JsonResponse
     {
         $auction = Auction::with([
-            'listing.user:id,name,campus',
+            'listing.user:id,name,campus,status,ban_expires_at',
             'listing.category:id,name,slug',
             'winner:id,name,campus',
             'bids.user:id,name,campus',
@@ -55,6 +69,23 @@ class AuctionController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Lelang dengan ID tersebut tidak ditemukan.',
+            ], 404);
+        }
+
+        if (!$auction->listing || !$auction->listing->user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Lelang dengan ID tersebut tidak ditemukan.',
+            ], 404);
+        }
+
+        // Memeriksa status akun pemilik barang.
+        $auction->listing->user->refreshBanStatus();
+
+        if (in_array($auction->listing->user->status, ['suspended', 'banned'], true)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Lelang tidak tersedia.',
             ], 404);
         }
 
@@ -202,6 +233,25 @@ class AuctionController extends Controller
                     'status' => 'error',
                     'message' => 'Lelang dengan ID tersebut tidak ditemukan.',
                 ], 404);
+            }
+
+            // Memeriksa status akun pemilik barang.
+            $seller = $auction->listing?->user;
+
+            if (!$seller) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Lelang dengan ID tersebut tidak ditemukan.',
+                ], 404);
+            }
+
+            $seller->refreshBanStatus();
+
+            if (in_array($seller->status, ['suspended', 'banned'], true)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Penawaran tidak dapat dilakukan karena akun penjual sedang diblokir.',
+                ], 403);
             }
 
             // A. Penjual tidak boleh menawar barangnya sendiri
@@ -416,13 +466,10 @@ class AuctionController extends Controller
             ],
         ]);
     }
-        /**
+
+    /**
      * Halaman web daftar lelang.
      */
-    
-/**
- * Halaman web daftar lelang.
- */
     public function webIndex(Request $request): View
     {
         // Desktop: 20 lelang per halaman. HP: 10 lelang per halaman.
@@ -436,10 +483,20 @@ class AuctionController extends Controller
         $baseQuery = Auction::with([
             'listing.category',
             'listing.images',
+            'listing.user',
             'highestBid.user',
         ])
             ->whereIn('auctions.status', ['active', 'closed'])
-            ->whereHas('listing');
+            ->whereHas('listing.user', function ($userQuery) {
+                $userQuery->where(function ($statusQuery) {
+                    $statusQuery->where('status', 'active')
+                        ->orWhere(function ($expiredQuery) {
+                            $expiredQuery->where('status', 'suspended')
+                                ->whereNotNull('ban_expires_at')
+                                ->where('ban_expires_at', '<=', now());
+                        });
+                });
+            });
 
         // Hitung jumlah pengguna berbeda yang pernah menawar.
         $uniqueBiddersQuery = AuctionBid::query()
@@ -473,6 +530,14 @@ class AuctionController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
+        if ($spotlight && $spotlight->listing->user) {
+            $spotlight->listing->user->refreshBanStatus();
+        }
+
+        foreach ($auctions as $auction) {
+            $auction->listing->user->refreshBanStatus();
+        }
+
         return view('auctions.index', compact(
             'auctions',
             'spotlight'
@@ -494,6 +559,16 @@ class AuctionController extends Controller
         ])->findOrFail($id);
 
         abort_unless($auction->listing, 404);
+
+        // Memeriksa status akun pemilik barang.
+        $auction->listing->user?->refreshBanStatus();
+
+        if (
+            !$auction->listing->user ||
+            in_array($auction->listing->user->status, ['suspended', 'banned'], true)
+        ) {
+            abort(404);
+        }
 
         if (in_array($auction->status, ['pending_payment', 'pending_approval', 'canceled'], true)) {
             $user = auth()->user();
@@ -614,7 +689,8 @@ class AuctionController extends Controller
             $this->markListingBookedIfWinner($auction, $highestBid);
         });
     }
-        /**
+
+    /**
      * Mengubah status barang menjadi booked jika lelang
      * berakhir dan memiliki pemenang.
      */
